@@ -350,7 +350,7 @@ const LoginScreen = () => {
           <View style={styles.outerShapeTop} />
           <View style={styles.outerShapeBottom} />
 
-          <View style={{ flex: 1, paddingHorizontal: W * 0.04, paddingTop: H * 0.03, paddingBottom: H * 0.02, justifyContent: "space-between" }}>
+          <View style={{ flex: 1, paddingHorizontal: W * 0.04, paddingTop: H * 0.04, paddingBottom: H * 0.02, justifyContent: "space-between" }}>
             {/* Top Section */}
             <View style={{ alignItems: "center" }}>
               {/* Brand Badge */}

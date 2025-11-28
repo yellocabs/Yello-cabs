@@ -1,9 +1,8 @@
 import React from "react";
-import { Text, TouchableOpacity, View } from "react-native";
-import { ButtonProps } from "@/types/declare";
+import { Text, TouchableOpacity, View, ActivityIndicator } from "react-native";
+
 
 const getBgVariantStyle = (variant: ButtonProps["bgVariant"]) => {
-  // If the variant starts with 'bg-' assume it's a raw Tailwind class
   if (variant?.startsWith("bg-")) return variant;
 
   switch (variant) {
@@ -21,7 +20,6 @@ const getBgVariantStyle = (variant: ButtonProps["bgVariant"]) => {
   }
 };
 
-
 const getTextVariantStyle = (variant: ButtonProps["textVariant"]) => {
   switch (variant) {
     case "primary":
@@ -32,7 +30,6 @@ const getTextVariantStyle = (variant: ButtonProps["textVariant"]) => {
       return "text-red-100";
     case "success":
       return "text-green-100";
-      
     case "default":
     default:
       return "text-white";
@@ -50,26 +47,51 @@ const CustomButton = ({
   rounded = "full",
   height = "h-14",
   flex = false,
+  loading = false,   // <-- ADD THIS
+  disabled = false,  // <-- ADD THIS
   ...props
 }: ButtonProps) => {
+  const isDisabled = loading || disabled;
+
   return (
     <TouchableOpacity
-      onPress={onPress}
-      className={`${flex ? "flex-1" : "w-full"} ${height} ${
-        rounded === "xl" ? "rounded-xl" : "rounded-full"
-      } flex-row justify-center items-center shadow-md shadow-neutral-400/70 ${getBgVariantStyle(
-        bgVariant
-      )} ${className}`}
+      onPress={isDisabled ? undefined : onPress}
+      disabled={isDisabled}
+      className={`
+        ${flex ? "flex-1" : "w-full"}
+        ${height}
+        ${rounded === "xl" ? "rounded-xl" : "rounded-full"}
+        flex-row justify-center items-center
+        shadow-md shadow-neutral-400/70
+        ${getBgVariantStyle(bgVariant)}
+        ${className}
+        ${isDisabled ? "opacity-60" : ""}
+      `}
       {...props}
     >
-      {IconLeft && <View className="mr-2"><IconLeft /></View>}
-      <Text className={`text-lg font-bold ${getTextVariantStyle(textVariant)} text-center`}>
-        {title}
-      </Text>
-      {IconRight && <View className="ml-2"><IconRight /></View>}
+      {loading ? (
+        <ActivityIndicator size="small" color="#fff" />
+      ) : (
+        <>
+          {IconLeft && (
+            <View className="mr-2">
+              <IconLeft />
+            </View>
+          )}
+          <Text
+            className={`text-lg font-bold ${getTextVariantStyle(textVariant)} text-center`}
+          >
+            {title}
+          </Text>
+          {IconRight && (
+            <View className="ml-2">
+              <IconRight />
+            </View>
+          )}
+        </>
+      )}
     </TouchableOpacity>
   );
 };
-
 
 export default CustomButton;

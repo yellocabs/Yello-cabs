@@ -12,6 +12,7 @@ declare global {
     rounded?: "full" | "xl";
     height?: string;
     flex?: boolean;
+    loading:boolean
   }
 }
 
