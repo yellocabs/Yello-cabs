@@ -21,6 +21,7 @@ const GoogleLoginButton = ({ onPress }: Props) => {
       )}
       bgVariant="outline"
       textVariant="primary"
+      loading= {false}
       onPress={onPress}
     />
   );

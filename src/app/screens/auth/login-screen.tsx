@@ -82,8 +82,6 @@ const LoginScreen = () => {
       setLoading(true);
 
       const response = await verifyOtp(phone, otp, role);
-      // console.log("Verify OTP:", response.data);
-
       const token = response.data?.token;
       if (token) {
         await AsyncStorage.setItem("authToken", token);
@@ -115,9 +113,7 @@ const LoginScreen = () => {
     }
     try {
       setLoading(true);
-      const response = await sendOtp(phone);
-      // console.log("OTP Sent:", response.data);
-
+      const response = await sendOtp(Number(phone));
       if (response.data?.success) {
         setVerification((prev) => ({
           ...prev,
@@ -150,7 +146,7 @@ const LoginScreen = () => {
   };
 
   const handleGoogleLogin = async () => {
-    setLoading(true);
+    // setLoading(true);
     try {
       const response = await googleLogin(); // Google sign-in
       if (!response.ok) {
@@ -158,8 +154,8 @@ const LoginScreen = () => {
         return;
       }
       const { idToken }: any = response;
-
-      const extractedIdToken = idToken || response.data?.idToken;
+      console.log(response)
+      const extractedIdToken = idToken || response.data;
 
       if (extractedIdToken) {
         const backendResponse = await axios.post(`${Config.BASE_URL || "http://localhost:8000"}/google-login`, {
@@ -494,6 +490,7 @@ const LoginScreen = () => {
 
             <CustomButton
               title="Browse Home"
+              loading={loading}
               onPress={() => {
                 setShowSuccessModal(false);
                 onHome();
