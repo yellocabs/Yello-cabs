@@ -8,6 +8,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { configureGoogleSignIn } from './services/google-auth';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
+import Toast from "react-native-toast-message";
+
 
 
 export default function App() {
@@ -34,6 +36,7 @@ export default function App() {
       <NavigationContainer>
         <StatusBar barStyle="dark-content" />
         <RootNavigator />
+         <Toast />
       </NavigationContainer>
       </GestureHandlerRootView>
       </SafeAreaProvider>

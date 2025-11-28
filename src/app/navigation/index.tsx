@@ -22,7 +22,6 @@ const RootNavigator = () => {
     const checkToken = async () => {
       try {
         const token = await AsyncStorage.getItem('authToken');
-        console.log('ninja',token)
         const storedRole = await AsyncStorage.getItem('role'); // optional if you store role
         if (token) {
           setToken(token);
