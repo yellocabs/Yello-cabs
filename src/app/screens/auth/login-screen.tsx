@@ -82,9 +82,14 @@ const LoginScreen = () => {
       setLoading(true);
 
       const response = await verifyOtp(phone, otp, role);
-      const token = response.data?.token;
+      const token = response.data?.data?.token;
+      const userRole = response.data?.data?.user?.role;
+
+      console.log(response) 
+
       if (token) {
         await AsyncStorage.setItem("authToken", token);
+        console.log(token)
         setToken(token);
       }
 
@@ -113,7 +118,7 @@ const LoginScreen = () => {
     }
     try {
       setLoading(true);
-      const response = await sendOtp(Number(phone));
+      const response = await sendOtp(phone);
       if (response.data?.success) {
         setVerification((prev) => ({
           ...prev,

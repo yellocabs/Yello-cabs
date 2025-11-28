@@ -1,4 +1,5 @@
 export type RootStackParamList = {
+  Auth: undefined;
   Home: { expand?: boolean } | undefined;
   FindRide: undefined;
   BookRide: undefined;
