@@ -24,7 +24,32 @@ export const FALLBACK_REGION: Region = {
   latitudeDelta: 0.012,
   longitudeDelta: 0.012,
 };
+// REALTIME NEARBY RIDERS
 
+// useEffect(() => {
+//   if (userLatitude && userLongitude && isFocused) {
+//     emit("subscribeToZone", {
+//       latitude: location.latitude,
+//       longitude: location.longitude,
+//     });
+
+//     on("nearbyRiders", (riders: any[]) => {
+//       const updatedMarkers = riders.map((rider) => ({
+//         id: rider.id,
+//         latitude: rider.coords.latitude,
+//         longitude: rider.coords.longitude,
+//         type: "rider",
+//         rotation: rider.coords.heading,
+//         visible: true,
+//       }));
+//       setMarkers(updatedMarkers);
+//     });
+//   }
+
+//   return () => {
+//     off("nearbyriders");
+//   };
+// }, [location, emit, on, off, isFocused]);
 // --- Bottom panel offset ---
 export const bottomPanelHeightRatio = 0.45;
 export const bottomOffset = height * bottomPanelHeightRatio + 24;

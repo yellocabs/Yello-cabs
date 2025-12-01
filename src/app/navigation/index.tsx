@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import type { RootStackParamList } from "@/types/navigation-types"; 
+import type { RootStackParamList } from '@/types/navigation-types';
 import AuthNavigator from './auth-navigator';
 import TabNavigator from './tab-navigator';
 import DriverNavigator from './driver-navigator';
@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator, View } from 'react-native';
 import { useUserStore } from '@/store/use-user-store';
 import { useAuthStore } from '@/store/auth-store';
+import { WSProvider } from '@/services/WSProvider';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -16,7 +17,8 @@ const RootNavigator = () => {
   const [loading, setLoading] = useState(true);
   const { setToken } = useAuthStore();
   const { role, setRole } = useUserStore();
-  const [initialRoute, setInitialRoute] = useState<keyof RootStackParamList>('Auth');
+  const [initialRoute, setInitialRoute] =
+    useState<keyof RootStackParamList>('Auth');
 
   useEffect(() => {
     const checkToken = async () => {
@@ -47,12 +49,17 @@ const RootNavigator = () => {
   }
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRoute}>
-      <Stack.Screen name="Auth" component={AuthNavigator} />
-      <Stack.Screen name="Tabs" component={TabNavigator} />
-      <Stack.Screen name="Driver" component={DriverNavigator} />
-      <Stack.Screen name="Rider" component={RiderNavigator} />
-    </Stack.Navigator>
+    <WSProvider>
+      <Stack.Navigator
+        screenOptions={{ headerShown: false }}
+        initialRouteName={initialRoute}
+      >
+        <Stack.Screen name="Auth" component={AuthNavigator} />
+        <Stack.Screen name="Tabs" component={TabNavigator} />
+        <Stack.Screen name="Driver" component={DriverNavigator} />
+        <Stack.Screen name="Rider" component={RiderNavigator} />
+      </Stack.Navigator>
+    </WSProvider>
   );
 };
 

@@ -6,8 +6,8 @@ import {
   TouchableOpacity,
   Image,
   useWindowDimensions,
-} from "react-native";
-import React, { useState } from "react";
+} from 'react-native';
+import React, { useState } from 'react';
 import {
   ChevronRight,
   Edit2,
@@ -21,12 +21,12 @@ import {
   Shield,
   HelpCircle,
   Users,
-} from "lucide-react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useAuthStore } from "@/store/auth-store";
-import { useUserStore } from "@/store/use-user-store";
-import { useNavigation } from "@react-navigation/native";
-import Toast from "react-native-toast-message";
+} from 'lucide-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useAuthStore } from '@/store/auth-store';
+import { useUserStore } from '@/store/use-user-store';
+import { useNavigation } from '@react-navigation/native';
+import Toast from 'react-native-toast-message';
 
 const ProfileScreen = () => {
   const { width, height } = useWindowDimensions();
@@ -40,7 +40,7 @@ const ProfileScreen = () => {
 
   const [isDarkModeEnabled, setIsDarkModeEnabled] = useState(false);
   const toggleDarkMode = () =>
-    setIsDarkModeEnabled((previousState) => !previousState);
+    setIsDarkModeEnabled(previousState => !previousState);
 
   // ----- List Item Component -----
   const ProfileListItem = ({
@@ -54,27 +54,24 @@ const ProfileScreen = () => {
     <TouchableOpacity
       onPress={onPress}
       style={{
-        flexDirection: "row",
-        alignItems: "center",
+        flexDirection: 'row',
+        alignItems: 'center',
         height: listItemHeight,
         paddingHorizontal: width * 0.04,
         borderBottomWidth: isLogout ? 0 : 1,
-        borderColor: "rgba(0,0,0,0.1)",
+        borderColor: 'rgba(0,0,0,0.1)',
         marginTop: isLogout ? height * 0.02 : 0,
       }}
     >
-      <Icon
-        size={iconSize}
-        color={isLogout ? "#ef4444" : "#000000"}
-      />
+      <Icon size={iconSize} color={isLogout ? '#ef4444' : '#000000'} />
 
       <Text
         style={{
           flex: 1,
           marginLeft: width * 0.04,
           fontSize: width * 0.045,
-          color: isLogout ? "#ef4444" : "#333",
-          fontWeight: isLogout ? "600" : "400",
+          color: isLogout ? '#ef4444' : '#333',
+          fontWeight: isLogout ? '600' : '400',
         }}
       >
         {title}
@@ -85,7 +82,7 @@ const ProfileScreen = () => {
           style={{
             marginRight: width * 0.02,
             fontSize: width * 0.038,
-            color: "#666",
+            color: '#666',
           }}
         >
           {value}
@@ -95,7 +92,7 @@ const ProfileScreen = () => {
       {showChevron && (
         <ChevronRight
           size={iconSize * 0.9}
-          color={isLogout ? "#ef4444" : "#999"}
+          color={isLogout ? '#ef4444' : '#999'}
         />
       )}
     </TouchableOpacity>
@@ -105,12 +102,12 @@ const ProfileScreen = () => {
   const DarkModeItem = ({ icon: Icon, title }) => (
     <View
       style={{
-        flexDirection: "row",
-        alignItems: "center",
+        flexDirection: 'row',
+        alignItems: 'center',
         height: listItemHeight,
         paddingHorizontal: width * 0.04,
         borderBottomWidth: 1,
-        borderColor: "rgba(0,0,0,0.1)",
+        borderColor: 'rgba(0,0,0,0.1)',
       }}
     >
       <Icon size={iconSize} color="#000" />
@@ -120,79 +117,79 @@ const ProfileScreen = () => {
           flex: 1,
           marginLeft: width * 0.04,
           fontSize: width * 0.045,
-          color: "#333",
+          color: '#333',
         }}
       >
         {title}
       </Text>
 
       <Switch
-        trackColor={{ false: "#767577", true: "#81b0ff" }}
-        thumbColor={isDarkModeEnabled ? "#007aff" : "#f4f3f4"}
+        trackColor={{ false: '#767577', true: '#81b0ff' }}
+        thumbColor={isDarkModeEnabled ? '#007aff' : '#f4f3f4'}
         onValueChange={toggleDarkMode}
         value={isDarkModeEnabled}
       />
     </View>
   );
-const navigation = useNavigation();
-const { setToken } = useAuthStore();
-const { setRole } = useUserStore();
+  const navigation = useNavigation();
+  const { setToken } = useAuthStore();
+  const { setRole } = useUserStore();
 
-const handleLogout = async () => {
-  try {
-    await AsyncStorage.removeItem("authToken");
-    await AsyncStorage.removeItem("role");
+  const handleLogout = async (disconnect?: () => void) => {
+    try {
+      if (disconnect) {
+        disconnect();
+      }
+      await AsyncStorage.removeItem('authToken');
+      await AsyncStorage.removeItem('role');
 
-    setToken(null);
-    setRole(null);
-    Toast.show({
-      type: "success",
-      text1: "Logged Out",
-      text2: "You have been logged out successfully 🎉",
-      position: "bottom",
-      visibilityTime: 2000,
-    });
-    navigation.reset({
-      index: 0,
-      routes: [{ name: "Auth" }],
-    });
-  } catch (err) {
-    console.log("Logout error:", err);
-  }
-};
+      setToken(null);
+      setRole(null);
+      Toast.show({
+        type: 'success',
+        text1: 'Logged Out',
+        text2: 'You have been logged out successfully 🎉',
+        position: 'bottom',
+        visibilityTime: 2000,
+      });
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Auth' }],
+      });
+    } catch (err) {
+      console.log('Logout error:', err);
+    }
+  };
 
   return (
-    
-    <ScrollView style={{ flex: 1, backgroundColor: "rgba(255, 235, 59, 0.2)" }}>
-
+    <ScrollView style={{ flex: 1, backgroundColor: 'rgba(255, 235, 59, 0.2)' }}>
       {/* ----- PROFILE HEADER ----- */}
-      <View style={{ alignItems: "center", paddingVertical: height * 0.04 }}>
-
+      <View style={{ alignItems: 'center', paddingVertical: height * 0.04 }}>
         <View
           style={{
             width: avatarSize,
             height: avatarSize,
             borderRadius: avatarSize / 2,
-            backgroundColor: "#ccc",
-            overflow: "hidden",
-            position: "relative",
+            backgroundColor: '#ccc',
+            overflow: 'hidden',
+            position: 'relative',
           }}
         >
           <Image
             source={{
-              uri: "https://images.unsplash.com/photo-1507003211169-0a812d8a7c29?q=80&w=100&auto=format&fit=crop",
+              uri: 'https://images.unsplash.com/photo-1507003211169-0a812d8a7c29?q=80&w=100&auto=format&fit=crop',
             }}
-            style={{ width: "100%", height: "100%" }}
+            style={{ width: '100%', height: '100%' }}
             resizeMode="cover"
           />
 
           {/* Edit Button */}
           <TouchableOpacity
             style={{
-              position: "absolute",
+              position: 'absolute',
               bottom: 4,
               right: 4,
-              backgroundColor: "#fff",
+              backgroundColor: '#fff',
               padding: 4,
               borderRadius: 20,
               elevation: 3,
@@ -206,8 +203,8 @@ const handleLogout = async () => {
           style={{
             marginTop: height * 0.02,
             fontSize: nameFont,
-            fontWeight: "700",
-            color: "#333",
+            fontWeight: '700',
+            color: '#333',
           }}
         >
           Andrew Ainsley
@@ -217,7 +214,7 @@ const handleLogout = async () => {
           style={{
             marginTop: height * 0.005,
             fontSize: phoneFont,
-            color: "#555",
+            color: '#555',
           }}
         >
           +1 111 467 378 399
@@ -227,7 +224,7 @@ const handleLogout = async () => {
       {/* ----- MENU CARD ----- */}
       <View
         style={{
-          backgroundColor: "white",
+          backgroundColor: 'white',
           marginHorizontal: width * 0.04,
           borderRadius: 12,
           elevation: 3,
@@ -259,7 +256,6 @@ const handleLogout = async () => {
           showChevron={false}
           onPress={handleLogout}
         />
-
       </View>
 
       <View style={{ height: height * 0.12 }} />

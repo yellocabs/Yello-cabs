@@ -13,138 +13,126 @@
 // import MapViewDirections from "react-native-maps-directions";
 
 // import { icons } from "@/constants";
-// import {
-//   calculateDriverTimes,
-//   calculateRegion,
-//   generateMarkersFromData,
-// } from "@/libs/map";
-// import { useDriverStore, useLocationStore } from "@/store";
-// import { MarkerData } from "@/types/declare";
+import useGenerateRandomMarkers from "@/hooks/useGenerateRandomMarkers";
+import {
+  calculateDriverTimes,
+  calculateRegion,
+} from "@/libs/map";
+import { useDriverStore, useLocationStore } from "@/store";
+import { MarkerData } from "@/types/declare";
 
-// const { height } = Dimensions.get("window");
+const { height } = Dimensions.get("window");
 
-// const FALLBACK_REGION: Region = {
-//   latitude: 37.78825,
-//   longitude: -122.4324,
-//   latitudeDelta: 0.012,
-//   longitudeDelta: 0.012,
-// };
+const FALLBACK_REGION: Region = {
+  latitude: 37.78825,
+  longitude: -122.4324,
+  latitudeDelta: 0.012,
+  longitudeDelta: 0.012,
+};
 
-// // Replace with your own key or keep from env / config
-// const DIRECTIONS_API_KEY = "AIzaSyAC8JJ79eaC8PjAdFpNImUTjpRuJXUcWMM"; // replace as needed
+// Replace with your own key or keep from env / config
+const DIRECTIONS_API_KEY = "AIzaSyAC8JJ79eaC8PjAdFpNImUTjpRuJXUcWMM"; // replace as needed
 
-// const RAPIDO_MAP_STYLE = [
-//   { featureType: "poi", stylers: [{ visibility: "off" }] },
-//   { featureType: "transit", stylers: [{ visibility: "off" }] },
-//   { featureType: "road", elementType: "labels.icon", stylers: [{ visibility: "off" }] },
-//   { featureType: "administrative.land_parcel", stylers: [{ visibility: "off" }] },
-//   { featureType: "landscape.man_made", stylers: [{ visibility: "off" }] },
-//   { featureType: "road", elementType: "geometry", stylers: [{ color: "#ebebeb" }] },
-//   { featureType: "water", elementType: "geometry", stylers: [{ color: "#a2daf2" }] },
-// ];
+const RAPIDO_MAP_STYLE = [
+  { featureType: "poi", stylers: [{ visibility: "off" }] },
+  { featureType: "transit", stylers: [{ visibility: "off" }] },
+  { featureType: "road", elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+  { featureType: "administrative.land_parcel", stylers: [{ visibility: "off" }] },
+  { featureType: "landscape.man_made", stylers: [{ visibility: "off" }] },
+  { featureType: "road", elementType: "geometry", stylers: [{ color: "#ebebeb" }] },
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#a2daf2" }] },
+];
 
-// // Dummy drivers (you had these earlier). If you load real drivers from store, replace this.
-// const drivers = [
-//   { id: 1, name: "Alice", latitude: 37.78855, longitude: -122.4310, vehicle: "Sedan" },
-//   { id: 2, name: "Bob", latitude: 37.78920, longitude: -122.4345, vehicle: "Hatchback" },
-//   { id: 3, name: "Charlie", latitude: 37.78700, longitude: -122.4330, vehicle: "SUV" },
-// ];
+// Dummy drivers (you had these earlier). If you load real drivers from store, replace this.
+const drivers = [
+  { id: 1, name: "Alice", latitude: 37.78855, longitude: -122.4310, vehicle: "Sedan" },
+  { id: 2, name: "Bob", latitude: 37.78920, longitude: -122.4345, vehicle: "Hatchback" },
+  { id: 3, name: "Charlie", latitude: 37.78700, longitude: -122.4330, vehicle: "SUV" },
+];
 
-// // Panel offset calculation (matches your previous logic)
-// const bottomPanelHeightRatio = 0.45;
-// const bottomOffset = height * bottomPanelHeightRatio + 24;
+// Panel offset calculation (matches your previous logic)
+const bottomPanelHeightRatio = 0.45;
+const bottomOffset = height * bottomPanelHeightRatio + 24;
 
-// const Map: React.FC = () => {
-//   const mapRef = useRef<MapView | null>(null);
-//   const pulseAnim = useRef(new Animated.Value(1)).current;
+const Map: React.FC = () => {
+  const mapRef = useRef<MapView | null>(null);
+  const pulseAnim = useRef(new Animated.Value(1)).current;
 
-//   // ensure map is ready before running animations
-//   const [mapReady, setMapReady] = useState(false);
+  // ensure map is ready before running animations
+  const [mapReady, setMapReady] = useState(false);
 
-//   // Using your stores
-//   const {
-//     userLongitude,
-//     userLatitude,
-//     destinationLatitude,
-//     destinationLongitude,
-//   } = useLocationStore();
+  // Using your stores
+  const {
+    userLongitude,
+    userLatitude,
+    destinationLatitude,
+    destinationLongitude,
+  } = useLocationStore();
 
-//   const { selectedDriver, setDrivers } = useDriverStore();
+  const { selectedDriver, setDrivers } = useDriverStore();
 
-//   const [markers, setMarkers] = useState<MarkerData[]>([]);
-//   const [loading] = useState(false);
-//   const [error] = useState<null | string>(null);
+  const [markers, setMarkers] = useState<MarkerData[]>([]);
+  const [loading] = useState(false);
+  const [error] = useState<null | string>(null);
+  useGenerateRandomMarkers(setMarkers);
 
-//   const hasRoute = !!(userLatitude && userLongitude && destinationLatitude && destinationLongitude);
+  const hasRoute = !!(userLatitude && userLongitude && destinationLatitude && destinationLongitude);
 
-//   // --- pulsing animation (user marker) ---
-//   useEffect(() => {
-//     const loop = Animated.loop(
-//       Animated.sequence([
-//         Animated.timing(pulseAnim, {
-//           toValue: 1.2,
-//           duration: 1000,
-//           easing: Easing.out(Easing.ease),
-//           useNativeDriver: true,
-//         }),
-//         Animated.timing(pulseAnim, {
-//           toValue: 1,
-//           duration: 1000,
-//           easing: Easing.in(Easing.ease),
-//           useNativeDriver: true,
-//         }),
-//       ])
-//     );
-//     loop.start();
-//     return () => loop.stop();
-//   }, [pulseAnim]);
+  // --- pulsing animation (user marker) ---
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.2,
+          duration: 1000,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1000,
+          easing: Easing.in(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [pulseAnim]);
 
-//   // --- generate driver markers when user location available ---
-//   useEffect(() => {
-//     if (Array.isArray(drivers) && userLatitude && userLongitude) {
-//       const generated = generateMarkersFromData({
-//         data: drivers,
-//         userLatitude,
-//         userLongitude,
-//       });
-//       setMarkers(generated);
-//     }
-//   }, [userLatitude, userLongitude]);
-
-//   // --- calculate ETA / driver times when markers & route exist ---
-//   useEffect(() => {
-//     let cancelled = false;
-//     const run = async () => {
-//       if (
-//         markers.length > 0 &&
-//         destinationLatitude &&
-//         destinationLongitude &&
-//         userLatitude &&
-//         userLongitude
-//       ) {
-//         try {
-//           const updated = await calculateDriverTimes({
-//             markers,
-//             userLatitude,
-//             userLongitude,
-//             destinationLatitude,
-//             destinationLongitude,
-//           });
-//           if (!cancelled) {
-//             setDrivers(updated as MarkerData[]);
-//           }
-//         } catch (e) {
-//           // optional: handle error
-//           console.warn("calculateDriverTimes err:", e);
-//         }
+  // --- calculate ETA / driver times when markers & route exist ---
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      if (
+        markers.length > 0 &&
+        destinationLatitude &&
+        destinationLongitude &&
+        userLatitude &&
+        userLongitude
+      ) {
+        try {
+          const updated = await calculateDriverTimes({
+            markers,
+            userLatitude,
+            userLongitude,
+            destinationLatitude,
+            destinationLongitude,
+          });
+          if (!cancelled) {
+            setDrivers(updated as MarkerData[]);
+          }
+        } catch (e) {
+          // optional: handle error
+          console.warn("calculateDriverTimes err:", e);
+        }
 //       }
-//     };
-//     run();
-//     return () => {
-//       cancelled = true;
-//     };
-//   }, [markers, destinationLatitude, destinationLongitude, userLatitude, userLongitude, setDrivers]);
-
+    };
+    run();
+    return () => {
+      cancelled = true;
+    };
+  }, [markers, destinationLatitude, destinationLongitude, userLatitude, userLongitude, setDrivers]);
 //   // --- complex animation chain (user -> dest -> fit) ---
 //   useEffect(() => {
 //   let cancelled = false;
@@ -411,5 +399,3 @@
 // };
 
 // export default Map;
-
-
