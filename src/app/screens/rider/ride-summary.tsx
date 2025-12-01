@@ -40,7 +40,7 @@ const CenterIcon = ({ isOrigin }: any) => {
 /* ---------------------------------------------- */
 /* Location Row Component                          */
 /* ---------------------------------------------- */
-const LocationEntry = ({ title, address, isOrigin }) => {
+const LocationEntry = ({ title, address, isOrigin, navigation }) => {
   return (
     <View className="flex-row items-center mb-5">
       <View className="items-center mr-4 relative">
@@ -64,7 +64,21 @@ const LocationEntry = ({ title, address, isOrigin }) => {
         <Text className="text-[14px] text-[#757575]">{address}</Text>
       </View>
 
-      <TouchableOpacity className="w-[30px] h-[30px] justify-center items-center ml-2">
+      <TouchableOpacity
+        className="w-[30px] h-[30px] justify-center items-center ml-2"
+        onPress={() =>
+          setTimeout(() => {
+            navigation.navigate(
+              'Tabs',
+              {
+                screen: 'Home',
+                params: { expanded: true },
+              },
+              1000,
+            );
+          })
+        }
+      >
         <Image
           source={icons.edit}
           className="w-5 h-5"
@@ -102,7 +116,7 @@ const RideSummary = () => {
   };
   return (
     <RideLayout title="Distance" h={0.45} minHeight={0.45}>
-      <View className="flex-1 bg-white rounded-2xl px-5 pt-3">
+      <View className="flex-1 bg-white rounded-2xl px-5 pt-3 pb-20">
         {/* Header */}
         <View className="flex-row justify-between items-center mb-3">
           <Text className="text-[18px] font-JakartaSemiBold text-[#4A4A4A]">
@@ -117,22 +131,22 @@ const RideSummary = () => {
         <View className="h-[1px] bg-[#F0F0F0] mb-5" />
 
         {/* Locations */}
-        <ScrollView style={{ flex: 1 }}>
-          <View className="mb-12">
-            <LocationEntry
-              title="Pick up location"
-              address={userAddress}
-              isOrigin={true}
-            />
-            <LocationEntry
-              title="Destination location"
-              address={destinationAddress}
-              isOrigin={false}
-            />
-          </View>
+        <ScrollView>
+          <LocationEntry
+            title="Pick up location"
+            address={userAddress}
+            isOrigin={true}
+            navigation={navigation}
+          />
+          <LocationEntry
+            title="Destination location"
+            address={destinationAddress}
+            isOrigin={false}
+            navigation={navigation}
+          />
         </ScrollView>
 
-        <View className="py-2">
+        <View className="absolute bottom-0 left-0 right-0 px-5 py-2 bg-white">
           <CustomButton title="Continue to Order" onPress={handlePress} />
         </View>
       </View>

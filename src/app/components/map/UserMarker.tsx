@@ -13,16 +13,9 @@ interface Props {
   longitude: number | null;
   // This prop will now control the outer pulse animation effect
   pulseAnim: Animated.Value;
-  // Added URI for the profile picture
-  profileImageUri: string;
 }
 
-const UserMarker: React.FC<Props> = ({
-  latitude,
-  longitude,
-  pulseAnim,
-  profileImageUri,
-}) => {
+const UserMarker: React.FC<Props> = ({ latitude, longitude, pulseAnim }) => {
   if (!latitude || !longitude) return null;
 
   const animatedPulseRadius = pulseAnim.interpolate({

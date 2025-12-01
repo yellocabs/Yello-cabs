@@ -1,12 +1,12 @@
 import { View, Text, Image } from 'react-native';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import GoogleTextInput from '@/components/google-text-input';
 import RideLayout from '@/components/ride-layout';
 import LocationPermissionModal from '@/components/location-permission-modal';
 import { useLocationStore } from '@/store/location-store';
 import { useFetchLocation } from '@/hooks/useFetchLocation';
 import { icons } from '@/constants';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 // ------------------------------------------------------------------
 // TWO ADDRESS INPUTS: FROM + TO
@@ -102,6 +102,7 @@ const ExpandedAddressSelector = ({
 // ------------------------------------------------------------------
 const HomeScreen = () => {
   const navigation = useNavigation();
+  const route = useRoute();
   const layoutRef = useRef<any>(null);
   const [expanded, setExpanded] = useState(false);
 
@@ -124,6 +125,12 @@ const HomeScreen = () => {
       layoutRef.current?.expandTo(0.9);
     }
   };
+
+  useEffect(() => {
+    if (route.params?.params?.expanded) {
+      handleExpand();
+    }
+  }, [route.params]);
 
   return (
     <>

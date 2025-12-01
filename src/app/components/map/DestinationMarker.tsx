@@ -1,17 +1,21 @@
-import React from "react";
-import { Image, Text } from "react-native";
-import { Marker } from "react-native-maps";
-import { icons } from "@/constants";
-import { useLocationStore } from "@/store";
+import React from 'react';
+import { Image, Text } from 'react-native';
+import { Marker } from 'react-native-maps';
+import { icons } from '@/constants';
 
 interface Props {
   latitude: number | null;
   longitude: number | null;
+  destinationAddress: string | null;
 }
 
-const DestinationMarker: React.FC<Props> = ({ latitude, longitude }) => {
+const DestinationMarker: React.FC<Props> = ({
+  latitude,
+  longitude,
+  destinationAddress,
+}) => {
   if (!latitude || !longitude) return null;
-    const {destinationAddress} = useLocationStore();
+
   return (
     <Marker
       coordinate={{ latitude, longitude }}
@@ -19,12 +23,12 @@ const DestinationMarker: React.FC<Props> = ({ latitude, longitude }) => {
     >
       <Image
         source={icons.pin}
-        style={{ width: 30, height: 30, tintColor: "#E91E63" }}
+        style={{ width: 30, height: 30, tintColor: '#E91E63' }}
         resizeMode="contain"
       />
-      <Text style={{ fontSize: 12, fontWeight: "bold" }}>
-      {destinationAddress}
-    </Text>
+      <Text style={{ fontSize: 12, fontWeight: 'bold' }}>
+        {destinationAddress}
+      </Text>
     </Marker>
   );
 };

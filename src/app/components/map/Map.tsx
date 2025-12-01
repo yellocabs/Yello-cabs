@@ -26,6 +26,7 @@ const Map: React.FC = () => {
     userLongitude,
     destinationLatitude,
     destinationLongitude,
+    destinationAddress,
   } = useLocationStore();
 
   const { selectedDriver, setDrivers } = useDriverStore();
@@ -171,23 +172,30 @@ const Map: React.FC = () => {
         zoomEnabled
         onMapReady={() => setMapReady(true)}
       >
-        <UserMarker
-          latitude={userLatitude}
-          longitude={userLongitude}
-          pulseAnim={pulseAnim}
-        />
-        <DriverMarkers markers={markers} selectedDriver={selectedDriver} />
-        <DestinationMarker
-          latitude={destinationLatitude}
-          longitude={destinationLongitude}
-        />
+        {userLatitude !== null && userLongitude !== null && (
+          <UserMarker
+            latitude={userLatitude}
+            longitude={userLongitude}
+            pulseAnim={pulseAnim}
+          />
+        )}
+        {mapReady && (
+          <DriverMarkers markers={markers} selectedDriver={selectedDriver} />
+        )}
+        {destinationLatitude !== null && destinationLongitude !== null && (
+          <DestinationMarker
+            latitude={destinationLatitude}
+            longitude={destinationLongitude}
+            destinationAddress={destinationAddress}
+          />
+        )}
 
         {/* Render route immediately — safe */}
         {mapReady &&
-          userLatitude &&
-          userLongitude &&
-          destinationLatitude &&
-          destinationLongitude && (
+          userLatitude !== null &&
+          userLongitude !== null &&
+          destinationLatitude !== null &&
+          destinationLongitude !== null && (
             <RouteAnimator
               userLatitude={userLatitude}
               userLongitude={userLongitude}
@@ -202,4 +210,4 @@ const Map: React.FC = () => {
   );
 };
 
-export default Map;
+export default React.memo(Map);
