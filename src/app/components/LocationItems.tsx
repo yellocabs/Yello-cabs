@@ -1,3 +1,4 @@
+import { icons } from '@/constants';
 import React, { FC } from 'react';
 import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native';
 import { Dimensions } from 'react-native';
@@ -12,10 +13,7 @@ const LocationItem: FC<{
     <TouchableOpacity onPress={onPress} style={styles.container}>
       {/* Left Section */}
       <View style={styles.leftRow}>
-        <Image
-          source={require('@/assets/icons/map_pin.png')}
-          style={styles.mapPinIcon}
-        />
+        <Image source={icons.map_pin} style={styles.mapPinIcon} />
 
         <View style={{ width: '83%' }}>
           <Text numberOfLines={1} style={styles.title}>
@@ -27,9 +25,6 @@ const LocationItem: FC<{
           </Text>
         </View>
       </View>
-
-      {/* Heart Icon Replacement */}
-      <Text style={styles.heartIcon}>♡</Text>
     </TouchableOpacity>
   );
 };
@@ -39,16 +34,12 @@ export default LocationItem;
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    paddingVertical: 12,
+    paddingVertical: 10,
     paddingHorizontal: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-
-    // white card-like look
     backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
 
   leftRow: {

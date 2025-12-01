@@ -1,7 +1,7 @@
 import { useLocationStore } from '@/store/location-store';
 import { GoogleInputProps } from '@/types/declare'; // Assuming this type is updated
 import React, { useRef, useState } from 'react';
-import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, Text, TouchableOpacity, View } from 'react-native';
 import {
   GooglePlacesAutocomplete,
   GooglePlacesAutocompleteRef,
@@ -16,6 +16,7 @@ import { icons } from '@/constants';
 import LocationItem from './LocationItems';
 
 // Use the environment variable for the API key
+const { width: screenWidth } = Dimensions.get('window');
 const googlePlacesApiKey = 'AIzaSyAC8JJ79eaC8PjAdFpNImUTjpRuJXUcWMM';
 
 const GoogleTextInput = ({
@@ -92,10 +93,11 @@ const GoogleTextInput = ({
               : 'white',
             position: 'absolute',
             top: 60,
-            width: '100%',
+            width: screenWidth * 0.92,
             borderRadius: 10,
             shadowColor: '#d4d4d4',
             zIndex: 9999,
+            marginHorizontal: -screenWidth * 0.15,
           },
         }}
         renderRow={data => (
