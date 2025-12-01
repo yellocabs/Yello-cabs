@@ -1,19 +1,20 @@
-import React, { useEffect, useRef, useState } from "react";
-import { View } from "react-native";
-import MapView, { PROVIDER_DEFAULT } from "react-native-maps";
+import React, { useRef, useState } from 'react';
+import { View } from 'react-native';
+import MapView, { PROVIDER_DEFAULT } from 'react-native-maps';
 
-import { useLocationStore, useDriverStore } from "@/store";
+import { useLocationStore, useDriverStore } from '@/store';
 
-import { RAPIDO_MAP_STYLE, FALLBACK_REGION } from "./constants";
-import UserMarker from "./UserMarker";
-import DriverMarkers from "./DriverMarkers";
-import DestinationMarker from "./DestinationMarker";
-import RouteAnimator from "./RouteAnimator";
-import RecenterButton from "./RecenterButton";
+import { FALLBACK_REGION } from './constants';
+import UserMarker from './UserMarker';
+import DriverMarkers from './DriverMarkers';
+import DestinationMarker from './DestinationMarker';
+import RouteAnimator from './RouteAnimator';
+import RecenterButton from './RecenterButton';
 
-import useMapAnimations from "./useMapAnimations";
-import useDriverMarkerLogic from "./useDriverMarkerLogic";
-import { calculateRegion } from "@/libs/map";
+import useMapAnimations from './useMapAnimations';
+import useDriverMarkerLogic from './useDriverMarkerLogic';
+import { calculateRegion } from '@/libs/map';
+import { customMapStyle } from '../../utils/CustomMap';
 
 const Map: React.FC = () => {
   const mapRef = useRef<MapView | null>(null);
@@ -50,10 +51,10 @@ const Map: React.FC = () => {
   return (
     <View style={{ flex: 1 }}>
       <MapView
-        ref={(r) => (mapRef.current = r)}
+        ref={r => (mapRef.current = r)}
         provider={PROVIDER_DEFAULT}
         style={{ flex: 1 }}
-        customMapStyle={RAPIDO_MAP_STYLE}
+        customMapStyle={customMapStyle}
         initialRegion={initialRegion}
         showsUserLocation={false}
         showsCompass={false}
@@ -74,14 +75,18 @@ const Map: React.FC = () => {
         />
 
         {/* Render route immediately — safe */}
-        {mapReady && userLatitude && userLongitude && destinationLatitude && destinationLongitude && (
-          <RouteAnimator
-            userLatitude={userLatitude}
-            userLongitude={userLongitude}
-            destinationLatitude={destinationLatitude}
-            destinationLongitude={destinationLongitude}
-          />
-        )}
+        {mapReady &&
+          userLatitude &&
+          userLongitude &&
+          destinationLatitude &&
+          destinationLongitude && (
+            <RouteAnimator
+              userLatitude={userLatitude}
+              userLongitude={userLongitude}
+              destinationLatitude={destinationLatitude}
+              destinationLongitude={destinationLongitude}
+            />
+          )}
       </MapView>
 
       <RecenterButton onPress={recenterMap} />
