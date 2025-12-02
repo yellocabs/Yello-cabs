@@ -2,40 +2,11 @@ import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView } from 'react-native';
 import CustomButton from '@/components/custom-button';
 import RideLayout from '@/components/ride-layout';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { icons } from '@/constants';
 import { useLocationStore } from '@/store';
 import { fetchDistance } from '@/utils/mapUtils';
 import FindOffers from './find-offer';
-
-/* ---------------------------------------------- */
-/* Center Icon Component                           */
-/* ---------------------------------------------- */
-const CenterIcon = ({ isOrigin }: any) => {
-  if (isOrigin) {
-    return (
-      <View className="w-[30px] h-[30px] justify-center items-center relative">
-        <View
-          className="w-[25px] h-[25px] rounded-full border-2"
-          style={{
-            borderColor: '#FFC700',
-            backgroundColor: '#FFC700',
-          }}
-        />
-        <View className="w-2 h-2 bg-black rounded-full absolute" />
-      </View>
-    );
-  }
-
-  return (
-    <View
-      className="w-[25px] h-[25px] rounded-full justify-center items-center"
-      style={{ backgroundColor: 'black' }}
-    >
-      <Text className="text-[#FFC700] text-[14px]">&#9679;</Text>
-    </View>
-  );
-};
 
 /* ---------------------------------------------- */
 /* Location Row Component                          */
@@ -67,15 +38,9 @@ const LocationEntry = ({ title, address, isOrigin, navigation }) => {
       <TouchableOpacity
         className="w-[30px] h-[30px] justify-center items-center ml-2"
         onPress={() =>
-          setTimeout(() => {
-            navigation.navigate(
-              'Tabs',
-              {
-                screen: 'Home',
-                params: { expanded: true },
-              },
-              1000,
-            );
+          navigation.navigate('Tabs', {
+            screen: 'Home',
+            params: { expanded: true },
           })
         }
       >
@@ -94,6 +59,7 @@ const LocationEntry = ({ title, address, isOrigin, navigation }) => {
 /* ---------------------------------------------- */
 const RideSummary = () => {
   const navigation = useNavigation();
+  const route = useRoute<any>();
 
   const {
     userAddress,
@@ -105,14 +71,23 @@ const RideSummary = () => {
     distance,
     duration, // ⬅️ GET distance directly
     distanceText,
+    setDestinationLocation,
   } = useLocationStore();
+
+  useEffect(() => {
+    if (route.params?.location) {
+      setDestinationLocation(route.params.location);
+    }
+  }, [route.params?.location]);
 
   useEffect(() => {
     fetchDistance(); // ⬅️ This sets global distance automatically
   }, [userLatitude, userLongitude, destinationLatitude, destinationLongitude]);
 
   const handlePress = () => {
-    navigation.navigate('FindOffer');
+    setTimeout(() => {
+      navigation.navigate('FindOffer');
+    }, 120);
   };
   return (
     <RideLayout title="Distance" h={0.45} minHeight={0.45}>

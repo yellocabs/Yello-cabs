@@ -20,10 +20,10 @@ const TwoAddressInput = ({
   navigation,
 }: any) => {
   const handleDestinationPress = (location: any) => {
-    setDestinationLocation(location);
-    setTimeout(() => {
-      navigation.navigate('Rider', { screen: 'FindRides' });
-    }, 120);
+    navigation.navigate('Rider', {
+      screen: 'FindOffer',
+      params: { location },
+    });
   };
 
   return (

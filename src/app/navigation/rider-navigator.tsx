@@ -8,6 +8,7 @@ import FindOffers from '@/screens/rider/find-offer';
 import FindRider from '@/screens/rider/find-rider';
 // import BookRide from "@/screens/rider/book-ride-screen";
 import MapScreen from '@/screens/rider/map-screen';
+import RideSummary from '@/screens/rider/ride-summary';
 // import notification from "@/screens/rider/notification";
 
 const Stack = createNativeStackNavigator();
@@ -15,10 +16,10 @@ const Stack = createNativeStackNavigator();
 const RiderNavigator = () => (
   <Stack.Navigator
     screenOptions={{ headerShown: false }}
-    initialRouteName="ConfirmRides" // 👈 add this
+    initialRouteName="FindOffer" // 👈 add this
   >
     {/* <Stack.Screen name="notification" component={notification} /> */}
-    <Stack.Screen name="ConfirmRides" component={ConfirmRide} />
+    {/*<Stack.Screen name="RideSummary" component={RideSummary} />*/}
     <Stack.Screen name="FindOffer" component={FindOffers} />
     <Stack.Screen name="FindRider" component={FindRider} />
     <Stack.Screen name="MapScreen" component={MapScreen} />

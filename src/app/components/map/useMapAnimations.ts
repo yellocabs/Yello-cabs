@@ -1,6 +1,6 @@
-import { useEffect } from "react";
-import { Region } from "react-native-maps";
-import { bottomOffset } from "./constants";
+import { useEffect } from 'react';
+import { Region } from 'react-native-maps';
+import { bottomOffset } from './constants';
 
 interface Props {
   mapRef: React.RefObject<any>;
@@ -11,7 +11,8 @@ interface Props {
   destinationLongitude: number | null;
 }
 
-const wait = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+const wait = (ms: number) =>
+  new Promise<void>(resolve => setTimeout(resolve, ms));
 
 const useMapAnimations = ({
   mapRef,
@@ -27,14 +28,27 @@ const useMapAnimations = ({
     let cancelled = false;
 
     const animateSequence = async () => {
-      const duration = 1500;
+      const duration = 150;
       const delay = 700;
       const zoomInDelta = 0.0015;
       const zoomOutDelta = 0.009;
 
-      const userLoc: Region = { latitude: userLatitude, longitude: userLongitude, latitudeDelta: 0, longitudeDelta: 0 };
-      const zoomInUserRegion = { ...userLoc, latitudeDelta: zoomInDelta, longitudeDelta: zoomInDelta };
-      const zoomOutUserRegion = { ...userLoc, latitudeDelta: zoomOutDelta, longitudeDelta: zoomOutDelta };
+      const userLoc: Region = {
+        latitude: userLatitude,
+        longitude: userLongitude,
+        latitudeDelta: 0,
+        longitudeDelta: 0,
+      };
+      const zoomInUserRegion = {
+        ...userLoc,
+        latitudeDelta: zoomInDelta,
+        longitudeDelta: zoomInDelta,
+      };
+      const zoomOutUserRegion = {
+        ...userLoc,
+        latitudeDelta: zoomOutDelta,
+        longitudeDelta: zoomOutDelta,
+      };
 
       mapRef.current?.animateToRegion(zoomInUserRegion, duration);
       await wait(duration + delay);
@@ -46,9 +60,22 @@ const useMapAnimations = ({
 
       if (!destinationLatitude || !destinationLongitude) return;
 
-      const destLoc: Region = { latitude: destinationLatitude, longitude: destinationLongitude, latitudeDelta: 0, longitudeDelta: 0 };
-      const zoomInDestRegion = { ...destLoc, latitudeDelta: zoomInDelta, longitudeDelta: zoomInDelta };
-      const zoomOutDestRegion = { ...destLoc, latitudeDelta: zoomOutDelta, longitudeDelta: zoomOutDelta };
+      const destLoc: Region = {
+        latitude: destinationLatitude,
+        longitude: destinationLongitude,
+        latitudeDelta: 0,
+        longitudeDelta: 0,
+      };
+      const zoomInDestRegion = {
+        ...destLoc,
+        latitudeDelta: zoomInDelta,
+        longitudeDelta: zoomInDelta,
+      };
+      const zoomOutDestRegion = {
+        ...destLoc,
+        latitudeDelta: zoomOutDelta,
+        longitudeDelta: zoomOutDelta,
+      };
 
       mapRef.current?.animateToRegion(zoomInDestRegion, duration);
       await wait(duration + delay);
@@ -65,16 +92,30 @@ const useMapAnimations = ({
           { latitude: destinationLatitude, longitude: destinationLongitude },
         ],
         {
-          edgePadding: { top: 100, right: 100, bottom: bottomOffset, left: 100 },
+          edgePadding: {
+            top: 100,
+            right: 100,
+            bottom: bottomOffset,
+            left: 100,
+          },
           animated: true,
-        }
+        },
       );
     };
 
     animateSequence();
 
-    return () => { cancelled = true; };
-  }, [mapRef, mapReady, userLatitude, userLongitude, destinationLatitude, destinationLongitude]);
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    mapRef,
+    mapReady,
+    userLatitude,
+    userLongitude,
+    destinationLatitude,
+    destinationLongitude,
+  ]);
 };
 
 export default useMapAnimations;

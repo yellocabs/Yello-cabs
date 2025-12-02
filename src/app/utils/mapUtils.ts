@@ -61,15 +61,14 @@ export const calculateDistance = (
   return R * c; // Distance in km
 };
 
-export const fetchDistance = async () => {
+export const fetchDistance = async (
+  mode: 'driving' | 'walking' | 'bicycling' | 'transit' = 'driving',
+) => {
   const {
     userLatitude,
     userLongitude,
     destinationLatitude,
     destinationLongitude,
-    setDistance,
-    setDistanceText,
-    setDuration, // <-- make sure this exists in your store
   } = useLocationStore.getState();
 
   if (
@@ -78,43 +77,67 @@ export const fetchDistance = async () => {
     !destinationLatitude ||
     !destinationLongitude
   ) {
-    return;
+    return null;
   }
 
   try {
     const response = await fetch(
-      `https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${userLatitude},${userLongitude}&destinations=${destinationLatitude},${destinationLongitude}&key=AIzaSyAC8JJ79eaC8PjAdFpNImUTjpRuJXUcWMM`,
+      `https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${userLatitude},${userLongitude}&destinations=${destinationLatitude},${destinationLongitude}&key=${GOOGLE_API_KEY}&mode=${mode}`,
     );
 
     const data = await response.json();
     const element = data.rows?.[0]?.elements?.[0];
 
     if (element?.status === 'OK' && element.distance && element.duration) {
-      // --- DISTANCE ---
-      const meters = element.distance.value;
-      const km = meters / 1000;
-      const formattedDistance = `${km.toFixed(1)} km`; // 1286 → 1.3 km
-
-      setDistanceText(formattedDistance);
-      setDistance(km);
-
-      // --- DURATION ---
-      const seconds = element.duration.value;
-      const hours = Math.floor(seconds / 3600);
-      const minutes = Math.floor((seconds % 3600) / 60);
-
-      const formattedDuration = `${hours.toString().padStart(2, '0')}:${minutes
-        .toString()
-        .padStart(2, '0')}`;
-      setDuration(formattedDuration);
+      return {
+        distance: element.distance.text,
+        duration: element.duration.text,
+      };
     } else {
-      setDistanceText('');
-      setDistance(0);
-      setDuration('00:00');
+      return null;
     }
   } catch (error) {
-    setDistanceText('');
-    setDistance(0);
-    setDuration('00:00');
+    console.error('Error fetching distance:', error);
+    return null;
   }
+};
+export const calculateFare = (distance: number) => {
+  const rateStructure = {
+    bike: { baseFare: 10, perKmRate: 5, minimumFare: 25 },
+    auto: { baseFare: 15, perKmRate: 7, minimumFare: 30 },
+    cabEconomy: { baseFare: 20, perKmRate: 10, minimumFare: 50 },
+    cabPremium: { baseFare: 30, perKmRate: 15, minimumFare: 70 },
+  };
+
+  const fareCalculation = (
+    baseFare: number,
+    perKmRate: number,
+    minimumFare: number,
+  ) => {
+    const calculatedFare = baseFare + distance * perKmRate;
+    return Math.max(calculatedFare, minimumFare);
+  };
+
+  return {
+    bike: fareCalculation(
+      rateStructure.bike.baseFare,
+      rateStructure.bike.perKmRate,
+      rateStructure.bike.minimumFare,
+    ),
+    auto: fareCalculation(
+      rateStructure.auto.baseFare,
+      rateStructure.auto.perKmRate,
+      rateStructure.auto.minimumFare,
+    ),
+    cabEconomy: fareCalculation(
+      rateStructure.cabEconomy.baseFare,
+      rateStructure.cabEconomy.perKmRate,
+      rateStructure.cabEconomy.minimumFare,
+    ),
+    cabPremium: fareCalculation(
+      rateStructure.cabPremium.baseFare,
+      rateStructure.cabPremium.perKmRate,
+      rateStructure.cabPremium.minimumFare,
+    ),
+  };
 };
