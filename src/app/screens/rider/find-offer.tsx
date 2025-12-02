@@ -167,7 +167,14 @@ export default function FindOffers() {
     destinationLongitude,
     userAddress,
     destinationAddress,
+    setDestinationLocation,
   } = useLocationStore();
+
+  useEffect(() => {
+    if (route.params?.location) {
+      setDestinationLocation(route.params.location);
+    }
+  }, [route.params?.location]);
 
   const farePrices = useMemo(() => calculateFare(distance || 0), [distance]);
 
@@ -268,7 +275,7 @@ export default function FindOffers() {
   };
 
   return (
-    <RideLayout title="Find Offers">
+    <RideLayout title="Find Offers" snapPoints={['60%', '80%', '90%']}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={{ flex: 1, backgroundColor: 'white', paddingBottom: 100 }}>
           {/* Scrollable List */}

@@ -28,7 +28,7 @@ const useMapAnimations = ({
     let cancelled = false;
 
     const animateSequence = async () => {
-      const duration = 150;
+      const duration = 1500;
       const delay = 700;
       const zoomInDelta = 0.0015;
       const zoomOutDelta = 0.009;

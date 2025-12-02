@@ -90,7 +90,7 @@ const RideSummary = () => {
     }, 120);
   };
   return (
-    <RideLayout title="Distance">
+    <RideLayout title="Distance" snapPoints={['45%', '60%', '90%']}>
       <View className="flex-1 bg-white rounded-2xl px-5 pt-3 pb-20">
         {/* Header */}
         <View className="flex-row justify-between items-center mb-3">

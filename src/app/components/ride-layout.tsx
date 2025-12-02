@@ -24,15 +24,15 @@ import CustomIconButton from './custom-icon-buttom';
 interface RideLayoutProps {
   title: string;
   children: React.ReactNode;
+  snapPoints?: (string | number)[];
 }
 
 // We forward a ref so parent can call methods on this layout (e.g. goToNext)
 const RideLayout = forwardRef<any, RideLayoutProps>(
-  ({ title, children }, ref) => {
+  ({ title, children, snapPoints = ['25%', '50%', '90%'] }, ref) => {
     const { height } = useWindowDimensions();
     const bottomSheetRef = useRef<BottomSheet>(null);
     const navigation = useNavigation();
-    const snapPoints = useMemo(() => ['25%', '50%', '90%'], []);
 
     useImperativeHandle(ref, () => ({
       expandTo(index: number) {
