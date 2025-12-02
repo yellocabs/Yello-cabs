@@ -146,7 +146,7 @@ const RideSummary = () => {
           />
         </ScrollView>
 
-        <View className="absolute bottom-0 left-0 right-0 px-5 py-2 bg-white">
+        <View className="absolute bottom-16 left-0 right-0 px-5 py-2 bg-white">
           <CustomButton title="Continue to Order" onPress={handlePress} />
         </View>
       </View>
