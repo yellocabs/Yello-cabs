@@ -18,6 +18,7 @@ const TwoAddressInput = ({
   setUserLocation,
   setDestinationLocation,
   navigation,
+  onPressIn,
 }: any) => {
   const handleDestinationPress = (location: any) => {
     setDestinationLocation(location);
@@ -57,6 +58,7 @@ const TwoAddressInput = ({
           textInputBackgroundColor="transparent"
           handlePress={setUserLocation}
           rightIcon={icons.target}
+          onPressIn={onPressIn}
         />
 
         <GoogleTextInput
@@ -66,6 +68,7 @@ const TwoAddressInput = ({
           textInputBackgroundColor="transparent"
           handlePress={handleDestinationPress}
           rightIcon={icons.pin}
+          onPressIn={onPressIn}
         />
       </View>
     </View>
@@ -105,6 +108,7 @@ const ExpandedAddressSelector = ({
   setUserLocation,
   setDestinationLocation,
   navigation,
+  onPressIn,
 }: any) => {
   return (
     <>
@@ -118,6 +122,7 @@ const ExpandedAddressSelector = ({
         setUserLocation={setUserLocation}
         setDestinationLocation={setDestinationLocation}
         navigation={navigation}
+        onPressIn={onPressIn}
       />
       <SelectOnMap />
 
@@ -153,6 +158,10 @@ const HomeScreen = () => {
       setExpanded(true);
       layoutRef.current?.expandTo(2);
     }
+  };
+
+  const handleTextInputPress = () => {
+    layoutRef.current?.expandTo(2);
   };
 
   useEffect(() => {
@@ -201,6 +210,7 @@ const HomeScreen = () => {
             setUserLocation={setUserLocation}
             setDestinationLocation={setDestinationLocation}
             navigation={navigation}
+            onPressIn={handleTextInputPress}
           />
         )}
       </RideLayout>

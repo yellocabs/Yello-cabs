@@ -276,29 +276,21 @@ export default function FindOffers() {
 
   return (
     <RideLayout title="Find Offers" snapPoints={['60%', '80%', '90%']}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        <View style={{ flex: 1, backgroundColor: 'white', paddingBottom: 100 }}>
-          {/* Scrollable List */}
-
-          <FlatList
-            data={rideOptions}
-            keyExtractor={item => item.type}
-            contentContainerStyle={{ padding: 16 }}
-            renderItem={({ item }) => (
-              <RideCard
-                item={item}
-                selected={selected}
-                onSelect={handleOptionSelect}
-                price={price}
-                setPrice={setPrice}
-              />
-            )}
+      <FlatList
+        data={rideOptions}
+        keyExtractor={item => item.type}
+        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+        renderItem={({ item }) => (
+          <RideCard
+            item={item}
+            selected={selected}
+            onSelect={handleOptionSelect}
+            price={price}
+            setPrice={setPrice}
           />
-        </View>
-      </ScrollView>
-
+        )}
+      />
       {/* BOTTOM BAR */}
-
       <View
         style={{
           position: 'absolute',
