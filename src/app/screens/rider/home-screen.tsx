@@ -178,7 +178,11 @@ const HomeScreen = () => {
         onNotNow={dismissPermissionModal}
       />
 
-      <RideLayout title="Home" ref={layoutRef}>
+      <RideLayout
+        title="Home"
+        ref={layoutRef}
+        snapPoints={expanded ? ['70%', '90%'] : undefined}
+      >
         {!expanded ? (
           <View className="my-3 px-6">
             <GoogleTextInput
