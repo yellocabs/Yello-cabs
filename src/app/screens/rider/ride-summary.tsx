@@ -90,7 +90,7 @@ const RideSummary = () => {
     }, 120);
   };
   return (
-    <RideLayout title="Distance" h={0.45} minHeight={0.45}>
+    <RideLayout title="Distance">
       <View className="flex-1 bg-white rounded-2xl px-5 pt-3 pb-20">
         {/* Header */}
         <View className="flex-row justify-between items-center mb-3">

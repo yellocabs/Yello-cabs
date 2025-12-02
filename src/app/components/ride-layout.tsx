@@ -4,45 +4,45 @@ import React, {
   useState,
   forwardRef,
   useImperativeHandle,
-} from "react";
-import { View, useWindowDimensions, Image, TouchableOpacity, Text } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import BottomSheet from "./bottom-sheet";
-import { icons, onboarding } from "@/constants";
-import { useNavigation } from "@react-navigation/native";
-import Map from "@/components/map/Map";
+  useMemo,
+} from 'react';
+import {
+  View,
+  useWindowDimensions,
+  Image,
+  TouchableOpacity,
+  Text,
+} from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
+import { icons, onboarding } from '@/constants';
+import { useNavigation } from '@react-navigation/native';
+import Map from '@/components/map/Map';
 
-import CustomIconButton from "./custom-icon-buttom";
+import CustomIconButton from './custom-icon-buttom';
 
 interface RideLayoutProps {
-  title: string
-  h: number;
-  minHeight: number
+  title: string;
   children: React.ReactNode;
 }
 
 // We forward a ref so parent can call methods on this layout (e.g. goToNext)
 const RideLayout = forwardRef<any, RideLayoutProps>(
-  ({ title, children, h, minHeight }, ref) => {
+  ({ title, children }, ref) => {
     const { height } = useWindowDimensions();
-    const bottomSheetRef = useRef<any>(null);
+    const bottomSheetRef = useRef<BottomSheet>(null);
     const navigation = useNavigation();
-
-    useEffect(() => {
-      setTimeout(() => bottomSheetRef.current?.expand(), 200);
-    }, []);
+    const snapPoints = useMemo(() => ['25%', '50%', '90%'], []);
 
     useImperativeHandle(ref, () => ({
-      expandTo(percent: number) {
-        bottomSheetRef.current?.expandTo(percent);
-      }
+      expandTo(index: number) {
+        bottomSheetRef.current?.snapToIndex(index);
+      },
     }));
-
 
     return (
       <GestureHandlerRootView className="flex-1">
         <View className="flex-1 bg-white">
-
           {/* MAP */}
           <View className="absolute inset-0">
             <Map />
@@ -50,8 +50,7 @@ const RideLayout = forwardRef<any, RideLayoutProps>(
 
           {/* HEADER */}
           <View className="flex flex-row absolute z-10 top-16 items-center px-5">
-
-            {title !== "Home" && (
+            {title !== 'Home' && (
               <CustomIconButton
                 icon={icons.left}
                 size={45}
@@ -63,20 +62,13 @@ const RideLayout = forwardRef<any, RideLayoutProps>(
             {/* <Text className="text-xl font-UrbanistSemiBold ml-5">{title}</Text> */}
           </View>
 
-          <BottomSheet
-            ref={bottomSheetRef}
-            activeHeight={height * h}
-            backgroundColor="#ffffff"
-            showBackdrop={false}
-            minHeight={minHeight}
-          >
-            {children}
+          <BottomSheet ref={bottomSheetRef} index={1} snapPoints={snapPoints}>
+            <BottomSheetView>{children}</BottomSheetView>
           </BottomSheet>
         </View>
       </GestureHandlerRootView>
     );
-  }
+  },
 );
-
 
 export default RideLayout;

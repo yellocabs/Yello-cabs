@@ -148,7 +148,7 @@ const HomeScreen = () => {
   const handleExpand = () => {
     if (!expanded) {
       setExpanded(true);
-      layoutRef.current?.expandTo(0.9);
+      layoutRef.current?.expandTo(2);
     }
   };
 
@@ -175,12 +175,7 @@ const HomeScreen = () => {
         onNotNow={dismissPermissionModal}
       />
 
-      <RideLayout
-        title="Home"
-        ref={layoutRef}
-        h={expanded ? 0.9 : 0.25}
-        minHeight={0.4}
-      >
+      <RideLayout title="Home" ref={layoutRef}>
         {!expanded ? (
           <View className="my-3 px-6">
             <GoogleTextInput

@@ -268,7 +268,7 @@ export default function FindOffers() {
   };
 
   return (
-    <RideLayout title="Find Offers" h={0.6} minHeight={0.6}>
+    <RideLayout title="Find Offers">
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={{ flex: 1, backgroundColor: 'white', paddingBottom: 100 }}>
           {/* Scrollable List */}
