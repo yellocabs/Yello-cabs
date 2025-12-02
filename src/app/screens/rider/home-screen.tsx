@@ -6,6 +6,7 @@ import LocationPermissionModal from '@/components/location-permission-modal';
 import { useLocationStore } from '@/store/location-store';
 import { useFetchLocation } from '@/hooks/useFetchLocation';
 import { icons } from '@/constants';
+import CustomButton from '@/components/custom-button';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
 // ------------------------------------------------------------------
@@ -68,6 +69,30 @@ const TwoAddressInput = ({
   );
 };
 
+const SelectOnMap = () => {
+  const navigation = useNavigation<any>();
+  return (
+    <View className="px-6">
+      <View className="flex-row items-center my-3">
+        <View className="flex-1 h-px bg-gray-300" />
+        <Text className="mx-4 text-gray-500">Or</Text>
+        <View className="flex-1 h-px bg-gray-300" />
+      </View>
+      <CustomButton
+        title="Select on Map"
+        bgVariant="outline"
+        textVariant="primary"
+        onPress={() =>
+          navigation.navigate('Rider', {
+            screen: 'MapScreen',
+            params: { type: 'destination' },
+          })
+        }
+      />
+    </View>
+  );
+};
+
 // ------------------------------------------------------------------
 // EXPANDED SECTION UI
 // ------------------------------------------------------------------
@@ -91,6 +116,7 @@ const ExpandedAddressSelector = ({
         setDestinationLocation={setDestinationLocation}
         navigation={navigation}
       />
+      <SelectOnMap />
 
       <View className="h-2 bg-neutral-50 w-full" />
     </>
@@ -102,7 +128,7 @@ const ExpandedAddressSelector = ({
 // ------------------------------------------------------------------
 const HomeScreen = () => {
   const navigation = useNavigation();
-  const route = useRoute();
+  const route = useRoute<any>();
   const layoutRef = useRef<any>(null);
   const [expanded, setExpanded] = useState(false);
 
@@ -129,6 +155,14 @@ const HomeScreen = () => {
   useEffect(() => {
     if (route.params?.params?.expanded) {
       handleExpand();
+    }
+    if (route.params?.location) {
+      const { location, type } = route.params;
+      if (type === 'destination') {
+        setDestinationLocation(location);
+      } else {
+        setUserLocation(location);
+      }
     }
   }, [route.params]);
 

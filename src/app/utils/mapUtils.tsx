@@ -1,8 +1,7 @@
-import axios from "axios";
-import { useUserStore } from "@/store/use-user-store";
-import { useLocationStore } from "@/store/location-store";
-import { useState } from "react";
-
+import axios from 'axios';
+import { useUserStore } from '@/store/use-user-store';
+import { useLocationStore } from '@/store/location-store';
+import { useState } from 'react';
 
 // export const getLatLong = async (placeId: string) => {
 //     try {
@@ -168,61 +167,3 @@ import { useState } from "react";
 //     cabEconomy: { icon: require('@/assets/icons/cab.png') },
 //     cabPremium: { icon: require('@/assets/icons/cab_premium.png') },
 //   };
- 
-export const fetchDistance = async () => {
-  const {
-    userLatitude,
-    userLongitude,
-    destinationLatitude,
-    destinationLongitude,
-    setDistance,
-    setDistanceText,
-    setDuration, // <-- make sure this exists in your store
-  } = useLocationStore.getState();
-
-  if (
-    !userLatitude ||
-    !userLongitude ||
-    !destinationLatitude ||
-    !destinationLongitude
-  ) {
-    return;
-  }
-
-  try {
-    const response = await fetch(
-      `https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${userLatitude},${userLongitude}&destinations=${destinationLatitude},${destinationLongitude}&key=AIzaSyAC8JJ79eaC8PjAdFpNImUTjpRuJXUcWMM`
-    );
-
-    const data = await response.json();
-    const element = data.rows?.[0]?.elements?.[0];
-
-    if (element?.status === "OK" && element.distance && element.duration) {
-      // --- DISTANCE ---
-      const meters = element.distance.value;
-      const km = meters / 1000;
-      const formattedDistance = `${km.toFixed(1)} km`; // 1286 → 1.3 km
-
-      setDistanceText(formattedDistance);
-      setDistance(km);
-
-      // --- DURATION ---
-      const seconds = element.duration.value;
-      const hours = Math.floor(seconds / 3600);
-      const minutes = Math.floor((seconds % 3600) / 60);
-
-      const formattedDuration = `${hours.toString().padStart(2, "0")}:${minutes
-        .toString()
-        .padStart(2, "0")}`;
-      setDuration(formattedDuration);
-    } else {
-      setDistanceText("");
-      setDistance(0);
-      setDuration("00:00");
-    }
-  } catch (error) {
-    setDistanceText("");
-    setDistance(0);
-    setDuration("00:00");
-  }
-};
