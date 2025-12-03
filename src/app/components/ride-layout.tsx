@@ -17,7 +17,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { icons, onboarding } from '@/constants';
 import { useNavigation } from '@react-navigation/native';
-import Map from '@/components/map/Map';
+import Map from '@/components/map';
 
 import CustomIconButton from './custom-icon-buttom';
 

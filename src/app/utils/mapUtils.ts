@@ -82,7 +82,9 @@ export const fetchDistance = async (
 
   try {
     const response = await fetch(
-      `https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${userLatitude},${userLongitude}&destinations=${destinationLatitude},${destinationLongitude}&key=${GOOGLE_API_KEY}&mode=${mode}`,
+      `https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${
+        userLatitude
+      },${userLongitude}&destinations=${destinationLatitude},${destinationLongitude}&key=${GOOGLE_API_KEY}&mode=${mode}`,
     );
 
     const data = await response.json();
@@ -101,43 +103,55 @@ export const fetchDistance = async (
     return null;
   }
 };
-export const calculateFare = (distance: number) => {
+export const calculateFare = (
+  distance: number, // in km
+  duration: number, // in minutes
+  trafficLevel: number = 1,
+  demandLevel: number = 1,
+) => {
+  if (!distance || !duration) {
+    return { bike: 0, auto: 0, cabEconomy: 0, cabPremium: 0 };
+  }
+
+  const cityMultiplier = 1.1;
+
   const rateStructure = {
-    bike: { baseFare: 10, perKmRate: 5, minimumFare: 25 },
-    auto: { baseFare: 15, perKmRate: 7, minimumFare: 30 },
-    cabEconomy: { baseFare: 20, perKmRate: 10, minimumFare: 50 },
-    cabPremium: { baseFare: 30, perKmRate: 15, minimumFare: 70 },
+    bike: { baseFare: 10, perKmRate: 5, perMinRate: 0.5, minimumFare: 25 },
+    auto: { baseFare: 15, perKmRate: 7, perMinRate: 0.7, minimumFare: 30 },
+    cabEconomy: { baseFare: 20, perKmRate: 10, perMinRate: 1, minimumFare: 50 },
+    cabPremium: {
+      baseFare: 30,
+      perKmRate: 15,
+      perMinRate: 1.5,
+      minimumFare: 70,
+    },
   };
 
-  const fareCalculation = (
-    baseFare: number,
-    perKmRate: number,
-    minimumFare: number,
-  ) => {
-    const calculatedFare = baseFare + distance * perKmRate;
-    return Math.max(calculatedFare, minimumFare);
+  const fareCalculation = ({
+    baseFare,
+    perKmRate,
+    perMinRate,
+    minimumFare,
+  }: any) => {
+    let calculatedFare =
+      baseFare + distance * perKmRate + duration * perMinRate;
+
+    calculatedFare *= trafficLevel;
+    calculatedFare *= demandLevel;
+    calculatedFare *= cityMultiplier;
+
+    calculatedFare = Math.max(calculatedFare, minimumFare);
+
+    // ceil only if decimal exists
+    return calculatedFare % 1 !== 0
+      ? Math.ceil(calculatedFare)
+      : calculatedFare;
   };
 
   return {
-    bike: fareCalculation(
-      rateStructure.bike.baseFare,
-      rateStructure.bike.perKmRate,
-      rateStructure.bike.minimumFare,
-    ),
-    auto: fareCalculation(
-      rateStructure.auto.baseFare,
-      rateStructure.auto.perKmRate,
-      rateStructure.auto.minimumFare,
-    ),
-    cabEconomy: fareCalculation(
-      rateStructure.cabEconomy.baseFare,
-      rateStructure.cabEconomy.perKmRate,
-      rateStructure.cabEconomy.minimumFare,
-    ),
-    cabPremium: fareCalculation(
-      rateStructure.cabPremium.baseFare,
-      rateStructure.cabPremium.perKmRate,
-      rateStructure.cabPremium.minimumFare,
-    ),
+    bike: fareCalculation(rateStructure.bike),
+    auto: fareCalculation(rateStructure.auto),
+    cabEconomy: fareCalculation(rateStructure.cabEconomy),
+    cabPremium: fareCalculation(rateStructure.cabPremium),
   };
 };

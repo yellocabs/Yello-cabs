@@ -1,3 +1,4 @@
+// --- IMPORTS ---
 import { createRide } from '@/services/rideService';
 import CustomButton from '@/components/custom-button';
 import { icons } from '@/constants';
@@ -6,18 +7,13 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useLocationStore } from '@/store';
 import { calculateFare, fetchDistance } from '@/utils/mapUtils';
 import RideLayout from '@/components/ride-layout';
-import {
-  FlatList,
-  Image,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
+import { ZapIcon } from 'lucide-react-native';
 
 const PRIMARY_COLOR = '#f0bd1a';
 const CARD_BG = '#f0bd1a';
 
+// --- ICONS ---
 const BikeIcon = () => (
   <Image
     source={icons.bike}
@@ -47,13 +43,69 @@ const CabPremiumIcon = () => (
   />
 );
 
-const SnowflakeIcon = () => <Text className="text-3xl">❄️</Text>;
-const ZapIcon = () => <Text className="text-xl text-gray-700">⚡</Text>;
-
 const IconWrapper = ({ children }) => (
   <View className="w-10 h-10 flex items-center justify-center">{children}</View>
 );
 
+// --- FORMAT PRICE ---
+const formatPrice = (p: number) => (Number.isInteger(p) ? p : p.toFixed(2));
+
+// --- RIDE CARD ---
+const RideCard = ({ item, selected, onSelect, price, setPrice }) => {
+  const isSelected = selected === item.type;
+
+  return (
+    <TouchableOpacity
+      onPress={() => onSelect(item.type)}
+      className="rounded-2xl mb-5"
+      style={{ backgroundColor: isSelected ? CARD_BG : 'white', padding: 18 }}
+    >
+      <View className="flex-row items-center">
+        <IconWrapper>{item.icon}</IconWrapper>
+
+        <View className="flex-1 ml-3">
+          <Text className="text-xl font-semibold text-black">{item.title}</Text>
+          <Text className="text-gray-600">{item.time} away</Text>
+          <Text className="text-gray-600">{item.dropTime}</Text>
+        </View>
+
+        {!isSelected && (
+          <Text className="text-lg font-bold text-gray-800">
+            ₹{formatPrice(item.price)}
+          </Text>
+        )}
+      </View>
+
+      {isSelected && (
+        <View className="items-center">
+          <View className="flex-row items-center bg-[#333] rounded-full px-4 py-2 mt-3">
+            <TouchableOpacity
+              onPress={() => setPrice(p => Math.max(20, p - 5))}
+              className="w-10 h-10 rounded-full bg-[#555] flex items-center justify-center"
+            >
+              <Text className="text-white text-2xl font-bold">-</Text>
+            </TouchableOpacity>
+
+            <Text className="mx-6 text-white text-3xl font-bold">
+              ₹{formatPrice(price)}
+            </Text>
+
+            <TouchableOpacity
+              onPress={() => setPrice(p => p + 5)}
+              className="w-10 h-10 rounded-full bg-[#555] flex items-center justify-center"
+            >
+              <Text className="text-white text-2xl font-bold">+</Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text className="mt-2 line-through">
+            Recommended fare: ₹{formatPrice(item.price)}
+          </Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  );
+};
 const ToggleSwitch = ({ isActive, onToggle }) => {
   const trackColor = isActive ? PRIMARY_COLOR : '#d1d1d1';
   const thumbColor = isActive ? '#333' : '#888';
@@ -74,91 +126,30 @@ const ToggleSwitch = ({ isActive, onToggle }) => {
     </TouchableOpacity>
   );
 };
-
-const PriceAdjuster = ({ price, setPrice }) => {
-  const dec = () => setPrice(p => Math.max(20, p - 5));
-  const inc = () => setPrice(p => p + 5);
-
-  return (
-    <View className="flex-row items-center bg-[#333] rounded-full px-4 py-2 mt-3">
-      <TouchableOpacity
-        onPress={dec}
-        className="w-10 h-10 rounded-full bg-[#555] flex items-center justify-center"
-      >
-        <Text className="text-white text-2xl font-bold">-</Text>
-      </TouchableOpacity>
-
-      <Text className="mx-6 text-white text-3xl font-bold">₹{price}</Text>
-
-      <TouchableOpacity
-        onPress={inc}
-        className="w-10 h-10 rounded-full bg-[#555] flex items-center justify-center"
-      >
-        <Text className="text-white text-2xl font-bold">+</Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
-
-// RIDE CARD
-const RideCard = ({ item, selected, onSelect, price, setPrice }) => {
-  const isSelected = selected === item.type;
-
-  return (
-    <TouchableOpacity
-      onPress={() => onSelect(item.type)}
-      className="rounded-2xl mb-5"
-      style={{
-        backgroundColor: isSelected ? CARD_BG : 'white',
-        padding: 18,
-      }}
-    >
-      {/* HEADER */}
-      <View className="flex-row items-center">
-        <IconWrapper>{item.icon}</IconWrapper>
-
-        <View className="flex-1 ml-3">
-          <Text className={`text-xl font-semibold ${'text-black'}`}>
-            {item.title}
-          </Text>
-          <Text className={'text-gray-600'}>{item.time}</Text>
-          <Text className={'text-gray-600'}>{item.description}</Text>
-        </View>
-
-        {!isSelected && (
-          <Text className="text-lg font-bold text-gray-800">
-            ₹{item.price.toFixed(2)}
-          </Text>
-        )}
-      </View>
-
-      {/* PRICE ADJUSTER ONLY WHEN SELECTED */}
-      {isSelected && (
-        <View className="items-center">
-          <PriceAdjuster price={price} setPrice={setPrice} />
-          <Text className=" mt-2 line-through">
-            Recommended fare: ₹{item.price.toFixed(2)}
-          </Text>
-        </View>
-      )}
-    </TouchableOpacity>
-  );
-};
-
-// MAIN SCREEN
+// --- MAIN ---
 export default function FindOffers() {
-  const [isAutoAccept, setIsAutoAccept] = useState(true);
+  const [isAutoAccept, setIsAutoAccept] = useState(false);
   const [price, setPrice] = useState(0);
   const [selected, setSelected] = useState('Bike');
   const [loading, setLoading] = useState(false);
+
   const [durations, setDurations] = useState({
     bike: '',
     auto: '',
     cabEconomy: '',
     cabPremium: '',
   });
+
+  const [farePrices, setFarePrices] = useState({
+    bike: 0,
+    auto: 0,
+    cabEconomy: 0,
+    cabPremium: 0,
+  });
+
   const navigation = useNavigation();
   const route = useRoute<any>();
+
   const {
     distance,
     userLatitude,
@@ -170,81 +161,104 @@ export default function FindOffers() {
     setDestinationLocation,
   } = useLocationStore();
 
+  // READABLE DATE FORMAT
+  const getDropTime = (duration: string) => {
+    if (!duration) return '';
+    const now = new Date();
+    const minutes = parseInt(duration, 10) || 0;
+    now.setMinutes(now.getMinutes() + minutes);
+    return `Drop ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+  };
+
+  // Handle selecting location
   useEffect(() => {
     if (route.params?.location) {
       setDestinationLocation(route.params.location);
     }
   }, [route.params?.location]);
 
-  const farePrices = useMemo(() => calculateFare(distance || 0), [distance]);
-
+  // Fetch durations + distance from Google
   useEffect(() => {
-    const getDurations = async () => {
-      const bikeDuration = await fetchDistance('bicycling');
-      const drivingDuration = await fetchDistance('driving');
-      setDurations({
-        bike: bikeDuration?.duration || '',
-        auto: drivingDuration?.duration || '',
-        cabEconomy: drivingDuration?.duration || '',
-        cabPremium: drivingDuration?.duration || '',
-      });
-    };
-    getDurations();
-  }, [userLatitude, userLongitude, destinationLatitude, destinationLongitude]);
+    const load = async () => {
+      const bike = await fetchDistance('bicycling');
+      const driving = await fetchDistance('driving');
 
+      setDurations({
+        bike: bike?.duration || '',
+        auto: driving?.duration || '',
+        cabEconomy: driving?.duration || '',
+        cabPremium: driving?.duration || '',
+      });
+
+      if (driving?.distance) {
+        const km = parseFloat(driving.distance.replace(' km', ''));
+        useLocationStore.getState().setDistance(km);
+      }
+    };
+
+    if (destinationLatitude && destinationLongitude) load();
+  }, [destinationLatitude, destinationLongitude]);
+
+  // ---- CALCULATE FARE (PASS DURATION TOO) ----
+  useEffect(() => {
+    if (!distance || !durations.auto) return;
+
+    const durationNumber = parseInt(durations.auto, 10) || 0;
+
+    const fares = calculateFare(distance, durationNumber);
+
+    setFarePrices({
+      bike: fares.bike,
+      auto: fares.auto,
+      cabEconomy: fares.cabEconomy,
+      cabPremium: fares.cabPremium,
+    });
+  }, [distance, durations]);
+
+  // Create ride options
   const rideOptions = useMemo(
     () => [
       {
         type: 'Bike',
-        seats: 1,
-        time: durations.bike,
-        dropTime: '4:28 pm',
-        price: farePrices?.bike,
-        isFastest: true,
-        icon: <BikeIcon />,
         title: 'Moto',
+        icon: <BikeIcon />,
+        time: durations.bike,
+        dropTime: getDropTime(durations.bike),
+        price: farePrices.bike,
       },
       {
         type: 'Auto',
-        seats: 3,
-        time: durations.auto,
-        dropTime: '4:30 pm',
-        price: farePrices.auto,
-        icon: <AutoIcon />,
         title: 'Auto',
+        icon: <AutoIcon />,
+        time: durations.auto,
+        dropTime: getDropTime(durations.auto),
+        price: farePrices.auto,
       },
       {
         type: 'Cab Economy',
-        seats: 4,
-        time: durations.cabEconomy,
-        dropTime: '4:28 pm',
-        price: farePrices.cabEconomy,
-        icon: <CabIcon />,
         title: 'Cab Economy',
+        icon: <CabIcon />,
+        time: durations.cabEconomy,
+        dropTime: getDropTime(durations.cabEconomy),
+        price: farePrices.cabEconomy,
       },
       {
         type: 'Cab Premium',
-        seats: 4,
-        time: durations.cabPremium,
-        dropTime: '4:30 pm',
-        price: farePrices.cabPremium,
-        icon: <CabPremiumIcon />,
         title: 'Cab Premium',
+        icon: <CabPremiumIcon />,
+        time: durations.cabPremium,
+        dropTime: getDropTime(durations.cabPremium),
+        price: farePrices.cabPremium,
       },
     ],
     [farePrices, durations],
   );
 
+  // Auto update selected price
   useEffect(() => {
-    const selectedOption = rideOptions.find(option => option.type === selected);
-    if (selectedOption) {
-      setPrice(selectedOption.price);
-    }
+    const opt = rideOptions.find(o => o.type === selected);
+    if (opt) setPrice(opt.price);
   }, [selected, rideOptions]);
-
-  const handleOptionSelect = useCallback((type: string) => {
-    setSelected(type);
-  }, []);
 
   const handleRideBooking = async () => {
     setLoading(true);
@@ -258,6 +272,7 @@ export default function FindOffers() {
             : selected === 'Bike'
               ? 'bike'
               : 'auto',
+
       drop: {
         latitude: destinationLatitude,
         longitude: destinationLongitude,
@@ -284,12 +299,13 @@ export default function FindOffers() {
           <RideCard
             item={item}
             selected={selected}
-            onSelect={handleOptionSelect}
+            onSelect={setSelected}
             price={price}
             setPrice={setPrice}
           />
         )}
       />
+
       {/* BOTTOM BAR */}
       <View
         style={{
@@ -328,7 +344,6 @@ export default function FindOffers() {
             onToggle={() => setIsAutoAccept(v => !v)}
           />
         </View>
-
         <CustomButton
           title="Find offers"
           onPress={handleRideBooking}
