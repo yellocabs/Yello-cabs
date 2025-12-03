@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { ReactNativeModal } from 'react-native-modal';
 import { icons } from '@/constants'; // adjust if your error icon lives elsewhere
-import CustomButton from './shared/custom-button';
+import CustomButton from './custom-button';
 
 type ErrorModalProps = {
   isVisible: boolean;

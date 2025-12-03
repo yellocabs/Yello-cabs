@@ -1,7 +1,7 @@
 import React from 'react';
 import { Image } from 'react-native';
 import { icons } from '@/constants';
-import CustomButton from './shared/custom-button';
+import CustomButton from './custom-button';
 
 type Props = {
   onPress: () => void;

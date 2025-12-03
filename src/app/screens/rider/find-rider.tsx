@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useLocationStore } from '@/store';
 import { calculateFare, fetchDistance } from '@/utils/mapUtils';
-import RideLayout from '@/components/ride-layout';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import {
@@ -16,6 +15,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import CustomButton from '@/components/shared/custom-button';
+import RideLayout from '@/components/customer/ride-layout';
 
 // -------------------------------------------------------------------
 

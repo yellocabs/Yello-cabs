@@ -1,13 +1,13 @@
 import { View, Text, Image } from 'react-native';
 import React, { useRef, useState, useEffect } from 'react';
-import GoogleTextInput from '@/components/google-text-input';
-import RideLayout from '@/components/ride-layout';
-import LocationPermissionModal from '@/components/location-permission-modal';
+import RideLayout from '@/components/customer/ride-layout';
 import { useLocationStore } from '@/store/location-store';
 import { useFetchLocation } from '@/hooks/useFetchLocation';
 import { icons } from '@/constants';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import CustomButton from '@/components/shared/custom-button';
+import LocationPermissionModal from '@/components/shared/location-permission-modal';
+import GoogleTextInput from '@/components/customer/google-text-input';
 
 // ------------------------------------------------------------------
 // TWO ADDRESS INPUTS: FROM + TO

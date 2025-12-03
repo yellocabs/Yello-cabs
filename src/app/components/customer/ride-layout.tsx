@@ -18,8 +18,7 @@ import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import { icons, onboarding } from '@/constants';
 import { useNavigation } from '@react-navigation/native';
 import Map from '@/components/map';
-
-import CustomIconButton from './shared/custom-icon-buttom';
+import CustomIconButton from '../shared/custom-icon-buttom';
 
 interface RideLayoutProps {
   title: string;

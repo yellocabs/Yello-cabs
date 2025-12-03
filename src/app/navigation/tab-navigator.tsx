@@ -6,7 +6,7 @@ import Service from '@/screens/rider/services-screen';
 import History from '@/screens/rider/history-screen';
 import Profile from '@/screens/rider/profile-screen';
 import { icons } from '@/constants';
-import TabIcon from '@/components/tab-icon';
+import TabIcon from '@/components/shared/tab-icon';
 
 const Tab = createBottomTabNavigator();
 

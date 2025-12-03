@@ -17,9 +17,7 @@ import {
 import { ReactNativeModal } from 'react-native-modal';
 import OTPInput from 'react-native-otp-textinput';
 import { useNavigation } from '@react-navigation/native';
-import ErrorModal from '@/components/error-modal';
 import { useUserStore } from '@/store/use-user-store';
-import GoogleLoginButton from '@/components/google-login-button';
 import { googleLogin } from '@/services/google-auth';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -27,6 +25,8 @@ import { useAuthStore } from '@/store/auth-store';
 import Config from 'react-native-config';
 import { sendOtp, verifyOtp } from '@/api/end-points/auth';
 import CustomButton from '@/components/shared/custom-button';
+import GoogleLoginButton from '@/components/shared/google-login-button';
+import ErrorModal from '@/components/shared/error-modal';
 
 const LoginScreen = () => {
   const navigation = useNavigation<any>();
