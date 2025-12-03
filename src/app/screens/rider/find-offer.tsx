@@ -1,6 +1,5 @@
 // --- IMPORTS ---
 import { createRide } from '@/services/rideService';
-import CustomButton from '@/components/custom-button';
 import { icons } from '@/constants';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -9,6 +8,7 @@ import { calculateFare, fetchDistance } from '@/utils/mapUtils';
 import RideLayout from '@/components/ride-layout';
 import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
 import { ZapIcon } from 'lucide-react-native';
+import CustomButton from '@/components/shared/custom-button';
 
 const PRIMARY_COLOR = '#f0bd1a';
 const CARD_BG = '#f0bd1a';

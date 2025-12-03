@@ -1,7 +1,7 @@
 import React from 'react';
 import { Image } from 'react-native';
-import CustomButton from '@/components/custom-button';
 import { icons } from '@/constants';
+import CustomButton from './shared/custom-button';
 
 type Props = {
   onPress: () => void;
@@ -21,7 +21,7 @@ const GoogleLoginButton = ({ onPress }: Props) => {
       )}
       bgVariant="outline"
       textVariant="primary"
-      loading= {false}
+      loading={false}
       onPress={onPress}
     />
   );

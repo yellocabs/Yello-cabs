@@ -1,358 +1,217 @@
-// FindRider.jsx
-import { icons } from "@/constants";
-import { useLocationStore } from "@/store";
-import React, { useRef, useEffect, useState } from "react";
+// --- IMPORTS ---
+import { createRide } from '@/services/rideService';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { useLocationStore } from '@/store';
+import { calculateFare, fetchDistance } from '@/utils/mapUtils';
+import RideLayout from '@/components/ride-layout';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
 import {
   View,
   Text,
-  SafeAreaView,
   TouchableOpacity,
-  Animated,
-  Easing,
-  Dimensions,
   StyleSheet,
-  Image,
-  Modal,
-} from "react-native";
-import MapView, { Marker, Circle } from "react-native-maps";
-import { useNavigation } from "@react-navigation/native";
+  ScrollView,
+  ActivityIndicator,
+} from 'react-native';
+import CustomButton from '@/components/shared/custom-button';
 
-const { width, height } = Dimensions.get("window");
-const SPINNER_SIZE = Math.min(width, height) * 0.78;
+// -------------------------------------------------------------------
 
-export default function FindRider() {
+export default function FindOffers() {
   const navigation = useNavigation();
-  const { userLatitude, userLongitude } = useLocationStore();
+  const route: any = useRoute();
 
-  const rippleAnim = useRef(new Animated.Value(0)).current;
+  const { pickup, destination } = useLocationStore();
+  const { rideType } = route.params || {};
 
-  // Progress bar animation (0 → width)
-  const progressAnim = useRef(new Animated.Value(0)).current;
+  const [distance, setDistance] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Slide-to-cancel animation (0 → width - thumbSize)
-  const slideAnim = useRef(new Animated.Value(0)).current;
+  // Ride Options
+  const RIDE_OPTIONS = useMemo(() => {
+    if (!distance) return [];
 
-  const [timeoutModal, setTimeoutModal] = useState(false);
+    return [
+      {
+        id: 'moto',
+        name: 'Moto',
+        time: '3 min away',
+        price: calculateFare('moto', distance),
+      },
+      {
+        id: 'car',
+        name: 'Car',
+        time: '5 min away',
+        price: calculateFare('car', distance),
+      },
+      {
+        id: 'auto',
+        name: 'Auto',
+        time: '4 min away',
+        price: calculateFare('auto', distance),
+      },
+    ];
+  }, [distance]);
 
-  if (!userLatitude || !userLongitude) return <Text>Loading map...</Text>;
-
-  // ------------------------------
-  // Ripple animation
-  // ------------------------------
+  // Fetch Distance
   useEffect(() => {
-    Animated.loop(
-      Animated.timing(rippleAnim, {
-        toValue: 1,
-        duration: 2000,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      })
-    ).start();
-  }, []);
-
-  // Derived ripple animations
-  const ripple1Scale = rippleAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.6] });
-  const ripple1Opacity = rippleAnim.interpolate({ inputRange: [0, 1], outputRange: [0.9, 0.0] });
-
-  const ripple2Scale = rippleAnim.interpolate({ inputRange: [0, 1], outputRange: [0.7, 1.3] });
-  const ripple2Opacity = rippleAnim.interpolate({ inputRange: [0, 1], outputRange: [0.6, 0.0] });
-
-  // ------------------------------
-  // Start 2-minute search timer
-  // ------------------------------
-  const startSearchTimer = () => {
-    progressAnim.setValue(0); // reset
-    Animated.timing(progressAnim, {
-      toValue: width,
-      duration: 120000, // 2 minutes
-      easing: Easing.linear,
-      useNativeDriver: false,
-    }).start(({ finished }) => {
-      if (finished) {
-        // After 2 min, show modal
-        setTimeoutModal(true);
+    const loadDistance = async () => {
+      try {
+        if (pickup && destination) {
+          const dist = await fetchDistance(pickup, destination);
+          setDistance(dist);
+        }
+      } catch (err) {
+        console.log('Distance error:', err);
+      } finally {
+        setLoading(false);
       }
-    });
+    };
+
+    loadDistance();
+  }, [pickup, destination]);
+
+  const handleBack = () => {
+    navigation.goBack();
   };
 
-  useEffect(() => {
-    startSearchTimer();
-  }, []);
+  const handleCreateRide = async (option: any) => {
+    const ridePayload = {
+      rideType: option.name,
+      pickup,
+      destination,
+      distance,
+      fare: option.price,
+    };
 
-  // ------------------------------
-  // Slide to cancel logic
-  // ------------------------------
-  const thumbSize = 48;
-  const slideMax = width * 0.86 - thumbSize - 20;
-
-  const handleSlide = ({ nativeEvent }) => {
-    const touchX = nativeEvent.locationX;
-    if (touchX < 0) return;
-    if (touchX > slideMax) {
-      // fully slid right → cancel & navigate
-      slideAnim.setValue(slideMax);
-      navigation.navigate("FindOffers");
-      return;
-    }
-    slideAnim.setValue(touchX);
+    await createRide(ridePayload);
+    navigation.navigate('FindingDriver', { ridePayload });
   };
 
-  const sliderColor = slideAnim.interpolate({
-    inputRange: [0, slideMax],
-    outputRange: ["#000", "#FF0000"],
-  });
+  // -------------------------------------------------------------------
 
-  // ------------------------------
-  // Progress bar color change at end
-  // ------------------------------
-  const progressBarColor = progressAnim.interpolate({
-    inputRange: [0, width - 40, width],
-    outputRange: ["#d3d3d3", "#FFA500", "red"],
-  });
+  if (loading) {
+    return (
+      <RideLayout
+        title="Finding rides..."
+        subtitle="Please wait"
+        icon={<Ionicons name="car-outline" size={32} color="white" />}
+      >
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      </RideLayout>
+    );
+  }
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      {/* BACKGROUND MAP LIKE TAXI APPS */}
-      <MapView
-        style={StyleSheet.absoluteFill}
-        initialRegion={{
-          latitude: userLatitude,
-          longitude: userLongitude,
-          latitudeDelta: 0.01,
-          longitudeDelta: 0.01,
-        }}
-      >
-        {/* USER MARKER */}
-        <Marker coordinate={{ latitude: userLatitude, longitude: userLongitude }}>
-          <View style={styles.userPin} />
-        </Marker>
+    <RideLayout
+      title="Choose your ride"
+      subtitle={`${distance?.toFixed(2)} km distance`}
+      icon={<Ionicons name="location" size={32} color="white" />}
+    >
+      {/* Back Button */}
+      <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+        <Ionicons name="chevron-back" size={28} color="#fff" />
+      </TouchableOpacity>
 
-        <Circle
-          center={{ latitude: userLatitude, longitude: userLongitude }}
-          radius={200}
-          fillColor="rgba(255, 165, 0, 0.15)"
-          strokeColor="rgba(255, 165, 0, 0.6)"
-        />
-
-        {/* COMMENT: Add your REAL driver markers here */}
-      </MapView>
-
-      {/* FOREGROUND CONTENT */}
-      <View className="flex-1 items-center px-5">
-
-        {/* Header */}
-        <View className="w-full flex-row items-center mt-[10%] z-10">
-          <TouchableOpacity className="p-2" onPress={()=>{navigation.navigate("FindOffer")}}>
-            <Image source={icons.backArrow} className="w-10 h-10" />
-          </TouchableOpacity>
-          <Text className="text-lg font-semibold ml-2">Searching for Driver</Text>
-        </View>
-
-        {/* Taxi Icon */}
-        <View className="mt-6 mb-3 items-center z-10">
-          <View className="w-20 h-20 rounded-full bg-yellow-400 items-center justify-center shadow">
-            <Image source={icons.taxi} className="w-10 h-10" />
-          </View>
-        </View>
-
-        {/* Text */}
-        <Text className="text-xl font-bold">Searching Ride...</Text>
-        <Text className="text-sm text-gray-9000 mb-6">
-          This may take a few seconds...
-        </Text>
-
-        {/* Ripple Area */}
-        <View className="flex-1 justify-center items-center w-full">
-          <View
-            style={{
-              width: SPINNER_SIZE,
-              height: SPINNER_SIZE,
-              alignItems: "center",
-              justifyContent: "center",
-            }}
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {RIDE_OPTIONS.map(option => (
+          <TouchableOpacity
+            key={option.id}
+            style={styles.offerCard}
+            onPress={() => handleCreateRide(option)}
           >
-            {/* Ripple 1 */}
-            <Animated.View
-              style={[
-                styles.ripple,
-                {
-                  width: SPINNER_SIZE * 0.9,
-                  height: SPINNER_SIZE * 0.9,
-                  borderRadius: SPINNER_SIZE * 0.45,
-                  transform: [{ scale: ripple1Scale }],
-                  opacity: ripple1Opacity,
-                },
-              ]}
-            />
-
-            {/* Ripple 2 */}
-            <Animated.View
-              style={[
-                styles.ripple,
-                {
-                  width: SPINNER_SIZE * 0.64,
-                  height: SPINNER_SIZE * 0.64,
-                  borderRadius: SPINNER_SIZE * 0.32,
-                  transform: [{ scale: ripple2Scale }],
-                  opacity: ripple2Opacity,
-                },
-              ]}
-            />
-
-            {/* USER STATIC DOT */}
-            <View style={styles.userDot} />
-          </View>
-        </View>
-
-        {/* PROGRESS BAR FULL WIDTH */}
-        <View style={styles.progressContainer}>
-          <Animated.View
-            style={[
-              styles.progressBar,
-              {
-                width: progressAnim,
-                backgroundColor: progressBarColor,
-              },
-            ]}
-          />
-        </View>
-
-        {/* SLIDE TO CANCEL */}
-        <View className="w-full items-center pb-6 z-10">
-          <View
-            style={{
-              width: width * 0.86,
-              height: 56,
-              backgroundColor: "#eee",
-              borderRadius: 30,
-              paddingHorizontal: 10,
-              justifyContent: "center",
-            }}
-            onTouchMove={handleSlide}
-            onTouchStart={handleSlide}
-          >
-            <Animated.View
-              style={[
-                styles.sliderThumb,
-                {
-                  transform: [{ translateX: slideAnim }],
-                  backgroundColor: sliderColor,
-                },
-              ]}
-            >
-              <Text style={styles.sliderText}>×</Text>
-            </Animated.View>
-          </View>
-        </View>
-      </View>
-
-      {/* TIMEOUT POPUP */}
-      <Modal transparent visible={timeoutModal} animationType="fade">
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalBox}>
-            <Text style={styles.modalTitle}>No Drivers Found</Text>
-            <Text style={styles.modalMessage}>
-              Sorry, we could not find any rider. All our captains are busy.
-            </Text>
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={styles.waitBtn}
-                onPress={() => {
-                  setTimeoutModal(false);
-                  startSearchTimer();
-                }}
-              >
-                <Text style={styles.waitText}>Wait</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.cancelBtn}
-                onPress={() => navigation.navigate("FindOffer")}
-              >
-                <Text style={styles.cancelText}>Cancel</Text>
-              </TouchableOpacity>
+            {/* Icon */}
+            <View style={styles.offerIconContainer}>
+              <Ionicons
+                name={
+                  option.id === 'car'
+                    ? 'car-sport'
+                    : option.id === 'auto'
+                      ? 'car-outline'
+                      : 'bicycle'
+                }
+                size={28}
+                color="white"
+              />
             </View>
-          </View>
-        </View>
-      </Modal>
 
-    </SafeAreaView>
+            {/* Text */}
+            <View style={{ flex: 1 }}>
+              <Text style={styles.offerName}>
+                {option.name}{' '}
+                <Ionicons
+                  name="information-circle-outline"
+                  size={14}
+                  color="#ccc"
+                />
+              </Text>
+              <Text style={styles.offerTime}>{option.time}</Text>
+            </View>
+
+            {/* Price */}
+            <Text style={styles.offerPrice}>₹{option.price}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+
+      {/* Bottom Button */}
+      <CustomButton
+        title="Confirm Ride"
+        onPress={() => handleCreateRide(RIDE_OPTIONS[0])}
+        style={{ marginTop: 20 }}
+      />
+    </RideLayout>
   );
 }
 
+// -------------------------------------------------------------------
+
 const styles = StyleSheet.create({
-  userPin: {
-    width: 20,
-    height: 20,
-    backgroundColor: "#FFA500",
-    borderRadius: 10,
-    borderWidth: 3,
-    borderColor: "#fff",
+  centered: {
+    paddingTop: 40,
+    alignItems: 'center',
   },
-
-  userDot: {
-    width: 18,
-    height: 18,
-    backgroundColor: "#FFA500",
-    borderRadius: 9,
-    borderWidth: 3,
-    borderColor: "#fff",
-    zIndex: 5,
+  backButton: {
+    padding: 5,
+    alignSelf: 'flex-start',
   },
-
-  ripple: {
-    position: "absolute",
-    borderWidth: 2,
-    borderColor: "#FFD580",
-  },
-
-  progressContainer: {
-    width: width - 40,
-    height: 10,
-    backgroundColor: "#ddd",
-    borderRadius: 10,
-    overflow: "hidden",
-    marginBottom: 10,
-  },
-  progressBar: {
-    height: "100%",
-    borderRadius: 10,
-  },
-
-  sliderThumb: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  sliderText: {
-    fontSize: 22,
-    color: "#fff",
-    fontWeight: "bold",
-  },
-
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalBox: {
-    width: "80%",
-    backgroundColor: "white",
+  offerCard: {
+    backgroundColor: '#1b1b1b',
+    padding: 14,
     borderRadius: 12,
-    padding: 20,
-    alignItems: "center",
+    borderWidth: 1,
+    borderColor: '#333',
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
   },
-  modalTitle: { fontSize: 20, fontWeight: "bold", marginBottom: 10 },
-  modalMessage: { textAlign: "center", marginBottom: 20 },
-
-  modalButtons: { flexDirection: "row", gap: 12 },
-  waitBtn: { backgroundColor: "#FFA500", padding: 12, borderRadius: 8 },
-  cancelBtn: { backgroundColor: "red", padding: 12, borderRadius: 8 },
-
-  waitText: { color: "white", fontWeight: "600" },
-  cancelText: { color: "white", fontWeight: "600" },
+  offerIconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 100,
+    backgroundColor: '#333',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  offerName: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    letterSpacing: 0.3,
+  },
+  offerTime: {
+    color: '#bbb',
+    fontSize: 13,
+    marginTop: 3,
+  },
+  offerPrice: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '700',
+  },
 });

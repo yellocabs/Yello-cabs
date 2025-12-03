@@ -6,8 +6,8 @@ import LocationPermissionModal from '@/components/location-permission-modal';
 import { useLocationStore } from '@/store/location-store';
 import { useFetchLocation } from '@/hooks/useFetchLocation';
 import { icons } from '@/constants';
-import CustomButton from '@/components/custom-button';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import CustomButton from '@/components/shared/custom-button';
 
 // ------------------------------------------------------------------
 // TWO ADDRESS INPUTS: FROM + TO

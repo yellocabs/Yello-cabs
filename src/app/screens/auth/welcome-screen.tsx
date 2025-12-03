@@ -4,22 +4,15 @@ import React, {
   useState,
   forwardRef,
   useImperativeHandle,
-} from "react";
-import {
-  View,
-  useWindowDimensions,
-  Image,
-  Text,
-} from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import Swiper from "react-native-swiper";
+} from 'react';
+import { View, useWindowDimensions, Image, Text } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Swiper from 'react-native-swiper';
 
-import BottomSheet from "@/components/bottom-sheet";
-import CustomButton from "@/components/custom-button";
-import CustomIconButton from "@/components/custom-icon-buttom";
-import { icons, onboarding, bottomSheetData } from "@/constants";
-import { useNavigation } from "@react-navigation/native";
-
+import BottomSheet from '@/components/bottom-sheet';
+import { icons, onboarding, bottomSheetData } from '@/constants';
+import { useNavigation } from '@react-navigation/native';
+import CustomIconButton from '@/components/shared/custom-icon-buttom';
 
 const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
   const navigation = useNavigation<any>();
@@ -45,7 +38,7 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
 
   useImperativeHandle(ref, () => ({
     goToNext() {
-      if (isLastSlide) navigation.replace("Role");
+      if (isLastSlide) navigation.replace('Role');
       else swiperRef.current?.scrollBy(1);
     },
   }));
@@ -55,14 +48,14 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
   }, []);
 
   const handleNext = () => {
-    if (isLastSlide) navigation.replace("Role");
+    if (isLastSlide) navigation.replace('Role');
     else swiperRef.current?.scrollBy(1);
   };
 
   const handleSkip = () => {
     rootNav?.reset({
       index: 2,
-      routes: [{ name: "Tabs", params: { screen: "Home" } }],
+      routes: [{ name: 'Tabs', params: { screen: 'Home' } }],
     });
   };
 
@@ -75,15 +68,15 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
         flex: 1,
         paddingHorizontal: moderate(20),
         paddingVertical: moderate(25),
-        justifyContent: "space-between",
+        justifyContent: 'space-between',
       }}
     >
       <View>
         <Text
           style={{
             fontSize: moderate(34),
-            fontFamily: "UrbanistExtraBold",
-            color: "#000",
+            fontFamily: 'UrbanistExtraBold',
+            color: '#000',
             lineHeight: moderate(45),
           }}
         >
@@ -93,8 +86,8 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
         <Text
           style={{
             fontSize: moderate(30),
-            fontFamily: "UrbanistExtraBold",
-            color: "#000",
+            fontFamily: 'UrbanistExtraBold',
+            color: '#000',
             marginBottom: moderate(10),
           }}
         >
@@ -104,15 +97,21 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
         <Text
           style={{
             fontSize: moderate(15),
-            fontFamily: "UrbanistRegular",
-            color: "#444",
+            fontFamily: 'UrbanistRegular',
+            color: '#444',
           }}
         >
           {data?.description}
         </Text>
       </View>
 
-      <View style={{ flexDirection: "row", gap: moderate(12), marginBottom: moderate(60) }}>
+      <View
+        style={{
+          flexDirection: 'row',
+          gap: moderate(12),
+          marginBottom: moderate(60),
+        }}
+      >
         <CustomButton
           title="Skip"
           onPress={handleSkip}
@@ -124,7 +123,7 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
         />
 
         <CustomButton
-          title={sheetLast ? "Get Started" : "Next"}
+          title={sheetLast ? 'Get Started' : 'Next'}
           onPress={handleNext}
           bgVariant="primary"
           textVariant="primary"
@@ -136,15 +135,13 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
     </View>
   );
 
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={{ flex: 1, backgroundColor: "#f0bd1a" }}>
-
+      <View style={{ flex: 1, backgroundColor: '#f0bd1a' }}>
         {/* TOP ICON */}
         <View
           style={{
-            position: "absolute",
+            position: 'absolute',
             top: height * 0.06,
             left: width * 0.05,
             zIndex: 99,
@@ -162,7 +159,7 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
         <Swiper
           ref={swiperRef}
           loop={false}
-          onIndexChanged={(index) => {
+          onIndexChanged={index => {
             setActiveIndex(index);
             onIndexChange?.(index);
           }}
@@ -172,7 +169,7 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
                 width: 10,
                 height: 10,
                 margin: 3,
-                backgroundColor: "rgba(255,255,255,0.4)",
+                backgroundColor: 'rgba(255,255,255,0.4)',
                 borderRadius: 50,
               }}
             />
@@ -183,26 +180,26 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
                 width: 35,
                 height: 10,
                 margin: 3,
-                backgroundColor: "#fff",
+                backgroundColor: '#fff',
                 borderRadius: 50,
               }}
             />
           }
           paginationStyle={{
-            position: "absolute",
+            position: 'absolute',
             top: height * 0.07,
             right: width * 0.07,
             bottom: undefined,
             left: undefined,
           }}
         >
-          {onboarding.map((item) => {
+          {onboarding.map(item => {
             // ----------------------------------------------
             // CONDITIONAL IMAGE CONTAINER + IMAGE STYLES
             // ----------------------------------------------
             let containerStyle: any = {};
             let imageStyle: any = {};
-            <View></View>
+            <View></View>;
             if (item.id === 1) {
               containerStyle = {
                 marginBottom: height * 0.2,
@@ -211,23 +208,18 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
                 width: width * 1,
                 height: height * 0.47,
               };
-            }
-
-            else if (item.id === 2) {
+            } else if (item.id === 2) {
               containerStyle = {
                 marginBottom: height * 0.12,
-                justifyContent: "flex-start",
-                alignSelf: "center",
+                justifyContent: 'flex-start',
+                alignSelf: 'center',
               };
               imageStyle = {
-                width: width * 1.2,    
-                height: height * 0.60,
-                alignSelf: "center",
-                
+                width: width * 1.2,
+                height: height * 0.6,
+                alignSelf: 'center',
               };
-            }
-
-            else if (item.id === 3) {
+            } else if (item.id === 3) {
               containerStyle = {
                 marginBottom: height * 0.09,
               };
@@ -242,9 +234,9 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
                 key={item.id}
                 style={{
                   flex: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  overflow: "hidden"
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  overflow: 'hidden',
                 }}
               >
                 <View style={containerStyle}>

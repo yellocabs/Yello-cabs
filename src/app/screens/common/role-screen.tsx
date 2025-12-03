@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,33 +6,33 @@ import {
   Image,
   Alert,
   useWindowDimensions,
-} from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import CustomButton from "@/components/custom-button";
-import { icons } from "@/constants";
-import { useUserStore } from "@/store";
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { icons } from '@/constants';
+import { useUserStore } from '@/store';
+import CustomButton from '@/components/shared/custom-button';
 
-const IllustrationImage = require("@/assets/images/Users.gif");
+const IllustrationImage = require('@/assets/images/Users.gif');
 
 const RoleScreen = () => {
   const navigation = useNavigation<any>();
   const { setRole } = useUserStore();
   const { width, height } = useWindowDimensions();
 
-  const [selectedRole, setSelectedRole] = useState<"rider" | "captain" | null>(
-    null
+  const [selectedRole, setSelectedRole] = useState<'rider' | 'captain' | null>(
+    null,
   );
 
-  const handleRoleSelect = (role: "rider" | "captain") => {
+  const handleRoleSelect = (role: 'rider' | 'captain') => {
     setSelectedRole(role);
     setRole(role);
   };
 
   const handleGetStarted = () => {
     if (selectedRole) {
-      navigation.navigate("Login" as never);
+      navigation.navigate('Login' as never);
     } else {
-      Alert.alert("Error", "Please select a role to get started.");
+      Alert.alert('Error', 'Please select a role to get started.');
     }
   };
 
@@ -42,29 +42,29 @@ const RoleScreen = () => {
     isSelected,
     onSelect,
   }: {
-    role: "rider" | "captain";
+    role: 'rider' | 'captain';
     icon: any;
     isSelected: boolean;
-    onSelect: (role: "rider" | "captain") => void;
+    onSelect: (role: 'rider' | 'captain') => void;
   }) => {
-    const roleName = role === "rider" ? "Rider" : "Captain";
+    const roleName = role === 'rider' ? 'Rider' : 'Captain';
     const description =
-      role === "rider"
-        ? "Book quick and safe rides."
-        : "Earn by driving your cab.";
+      role === 'rider'
+        ? 'Book quick and safe rides.'
+        : 'Earn by driving your cab.';
 
     const baseClasses =
-      "rounded-3xl shadow-md items-center justify-between bg-brand-white";
+      'rounded-3xl shadow-md items-center justify-between bg-brand-white';
 
-    const selectedClasses = "border-2 border-primary-500 bg-primary-100";
-    const unselectedClasses = "border border-general-300";
+    const selectedClasses = 'border-2 border-primary-500 bg-primary-100';
+    const unselectedClasses = 'border border-general-300';
 
-    const textColor = isSelected ? "text-brand-black" : "text-general-200";
+    const textColor = isSelected ? 'text-brand-black' : 'text-general-200';
 
     return (
       <TouchableOpacity
         style={{
-          width: width * 0.40,
+          width: width * 0.4,
           paddingVertical: height * 0.02,
           paddingHorizontal: width * 0.04,
         }}
@@ -189,14 +189,14 @@ const RoleScreen = () => {
               paddingHorizontal: width * 0.03,
             }}
           >
-            Select{" "}
+            Select{' '}
             <Text className="font-UrbanistSemiBold text-brand-black">
               Captain
-            </Text>{" "}
-            if you want to drive, or{" "}
+            </Text>{' '}
+            if you want to drive, or{' '}
             <Text className="font-UrbanistSemiBold text-brand-black">
               Rider
-            </Text>{" "}
+            </Text>{' '}
             if you want to travel.
           </Text>
         </View>
@@ -221,13 +221,13 @@ const RoleScreen = () => {
             <RoleOption
               role="rider"
               icon={icons.user}
-              isSelected={selectedRole === "rider"}
+              isSelected={selectedRole === 'rider'}
               onSelect={handleRoleSelect}
             />
             <RoleOption
               role="captain"
               icon={icons.driver}
-              isSelected={selectedRole === "captain"}
+              isSelected={selectedRole === 'captain'}
               onSelect={handleRoleSelect}
             />
           </View>
@@ -241,7 +241,7 @@ const RoleScreen = () => {
           textVariant="default"
           rounded="2xl"
           height="h-14"
-          className={`shadow-lg mt-2 ${!selectedRole ? "opacity-50" : ""}`}
+          className={`shadow-lg mt-2 ${!selectedRole ? 'opacity-50' : ''}`}
           disabled={!selectedRole}
           flex={false}
         />
@@ -261,7 +261,7 @@ const RoleScreen = () => {
             className="flex-row items-center bg-brand-white rounded-full shadow-sm"
           >
             <Image
-              source={require("@/assets/icons/flag.png")}
+              source={require('@/assets/icons/flag.png')}
               style={{ width: width * 0.05, height: width * 0.05 }}
               resizeMode="contain"
             />

@@ -1,8 +1,8 @@
-import React from "react";
-import { View, Text, Image, TouchableOpacity } from "react-native";
-import { ReactNativeModal } from "react-native-modal";
-import { icons } from "@/constants"; // adjust if your error icon lives elsewhere
-import CustomButton from "@/components/custom-button";
+import React from 'react';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { ReactNativeModal } from 'react-native-modal';
+import { icons } from '@/constants'; // adjust if your error icon lives elsewhere
+import CustomButton from './shared/custom-button';
 
 type ErrorModalProps = {
   isVisible: boolean;
@@ -16,12 +16,12 @@ type ErrorModalProps = {
 
 const ErrorModal: React.FC<ErrorModalProps> = ({
   isVisible,
-  title = "Something went wrong",
+  title = 'Something went wrong',
   message,
   onClose,
   onPrimaryAction,
-  primaryLabel = "Try again",
-  secondaryLabel = "Close",
+  primaryLabel = 'Try again',
+  secondaryLabel = 'Close',
 }) => {
   const handlePrimary = () => {
     if (onPrimaryAction) onPrimaryAction();
@@ -38,16 +38,14 @@ const ErrorModal: React.FC<ErrorModalProps> = ({
       <View className="bg-brand-white rounded-3xl px-7 py-8">
         {/* Icon + Close */}
         <View className="flex-row justify-between items-start mb-2">
-          <View className="w-12 h-12 rounded-2xl  items-center justify-center">
-           
-          </View>
+          <View className="w-12 h-12 rounded-2xl  items-center justify-center"></View>
 
           <TouchableOpacity
             onPress={onClose}
             className="w-12 h-12 rounded-2xl bg-danger-100 items-center justify-center"
           >
             <Image
-              source={icons.close || icons.warning} 
+              source={icons.close || icons.warning}
               className="w-6 h-6"
               resizeMode="contain"
             />
@@ -87,7 +85,8 @@ const ErrorModal: React.FC<ErrorModalProps> = ({
 
         {/* Subtle helper */}
         <Text className="mt-4 text-[11px] text-general-200 font-UrbanistLight text-center">
-          If this keeps happening, please check your internet connection or try again later.
+          If this keeps happening, please check your internet connection or try
+          again later.
         </Text>
       </View>
     </ReactNativeModal>

@@ -3,8 +3,8 @@ import { View, StyleSheet } from 'react-native';
 import MapView, { Region } from 'react-native-maps';
 import { useLocationStore } from '@/store';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import CustomButton from '@/components/custom-button';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import CustomButton from '@/components/shared/custom-button';
 
 const MapScreen: React.FC = () => {
   const navigation = useNavigation();
