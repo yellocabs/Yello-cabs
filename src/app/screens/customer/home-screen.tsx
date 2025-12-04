@@ -1,5 +1,5 @@
-import { View, Text, Image } from 'react-native';
-import React, { useRef, useState, useEffect } from 'react';
+import { View, Text, Image, useWindowDimensions } from 'react-native';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import RideLayout from '@/components/customer/ride-layout';
 import { useLocationStore } from '@/store/location-store';
 import { useFetchLocation } from '@/hooks/useFetchLocation';
@@ -9,9 +9,6 @@ import CustomButton from '@/components/shared/custom-button';
 import LocationPermissionModal from '@/components/shared/location-permission-modal';
 import GoogleTextInput from '@/components/customer/google-text-input';
 
-// ------------------------------------------------------------------
-// TWO ADDRESS INPUTS: FROM + TO
-// ------------------------------------------------------------------
 const TwoAddressInput = ({
   userAddress,
   destinationAddress,
@@ -99,9 +96,6 @@ const SelectOnMap = () => {
   );
 };
 
-// ------------------------------------------------------------------
-// EXPANDED SECTION UI
-// ------------------------------------------------------------------
 const ExpandedAddressSelector = ({
   userAddress,
   destinationAddress,
@@ -131,14 +125,14 @@ const ExpandedAddressSelector = ({
   );
 };
 
-// ------------------------------------------------------------------
-// MAIN HOME SCREEN
-// ------------------------------------------------------------------
 const HomeScreen = () => {
+  const { height } = useWindowDimensions();
   const navigation = useNavigation();
   const route = useRoute<any>();
   const layoutRef = useRef<any>(null);
   const [expanded, setExpanded] = useState(false);
+  const snapPoints = useMemo(() => [height * 0.4, height * 0.7], [height]);
+  console.log('Using snap points:', snapPoints);
 
   const {
     userAddress,
@@ -154,14 +148,20 @@ const HomeScreen = () => {
   } = useFetchLocation();
 
   const handleExpand = () => {
-    if (!expanded) {
+    layoutRef.current?.expandTo(1); // Snap to 70%
+  };
+
+  const handleSheetChanges = (index: number) => {
+    console.log('Sheet changed to index:', index);
+    if (index === 0) {
+      setExpanded(false);
+    } else {
       setExpanded(true);
-      layoutRef.current?.expandTo(2);
     }
   };
 
   const handleTextInputPress = () => {
-    layoutRef.current?.expandTo(2);
+    handleExpand();
   };
 
   useEffect(() => {
@@ -190,13 +190,14 @@ const HomeScreen = () => {
       <RideLayout
         title="Home"
         ref={layoutRef}
-        snapPoints={expanded ? ['70%', '90%'] : undefined}
+        snapPoints={snapPoints}
+        onChange={handleSheetChanges}
       >
         {!expanded ? (
           <View className="my-3 px-6">
             <GoogleTextInput
-              icon={icons.target}
-              initialLocation={destinationAddress}
+              icon={icons.search}
+              initialLocation={destinationAddress || ''}
               containerStyle="bg-neutral-100"
               textInputBackgroundColor="transparent"
               handlePress={setDestinationLocation}

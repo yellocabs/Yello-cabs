@@ -24,15 +24,16 @@ interface RideLayoutProps {
   title: string;
   children: React.ReactNode;
   snapPoints?: (string | number)[];
+  onChange?: (index: number) => void;
+  initialIndex?: number;
 }
 
 // We forward a ref so parent can call methods on this layout (e.g. goToNext)
 const RideLayout = forwardRef<any, RideLayoutProps>(
-  ({ title, children, snapPoints = ['25%', '50%', '90%'] }, ref) => {
+  ({ title, children, snapPoints, onChange, initialIndex = 0 }, ref) => {
     const { height } = useWindowDimensions();
     const bottomSheetRef = useRef<BottomSheet>(null);
     const navigation = useNavigation();
-
     useImperativeHandle(ref, () => ({
       expandTo(index: number) {
         bottomSheetRef.current?.snapToIndex(index);
@@ -61,7 +62,13 @@ const RideLayout = forwardRef<any, RideLayoutProps>(
             {/* <Text className="text-xl font-UrbanistSemiBold ml-5">{title}</Text> */}
           </View>
 
-          <BottomSheet ref={bottomSheetRef} index={1} snapPoints={snapPoints}>
+          <BottomSheet
+            ref={bottomSheetRef}
+            index={initialIndex}
+            snapPoints={snapPoints}
+            enablePanDownToClose={false}
+            onChange={onChange}
+          >
             <BottomSheetView>{children}</BottomSheetView>
           </BottomSheet>
         </View>
