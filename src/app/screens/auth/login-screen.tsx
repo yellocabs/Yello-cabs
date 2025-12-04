@@ -26,6 +26,11 @@ import Config from 'react-native-config';
 import { sendOtp, verifyOtp } from '@/api/end-points/auth';
 import CustomButton from '@/components/shared/custom-button';
 import GoogleLoginButton from '@/components/shared/google-login-button';
+import {
+  getHash,
+  removeListener,
+  startOtpListener,
+} from 'react-native-otp-verify';
 import ErrorModal from '@/components/shared/error-modal';
 
 const LoginScreen = () => {
@@ -43,6 +48,61 @@ const LoginScreen = () => {
     error: '',
     code: '',
   });
+  const [otpKey, setOtpKey] = useState(0);
+  const [countdown, setCountdown] = useState(0);
+
+  // This useEffect handles the resend timer
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (countdown > 0) {
+      timer = setTimeout(() => {
+        setCountdown(countdown - 1);
+      }, 1000);
+    }
+    return () => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, [countdown]);
+
+  // This useEffect handles the OTP listener
+  useEffect(() => {
+    // Get the app hash for Android
+    if (Platform.OS === 'android') {
+      getHash()
+        .then(hash => {
+          console.log('Use this hash for your SMS message on Android:', hash);
+        })
+        .catch(console.log);
+    }
+
+    // Start the listener
+    startOtpListener(message => {
+      // Extract the OTP from the message
+      try {
+        const otp = /(\d{4})/g.exec(message)?.[1];
+        if (otp) {
+          setVerification(prev => ({ ...prev, code: otp }));
+          setOtpKey(k => k + 1); // Change key to force re-render
+        }
+      } catch (error) {
+        console.log('Error parsing OTP message:', error);
+      }
+    });
+
+    // Cleanup on unmount
+    return () => {
+      removeListener();
+    };
+  }, []);
+
+  // This useEffect handles the automatic submission
+  useEffect(() => {
+    if (verification.code.length === 4 && verification.state === 'pending') {
+      onPressVerify();
+    }
+  }, [verification.code, verification.state]);
 
   const [errorState, setErrorState] = useState<{
     visible: boolean;
@@ -111,7 +171,13 @@ const LoginScreen = () => {
     }
   };
 
+  const onResendOtp = () => {
+    if (countdown > 0) return;
+    onSignUpPress();
+  };
+
   const onSignUpPress = async () => {
+    if (loading) return;
     if (!phone || phone.length !== 10) {
       showError(
         'Invalid phone number',
@@ -123,11 +189,13 @@ const LoginScreen = () => {
       setLoading(true);
       const response = await sendOtp(phone);
       if (response.data?.success) {
-        setVerification(prev => ({
-          ...prev,
-          state: 'pending',
+        setVerification({
+          code: '', // Clear previous OTP
           error: '',
-        }));
+          state: 'pending',
+        });
+        setOtpKey(k => k + 1); // Reset OTP input visual
+        setCountdown(30); // Start timer
       } else {
         showError(
           'Error sending OTP',
@@ -163,22 +231,21 @@ const LoginScreen = () => {
     // setLoading(true);
     try {
       const response = await googleLogin(); // Google sign-in
-      if (!response.ok) {
+      if (!response.ok || !response.data) {
         showError(
           'Google Sign-In Failed',
           'Something went wrong while signing in with Google. Please try again.',
         );
         return;
       }
-      const { idToken }: any = response;
+      const { idToken } = response.data;
       console.log(response);
-      const extractedIdToken = idToken || response.data;
 
-      if (extractedIdToken) {
+      if (idToken) {
         const backendResponse = await axios.post(
           `${Config.BASE_URL || 'http://localhost:8000'}/google-login`,
           {
-            idToken: extractedIdToken,
+            idToken: idToken,
           },
         );
 
@@ -585,6 +652,8 @@ const LoginScreen = () => {
             </Text>
 
             <OTPInput
+              key={otpKey}
+              defaultValue={verification.code}
               inputCount={4}
               handleTextChange={code =>
                 setVerification(prev => ({ ...prev, code, error: '' }))
@@ -606,22 +675,32 @@ const LoginScreen = () => {
               loading={loading}
             />
 
-            <Text
+            <TouchableOpacity
+              disabled={countdown > 0}
+              onPress={onResendOtp}
               style={{
                 marginTop: H * 0.015,
-                fontSize: Math.round(W * 0.033),
-                color: '#6B7280',
-                fontFamily: 'UrbanistMedium',
-                textAlign: 'center',
+                alignItems: 'center',
               }}
             >
-              Didn’t receive the code?{' '}
               <Text
-                style={{ color: '#111827', fontFamily: 'UrbanistSemiBold' }}
+                style={{
+                  fontSize: Math.round(W * 0.033),
+                  color: '#6B7280',
+                  fontFamily: 'UrbanistMedium',
+                }}
               >
-                Resend
+                Didn’t receive the code?{' '}
+                <Text
+                  style={{
+                    color: countdown > 0 ? '#9CA3AF' : '#111827',
+                    fontFamily: 'UrbanistSemiBold',
+                  }}
+                >
+                  {countdown > 0 ? `Resend in ${countdown}s` : 'Resend'}
+                </Text>
               </Text>
-            </Text>
+            </TouchableOpacity>
           </View>
         </ReactNativeModal>
 
