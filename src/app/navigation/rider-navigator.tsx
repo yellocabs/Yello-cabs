@@ -1,15 +1,8 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-// import NotFound from "@/screens/common/not-found";
-// import RideDetails from "@/screens/rider/ride-details-screen";
-// import FindRides from "@/screens/rider/find-ride-screen";
-import ConfirmRide from '@/screens/rider/ride-summary';
-import FindOffers from '@/screens/rider/find-offer';
-import FindRider from '@/screens/rider/find-rider';
-// import BookRide from "@/screens/rider/book-ride-screen";
-import MapScreen from '@/screens/rider/map-screen';
-import RideSummary from '@/screens/rider/ride-summary';
-// import notification from "@/screens/rider/notification";
+import FindOffers from '@/screens/customer/find-offer';
+import MapScreen from '@/screens/customer/map-screen';
+import FindRider from '@/screens/customer/find-rider';
 
 const Stack = createNativeStackNavigator();
 

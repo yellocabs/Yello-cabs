@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, useWindowDimensions } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Home from '@/screens/rider/home-screen';
-import Service from '@/screens/rider/services-screen';
-import History from '@/screens/rider/history-screen';
-import Profile from '@/screens/rider/profile-screen';
 import { icons } from '@/constants';
 import TabIcon from '@/components/shared/tab-icon';
+import ServicesScreen from '@/screens/customer/services-screen';
+import HomeScreen from '@/screens/customer/home-screen';
+import HistoryScreen from '@/screens/customer/history-screen';
+import ProfileScreen from '@/screens/customer/profile-screen';
 
 const Tab = createBottomTabNavigator();
 
@@ -54,7 +54,7 @@ const TabNavigator = () => {
     >
       <Tab.Screen
         name="Home"
-        component={Home}
+        component={HomeScreen}
         options={{
           title: 'Home',
           tabBarIcon: ({ focused }) => (
@@ -64,7 +64,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="Services"
-        component={Service}
+        component={ServicesScreen}
         options={{
           title: 'Services',
           tabBarIcon: ({ focused }) => (
@@ -78,7 +78,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="History"
-        component={History}
+        component={HistoryScreen}
         options={{
           title: 'Rides',
           tabBarIcon: ({ focused }) => (
@@ -88,7 +88,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="Profile"
-        component={Profile}
+        component={ProfileScreen}
         options={{
           title: 'Me',
           tabBarIcon: ({ focused }) => (
