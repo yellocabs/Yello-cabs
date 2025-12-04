@@ -133,7 +133,7 @@ const ProfileScreen = () => {
   );
   const navigation = useNavigation();
   const { setToken } = useAuthStore();
-  const { setRole } = useUserStore();
+  const { clearData } = useUserStore();
 
   const handleLogout = async (disconnect?: () => void) => {
     try {
@@ -141,10 +141,9 @@ const ProfileScreen = () => {
         disconnect();
       }
       await AsyncStorage.removeItem('authToken');
-      await AsyncStorage.removeItem('role');
 
       setToken(null);
-      setRole(null);
+      clearData();
       Toast.show({
         type: 'success',
         text1: 'Logged Out',

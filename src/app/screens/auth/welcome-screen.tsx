@@ -13,6 +13,7 @@ import BottomSheet from '@/components/bottom-sheet';
 import { icons, onboarding, bottomSheetData } from '@/constants';
 import { useNavigation } from '@react-navigation/native';
 import CustomIconButton from '@/components/shared/custom-icon-buttom';
+import CustomButton from '@/components/shared/custom-button';
 
 const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
   const navigation = useNavigation<any>();

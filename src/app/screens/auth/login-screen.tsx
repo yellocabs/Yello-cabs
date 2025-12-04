@@ -34,7 +34,7 @@ const LoginScreen = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [phone, setPhone] = useState<string>('');
   const [loading, setLoading] = useState(false);
-  const { role } = useUserStore();
+  const { user, setUser } = useUserStore();
   const { setToken } = useAuthStore();
   const rootNav = navigation.getParent();
 
@@ -81,9 +81,9 @@ const LoginScreen = () => {
     try {
       setLoading(true);
 
-      const response = await verifyOtp(phone, otp, role);
+      const response = await verifyOtp(phone, otp, user?.role);
       const token = response.data?.data?.token;
-      const userRole = response.data?.data?.user?.role;
+      const responseUser = response.data?.data?.user;
 
       console.log(response);
 
@@ -91,6 +91,9 @@ const LoginScreen = () => {
         await AsyncStorage.setItem('authToken', token);
         console.log(token);
         setToken(token);
+      }
+      if (responseUser) {
+        setUser(responseUser);
       }
 
       setVerification(prev => ({
@@ -143,7 +146,7 @@ const LoginScreen = () => {
   };
 
   const onHome = () => {
-    if (role === 'captain') {
+    if (user?.role === 'captain') {
       rootNav?.reset({
         index: 0,
         routes: [{ name: 'Driver', params: { screen: 'Home' } }],
@@ -186,6 +189,9 @@ const LoginScreen = () => {
           await AsyncStorage.setItem('authToken', data.token);
           setToken(data.token);
         }
+        if (data?.user) {
+          setUser(data.user);
+        }
       }
     } catch (error) {
       console.log('Login Error:', error);
@@ -199,7 +205,7 @@ const LoginScreen = () => {
   };
 
   useEffect(() => {
-    console.log('Role', role);
+    console.log('Role', user?.role);
     console.log('BASE_URL:', Config.BASE_URL);
   }, []);
 

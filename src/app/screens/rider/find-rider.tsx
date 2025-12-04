@@ -96,7 +96,6 @@ export default function FindOffers() {
     return (
       <RideLayout
         title="Finding rides..."
-        subtitle="Please wait"
         icon={<Ionicons name="car-outline" size={32} color="white" />}
       >
         <View style={styles.centered}>

@@ -8,7 +8,7 @@ const api = axios.create({
 });
 
 api.interceptors.request.use(config => {
-  const token = useUserStore.getState().token;
+  const token = useUserStore.getState().user?.token;
   console.log(token);
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -24,7 +24,7 @@ api.interceptors.response.use(
 
     // optional: auto logout on 401
     if (error.response?.status === 401) {
-      useUserStore.getState().logout();
+      useUserStore.getState().clearData();
     }
 
     return Promise.reject(error);

@@ -16,7 +16,7 @@ const IllustrationImage = require('@/assets/images/Users.gif');
 
 const RoleScreen = () => {
   const navigation = useNavigation<any>();
-  const { setRole } = useUserStore();
+  const { setUser } = useUserStore();
   const { width, height } = useWindowDimensions();
 
   const [selectedRole, setSelectedRole] = useState<'rider' | 'captain' | null>(
@@ -25,7 +25,7 @@ const RoleScreen = () => {
 
   const handleRoleSelect = (role: 'rider' | 'captain') => {
     setSelectedRole(role);
-    setRole(role);
+    setUser({ role });
   };
 
   const handleGetStarted = () => {

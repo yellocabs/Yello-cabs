@@ -1,25 +1,40 @@
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
+import { createJSONStorage, persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-type Role = 'rider' | 'captain' | null;
+type CustomLocation = {
+  latitude: number;
+  longitude: number;
+  address: string;
+} | null;
 
-type UserState = {
-  role: Role;
-  setRole: (newRole: Role) => void;
-  resetRole: () => void;
-};
+interface UserStoreProps {
+  user: any;
+  location: CustomLocation;
+  outOfRange: boolean;
+  setUser: (data: any) => void;
+  setOutOfRange: (data: boolean) => void;
+  setLocation: (data: CustomLocation) => void;
+  clearData: () => void;
+}
 
-export const useUserStore = create<UserState>()(
+export const useUserStore = create<UserStoreProps>()(
   persist(
-    (set) => ({
-      role: null,
-      setRole: (newRole) => set({ role: newRole }),
-      resetRole: () => set({ role: null }),
+    set => ({
+      user: null,
+      location: null,
+      outOfRange: false,
+      setUser: data => set({ user: data }),
+      setLocation: data => set({ location: data }),
+      setOutOfRange: data => set({ outOfRange: data }),
+      clearData: () => set({ user: null, location: null, outOfRange: false }),
     }),
     {
-      name: 'user-role-storage', // 👈 key in AsyncStorage
+      name: 'user-store',
+      partialize: state => ({
+        user: state.user,
+      }),
       storage: createJSONStorage(() => AsyncStorage),
-    }
-  )
+    },
+  ),
 );

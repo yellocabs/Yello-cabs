@@ -16,7 +16,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 const RootNavigator = () => {
   const [loading, setLoading] = useState(true);
   const { setToken } = useAuthStore();
-  const { role, setRole } = useUserStore();
+  const { user, setUser } = useUserStore();
   const [initialRoute, setInitialRoute] =
     useState<keyof RootStackParamList>('Auth');
 
@@ -24,11 +24,15 @@ const RootNavigator = () => {
     const checkToken = async () => {
       try {
         const token = await AsyncStorage.getItem('authToken');
-        const storedRole = await AsyncStorage.getItem('role'); // optional if you store role
-        if (token) {
+        const userStore = await AsyncStorage.getItem('user-store');
+        if (token && userStore) {
+          const { state } = JSON.parse(userStore);
+          const storedUser = state.user;
           setToken(token);
-          if (storedRole) setRole(storedRole as any);
-          setInitialRoute(storedRole === 'captain' ? 'Driver' : 'Tabs');
+          if (storedUser) {
+            setUser(storedUser);
+            setInitialRoute(storedUser.role === 'captain' ? 'Driver' : 'Tabs');
+          }
         }
       } catch (e) {
         console.log('Error checking token', e);
