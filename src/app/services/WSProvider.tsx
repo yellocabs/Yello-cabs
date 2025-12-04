@@ -41,6 +41,8 @@ export const WSProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   useEffect(() => {
+    console.log(SOCKET_URL);
+
     if (socketAccessToken) {
       if (socket.current) {
         socket.current.disconnect();
