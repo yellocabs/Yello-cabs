@@ -1,5 +1,5 @@
 import { CommonActions } from '@react-navigation/native';
-import { navigationRef } from '../navigation'; // adjust path as needed
+import { navigationRef } from '../navigation/navigation'; // adjust path as needed
 
 export const resetAndNavigate = (routeName: string) => {
   if (navigationRef.isReady()) {
@@ -7,7 +7,7 @@ export const resetAndNavigate = (routeName: string) => {
       CommonActions.reset({
         index: 0,
         routes: [{ name: routeName }],
-      })
+      }),
     );
   }
 };

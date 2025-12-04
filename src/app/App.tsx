@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { StatusBar } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
+import { navigationRef } from './navigation/navigation';
 import 'react-native-gesture-handler';
 import RootNavigator from './navigation';
 import SplashScreen from './screens/common/splash-screen';
@@ -29,7 +30,7 @@ export default function App() {
   return (
     <SafeAreaProvider className="flex-1">
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <NavigationContainer>
+        <NavigationContainer ref={navigationRef}>
           <StatusBar barStyle="dark-content" />
           <RootNavigator />
           <Toast />

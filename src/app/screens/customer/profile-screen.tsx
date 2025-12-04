@@ -22,10 +22,7 @@ import {
   HelpCircle,
   Users,
 } from 'lucide-react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAuthStore } from '@/store/auth-store';
-import { useUserStore } from '@/store/use-user-store';
-import { useNavigation } from '@react-navigation/native';
+import { logout } from '@/services/authService';
 import Toast from 'react-native-toast-message';
 
 const ProfileScreen = () => {
@@ -131,34 +128,6 @@ const ProfileScreen = () => {
       />
     </View>
   );
-  const navigation = useNavigation();
-  const { setToken } = useAuthStore();
-  const { clearData } = useUserStore();
-
-  const handleLogout = async (disconnect?: () => void) => {
-    try {
-      if (disconnect) {
-        disconnect();
-      }
-      await AsyncStorage.removeItem('authToken');
-
-      setToken(null);
-      clearData();
-      Toast.show({
-        type: 'success',
-        text1: 'Logged Out',
-        text2: 'You have been logged out successfully 🎉',
-        position: 'bottom',
-        visibilityTime: 2000,
-      });
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Auth' }],
-      });
-    } catch (err) {
-      console.log('Logout error:', err);
-    }
-  };
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: 'rgba(255, 235, 59, 0.2)' }}>
@@ -253,7 +222,7 @@ const ProfileScreen = () => {
           title="Logout"
           isLogout={true}
           showChevron={false}
-          onPress={handleLogout}
+          onPress={() => logout()}
         />
       </View>
 
