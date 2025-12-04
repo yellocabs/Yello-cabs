@@ -131,7 +131,7 @@ const HomeScreen = () => {
   const route = useRoute<any>();
   const layoutRef = useRef<any>(null);
   const [expanded, setExpanded] = useState(false);
-  const snapPoints = useMemo(() => [height * 0.4, height * 0.7], [height]);
+  const snapPoints = useMemo(() => [height * 0.8, height * 0.8], [height]);
   console.log('Using snap points:', snapPoints);
 
   const {
@@ -148,7 +148,7 @@ const HomeScreen = () => {
   } = useFetchLocation();
 
   const handleExpand = () => {
-    layoutRef.current?.expandTo(1); // Snap to 70%
+    layoutRef.current?.expandTo(1); // Snap to 80%
   };
 
   const handleSheetChanges = (index: number) => {
@@ -194,7 +194,7 @@ const HomeScreen = () => {
         onChange={handleSheetChanges}
       >
         {!expanded ? (
-          <View className="my-3 px-6">
+          <View className="my-3 px-6" style={{ height: height * 0.25 }}>
             <GoogleTextInput
               icon={icons.search}
               initialLocation={destinationAddress || ''}

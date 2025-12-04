@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { View, Animated, Easing } from 'react-native';
 import MapView, { PROVIDER_DEFAULT } from 'react-native-maps';
 
-import { useLocationStore, useRiderStore } from '@/store';
+import { useLocationStore } from '@/store/location-store';
+import { useRiderStore } from '@/store/useRiderStore';
 
 import { FALLBACK_REGION } from './constants';
 import UserMarker from './UserMarker';

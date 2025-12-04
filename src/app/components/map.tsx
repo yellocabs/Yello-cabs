@@ -21,6 +21,7 @@ import { icons } from '@/constants';
 import { calculateRegion } from '@/libs/map';
 import { useRiderStore, useLocationStore } from '@/store';
 import useMapAnimation from '@/hooks/useMapAnimation';
+import UserMarker from './map/UserMarker';
 
 const { height } = Dimensions.get('window');
 
@@ -161,13 +162,13 @@ const Map: React.FC = () => {
         {/* User marker + pulse */}
         {userLatitude && userLongitude && (
           <>
-            <Circle
-              center={{ latitude: userLatitude, longitude: userLongitude }}
-              radius={200}
-              fillColor="rgba(255, 165, 0, 0.2)"
-              strokeColor="rgba(255, 165, 0, 0.6)"
-              strokeWidth={1}
-            />
+            {userLatitude !== null && userLongitude !== null && (
+              <UserMarker
+                latitude={userLatitude}
+                longitude={userLongitude}
+                pulseAnim={pulseAnim}
+              />
+            )}
             <Marker
               coordinate={{ latitude: userLatitude, longitude: userLongitude }}
             >
