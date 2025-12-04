@@ -11,7 +11,7 @@ type AuthState = {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    set => ({
       token: null,
       setToken: (token) => set({ token }),
       clearToken: () => set({ token: null }),
@@ -19,6 +19,6 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage', // key in AsyncStorage
       storage: createJSONStorage(() => AsyncStorage),
-    }
-  )
+    },
+  ),
 );
