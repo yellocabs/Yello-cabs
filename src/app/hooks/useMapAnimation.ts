@@ -5,6 +5,7 @@ import { Region } from 'react-native-maps';
 const useMapAnimation = (
   mapRef: React.RefObject<any>,
   mapReady: boolean,
+  isFocused: boolean,
   userLatitude: number | null,
   userLongitude: number | null,
   destinationLatitude: number | null,
@@ -16,6 +17,7 @@ const useMapAnimation = (
 
   // --- User location animation ---
   useEffect(() => {
+    if (!isFocused) return;
     if (mapReady && userLatitude && userLongitude && !hasAnimated) {
       const userLoc = { latitude: userLatitude, longitude: userLongitude };
       const zoomInUserRegion: Region = {
@@ -26,10 +28,11 @@ const useMapAnimation = (
       mapRef.current.animateToRegion(zoomInUserRegion, 1500);
       setHasAnimated(true);
     }
-  }, [mapReady, userLatitude, userLongitude, hasAnimated, mapRef]);
+  }, [mapReady, userLatitude, userLongitude, hasAnimated, mapRef, isFocused]);
 
   // --- Fit to coordinates animation ---
   useEffect(() => {
+    if (!isFocused) return;
     if (
       mapReady &&
       userLatitude &&
@@ -54,6 +57,7 @@ const useMapAnimation = (
     }
   }, [
     mapReady,
+    isFocused,
     userLatitude,
     userLongitude,
     destinationLatitude,

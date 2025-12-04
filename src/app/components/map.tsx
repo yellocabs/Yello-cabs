@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, memo } from 'react';
 import {
   View,
   ActivityIndicator,
@@ -15,6 +15,7 @@ import MapView, {
   PROVIDER_DEFAULT,
 } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
+import { useIsFocused } from '@react-navigation/native';
 
 import { icons } from '@/constants';
 import { calculateRegion } from '@/libs/map';
@@ -64,6 +65,7 @@ const bottomOffset = height * bottomPanelHeightRatio + 24;
 
 const Map: React.FC = () => {
   const mapRef = useRef<MapView | null>(null);
+  const isFocused = useIsFocused();
 
   // ensure map is ready before running animations
   const [mapReady, setMapReady] = useState(false);
@@ -81,6 +83,7 @@ const Map: React.FC = () => {
   const { pulseAnim } = useMapAnimation(
     mapRef,
     mapReady,
+    isFocused,
     userLatitude,
     userLongitude,
     destinationLatitude,
@@ -254,4 +257,4 @@ const Map: React.FC = () => {
   );
 };
 
-export default Map;
+export default memo(Map);
