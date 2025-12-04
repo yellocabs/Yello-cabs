@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Dimensions,
   Animated,
-  Easing,
 } from 'react-native';
 import MapView, {
   Marker,
@@ -18,10 +17,8 @@ import MapView, {
 import MapViewDirections from 'react-native-maps-directions';
 
 import { icons } from '@/constants';
-import useGenerateRandomMarkers from '@/hooks/useGenerateRandomMarkers';
-import { calculateDriverTimes, calculateRegion } from '@/libs/map';
-import { useDriverStore, useLocationStore } from '@/store';
-import { MarkerData } from '@/types/declare';
+import { calculateRegion } from '@/libs/map';
+import { useRiderStore, useLocationStore } from '@/store';
 import useMapAnimation from '@/hooks/useMapAnimation';
 
 const { height } = Dimensions.get('window');
@@ -61,31 +58,6 @@ const RAPIDO_MAP_STYLE = [
   },
 ];
 
-// Dummy drivers (you had these earlier). If you load real drivers from store, replace this.
-const drivers = [
-  {
-    id: 1,
-    name: 'Alice',
-    latitude: 37.78855,
-    longitude: -122.431,
-    vehicle: 'Sedan',
-  },
-  {
-    id: 2,
-    name: 'Bob',
-    latitude: 37.7892,
-    longitude: -122.4345,
-    vehicle: 'Hatchback',
-  },
-  {
-    id: 3,
-    name: 'Charlie',
-    latitude: 37.787,
-    longitude: -122.433,
-    vehicle: 'SUV',
-  },
-];
-
 // Panel offset calculation (matches your previous logic)
 const bottomPanelHeightRatio = 0.45;
 const bottomOffset = height * bottomPanelHeightRatio + 24;
@@ -97,19 +69,14 @@ const Map: React.FC = () => {
   const [mapReady, setMapReady] = useState(false);
 
   // Using your stores
-  const {
-    userLongitude,
-    userLatitude,
-    destinationLatitude,
-    destinationLongitude,
-  } = useLocationStore();
+  const { destinationLatitude, destinationLongitude } = useLocationStore();
 
-  const { selectedDriver, setDrivers } = useDriverStore();
+  const { location: riderLocation } = useRiderStore();
+  const userLatitude = riderLocation?.latitude;
+  const userLongitude = riderLocation?.longitude;
 
-  const [markers, setMarkers] = useState<MarkerData[]>([]);
   const [loading] = useState(false);
   const [error] = useState<null | string>(null);
-  useGenerateRandomMarkers(setMarkers);
 
   const { pulseAnim } = useMapAnimation(
     mapRef,
@@ -120,54 +87,6 @@ const Map: React.FC = () => {
     destinationLongitude,
     bottomOffset,
   );
-
-  const hasRoute = !!(
-    userLatitude &&
-    userLongitude &&
-    destinationLatitude &&
-    destinationLongitude
-  );
-
-  // --- calculate ETA / driver times when markers & route exist ---
-  useEffect(() => {
-    let cancelled = false;
-    const run = async () => {
-      if (
-        markers.length > 0 &&
-        destinationLatitude &&
-        destinationLongitude &&
-        userLatitude &&
-        userLongitude
-      ) {
-        try {
-          const updated = await calculateDriverTimes({
-            markers,
-            userLatitude,
-            userLongitude,
-            destinationLatitude,
-            destinationLongitude,
-          });
-          if (!cancelled) {
-            setDrivers(updated as MarkerData[]);
-          }
-        } catch (e) {
-          // optional: handle error
-          console.warn('calculateDriverTimes err:', e);
-        }
-      }
-    };
-    run();
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    markers,
-    destinationLatitude,
-    destinationLongitude,
-    userLatitude,
-    userLongitude,
-    setDrivers,
-  ]);
 
   // --- recenter helper ---
   const recenterMap = () => {
@@ -267,22 +186,6 @@ const Map: React.FC = () => {
             </Marker>
           </>
         )}
-
-        {/* Driver markers */}
-        {markers.map(m => (
-          <Marker
-            key={m.id}
-            coordinate={{ latitude: m.latitude, longitude: m.longitude }}
-          >
-            <Image
-              source={
-                selectedDriver === +m.id ? icons.selectedMarker : icons.marker
-              }
-              style={{ width: 36, height: 36 }}
-              resizeMode="contain"
-            />
-          </Marker>
-        ))}
 
         {/* Destination + Route */}
         {destinationLatitude &&

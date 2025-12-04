@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
 type MarkerData = {
   id: number;
@@ -26,7 +26,7 @@ type LocationStore = {
   distance: number | null;
   distanceText: string | null;
 
-  duration: string | null;              // <-- NEW
+  duration: string | null; // <-- NEW
   setDuration: (value: string) => void; // <-- NEW
 
   setUserLocation: (params: {
@@ -45,8 +45,7 @@ type LocationStore = {
   setDistanceText: (distanceText: string) => void;
 };
 
-
-export const useLocationStore = create<LocationStore>((set) => ({
+export const useLocationStore = create<LocationStore>(set => ({
   userLatitude: null,
   userLongitude: null,
   userAddress: null,
@@ -58,11 +57,11 @@ export const useLocationStore = create<LocationStore>((set) => ({
   distance: null,
   distanceText: null,
 
-  duration: "00:00",                                     // NEW
-  setDuration: (value) => set({ duration: value }),      // NEW
+  duration: '00:00', // NEW
+  setDuration: value => set({ duration: value }), // NEW
 
-  setDistance: (distance) => set({ distance }),
-  setDistanceText: (distanceText) => set({ distanceText }),
+  setDistance: distance => set({ distance }),
+  setDistanceText: distanceText => set({ distanceText }),
 
   setUserLocation: ({ latitude, longitude, address }) => {
     set({
@@ -70,9 +69,6 @@ export const useLocationStore = create<LocationStore>((set) => ({
       userLongitude: longitude,
       userAddress: address,
     });
-
-    const { selectedDriver, clearSelectedDriver } = useDriverStore.getState();
-    if (selectedDriver) clearSelectedDriver();
   },
 
   setDestinationLocation: ({ latitude, longitude, address }) => {
@@ -81,17 +77,5 @@ export const useLocationStore = create<LocationStore>((set) => ({
       destinationLongitude: longitude,
       destinationAddress: address,
     });
-
-    const { selectedDriver, clearSelectedDriver } = useDriverStore.getState();
-    if (selectedDriver) clearSelectedDriver();
   },
-}));
-
-export const useDriverStore = create<DriverStore>((set) => ({
-  drivers: [],
-  selectedDriver: null,
-
-  setDrivers: (drivers) => set({ drivers }),
-  setSelectedDriver: (driverId) => set({ selectedDriver: driverId }),
-  clearSelectedDriver: () => set({ selectedDriver: null }),
 }));

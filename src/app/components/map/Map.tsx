@@ -2,36 +2,28 @@ import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { View, Animated, Easing } from 'react-native';
 import MapView, { PROVIDER_DEFAULT } from 'react-native-maps';
 
-import { useLocationStore, useDriverStore } from '@/store';
-import useGenerateRandomMarkers from '@/hooks/useGenerateRandomMarkers';
+import { useLocationStore, useRiderStore } from '@/store';
 
 import { FALLBACK_REGION } from './constants';
 import UserMarker from './UserMarker';
-import DriverMarkers from './DriverMarkers';
 import DestinationMarker from './DestinationMarker';
 import RouteAnimator from './RouteAnimator';
 import RecenterButton from './RecenterButton';
 
 import useMapAnimations from './useMapAnimations';
-import { calculateRegion, calculateDriverTimes } from '@/libs/map';
+import { calculateRegion } from '@/libs/map';
 import { customMapStyle } from '../../utils/CustomMap';
-import { MarkerData } from '@/types/declare';
 
 const Map: React.FC = () => {
   const mapRef = useRef<MapView | null>(null);
   const [mapReady, setMapReady] = useState(false);
 
-  const {
-    userLatitude,
-    userLongitude,
-    destinationLatitude,
-    destinationLongitude,
-    destinationAddress,
-  } = useLocationStore();
+  const { destinationLatitude, destinationLongitude, destinationAddress } =
+    useLocationStore();
 
-  const { selectedDriver, setDrivers } = useDriverStore();
-  const [markers, setMarkers] = useState<MarkerData[]>([]);
-  useGenerateRandomMarkers(setMarkers);
+  const { location: riderLocation } = useRiderStore();
+  const userLatitude = riderLocation?.latitude;
+  const userLongitude = riderLocation?.longitude;
 
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
@@ -82,30 +74,6 @@ const Map: React.FC = () => {
     destinationLongitude,
   });
 
-  // useEffect(() => {
-  //   if (userLatitude && userLongitude && isFocused) {
-  //     emit("subscribeToZone", {
-  //       latitude: location.latitude,
-  //       longitude: location.longitude,
-  //     });
-
-  //     on("nearbyRiders", (riders: any[]) => {
-  //       const updatedMarkers = riders.map((rider) => ({
-  //         id: rider.id,
-  //         latitude: rider.coords.latitude,
-  //         longitude: rider.coords.longitude,
-  //         type: "rider",
-  //         rotation: rider.coords.heading,
-  //         visible: true,
-  //       }));
-  //       setMarkers(updatedMarkers);
-  //     });
-  //   }
-
-  //   return () => {
-  //     off("nearbyriders");
-  //   };
-  // }, [userLatitude , userLongitude, emit, on, off, isFocused]);
   const initialRegion = useMemo(
     () =>
       calculateRegion({
@@ -116,46 +84,6 @@ const Map: React.FC = () => {
       }) || FALLBACK_REGION,
     [userLatitude, userLongitude, destinationLatitude, destinationLongitude],
   );
-
-  useEffect(() => {
-    let cancelled = false;
-    const run = async () => {
-      if (
-        markers.length > 0 &&
-        destinationLatitude &&
-        destinationLongitude &&
-        userLatitude &&
-        userLongitude
-      ) {
-        try {
-          const updated = await calculateDriverTimes({
-            markers,
-            userLatitude,
-            userLongitude,
-            destinationLatitude,
-            destinationLongitude,
-          });
-          if (!cancelled) {
-            setDrivers(updated as MarkerData[]);
-          }
-        } catch (e) {
-          // optional: handle error
-          console.warn('calculateDriverTimes err:', e);
-        }
-      }
-    };
-    run();
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    markers,
-    destinationLatitude,
-    destinationLongitude,
-    userLatitude,
-    userLongitude,
-    setDrivers,
-  ]);
 
   return (
     <View style={{ flex: 1 }}>
@@ -178,9 +106,6 @@ const Map: React.FC = () => {
             longitude={userLongitude}
             pulseAnim={pulseAnim}
           />
-        )}
-        {mapReady && (
-          <DriverMarkers markers={markers} selectedDriver={selectedDriver} />
         )}
         {destinationLatitude !== null && destinationLongitude !== null && (
           <DestinationMarker
