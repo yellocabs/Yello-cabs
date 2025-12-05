@@ -1,7 +1,7 @@
 import { View, Text, Image, useWindowDimensions } from 'react-native';
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import RideLayout from '@/components/customer/ride-layout';
-import { useLocationStore } from '@/store/location-store';
+import { useUserStore } from '@/store';
 import { useFetchLocation } from '@/hooks/useFetchLocation';
 import { icons } from '@/constants';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -12,13 +12,13 @@ import GoogleTextInput from '@/components/customer/google-text-input';
 const TwoAddressInput = ({
   userAddress,
   destinationAddress,
-  setUserLocation,
-  setDestinationLocation,
+  setLocation,
+  setDestination,
   navigation,
   onPressIn,
 }: any) => {
   const handleDestinationPress = (location: any) => {
-    setDestinationLocation(location);
+    setDestination(location);
     setTimeout(() => {
       navigation.navigate('Rider', {
         screen: 'FindOffer',
@@ -53,7 +53,7 @@ const TwoAddressInput = ({
           initialLocation={userAddress || ''}
           containerStyle="bg-neutral-100 mb-4"
           textInputBackgroundColor="transparent"
-          handlePress={setUserLocation}
+          handlePress={setLocation}
           rightIcon={icons.target}
           onPressIn={onPressIn}
         />
@@ -99,8 +99,8 @@ const SelectOnMap = () => {
 const ExpandedAddressSelector = ({
   userAddress,
   destinationAddress,
-  setUserLocation,
-  setDestinationLocation,
+  setLocation,
+  setDestination,
   navigation,
   onPressIn,
 }: any) => {
@@ -113,8 +113,8 @@ const ExpandedAddressSelector = ({
       <TwoAddressInput
         userAddress={userAddress}
         destinationAddress={destinationAddress}
-        setUserLocation={setUserLocation}
-        setDestinationLocation={setDestinationLocation}
+        setLocation={setLocation}
+        setDestination={setDestination}
         navigation={navigation}
         onPressIn={onPressIn}
       />
@@ -131,15 +131,12 @@ const HomeScreen = () => {
   const route = useRoute<any>();
   const layoutRef = useRef<any>(null);
   const [expanded, setExpanded] = useState(false);
-  const snapPoints = useMemo(() => [height * 0.8, height * 0.8], [height]);
-  console.log('Using snap points:', snapPoints);
+  const snapPoints = useMemo(() => [height * 0.9, height * 0.9], [height]);
 
-  const {
-    userAddress,
-    destinationAddress,
-    setDestinationLocation,
-    setUserLocation,
-  } = useLocationStore();
+  const { user, destination, setDestination, setLocation } = useUserStore();
+
+  const userAddress = user?.location?.address;
+  const destinationAddress = destination?.address;
 
   const {
     showPermissionModal,
@@ -148,11 +145,10 @@ const HomeScreen = () => {
   } = useFetchLocation();
 
   const handleExpand = () => {
-    layoutRef.current?.expandTo(1); // Snap to 80%
+    layoutRef.current?.expandTo(1); // Snap to 90%
   };
 
   const handleSheetChanges = (index: number) => {
-    console.log('Sheet changed to index:', index);
     if (index === 0) {
       setExpanded(false);
     } else {
@@ -171,9 +167,9 @@ const HomeScreen = () => {
     if (route.params?.location) {
       const { location, type } = route.params;
       if (type === 'destination') {
-        setDestinationLocation(location);
+        setDestination(location);
       } else {
-        setUserLocation(location);
+        setLocation(location);
       }
     }
   }, [route.params]);
@@ -200,7 +196,7 @@ const HomeScreen = () => {
               initialLocation={destinationAddress || ''}
               containerStyle="bg-neutral-100"
               textInputBackgroundColor="transparent"
-              handlePress={setDestinationLocation}
+              handlePress={setDestination}
               onPressIn={handleExpand}
             />
           </View>
@@ -208,8 +204,8 @@ const HomeScreen = () => {
           <ExpandedAddressSelector
             userAddress={userAddress}
             destinationAddress={destinationAddress}
-            setUserLocation={setUserLocation}
-            setDestinationLocation={setDestinationLocation}
+            setLocation={setLocation}
+            setDestination={setDestination}
             navigation={navigation}
             onPressIn={handleTextInputPress}
           />

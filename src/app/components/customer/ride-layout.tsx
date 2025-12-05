@@ -34,18 +34,48 @@ const RideLayout = forwardRef<any, RideLayoutProps>(
     const { height } = useWindowDimensions();
     const bottomSheetRef = useRef<BottomSheet>(null);
     const navigation = useNavigation();
+    const [isSheetVisible, setIsSheetVisible] = useState(true);
+    const interactionTimeout = useRef<NodeJS.Timeout | null>(null);
+
     useImperativeHandle(ref, () => ({
       expandTo(index: number) {
         bottomSheetRef.current?.snapToIndex(index);
       },
     }));
 
+    const handlePanDrag = () => {
+      if (interactionTimeout.current) {
+        clearTimeout(interactionTimeout.current);
+      }
+      setIsSheetVisible(false);
+    };
+
+    const handleRegionChangeComplete = () => {
+      if (interactionTimeout.current) {
+        clearTimeout(interactionTimeout.current);
+      }
+      interactionTimeout.current = setTimeout(() => {
+        setIsSheetVisible(true);
+      }, 500);
+    };
+
+    useEffect(() => {
+      if (isSheetVisible) {
+        bottomSheetRef.current?.snapToIndex(initialIndex);
+      } else {
+        bottomSheetRef.current?.close();
+      }
+    }, [isSheetVisible, initialIndex]);
+
     return (
       <GestureHandlerRootView className="flex-1">
         <View className="flex-1 bg-white">
           {/* MAP */}
           <View className="absolute inset-0">
-            <Map />
+            <Map
+              onPanDrag={handlePanDrag}
+              onRegionChangeComplete={handleRegionChangeComplete}
+            />
           </View>
 
           {/* HEADER */}

@@ -17,7 +17,7 @@ import MapView, {
 import MapViewDirections from 'react-native-maps-directions';
 import { useIsFocused } from '@react-navigation/native';
 
-import { icons } from '@/constants';
+import { COLORS, icons } from '@/constants';
 import { calculateRegion } from '@/libs/map';
 import { useRiderStore, useLocationStore } from '@/store';
 import useMapAnimation from '@/hooks/useMapAnimation';
@@ -62,9 +62,9 @@ const RAPIDO_MAP_STYLE = [
 
 // Panel offset calculation (matches your previous logic)
 const bottomPanelHeightRatio = 0.45;
-const bottomOffset = height * bottomPanelHeightRatio + 24;
+const bottomOffset = height * bottomPanelHeightRatio + 40;
 
-const Map: React.FC = () => {
+const Map: React.FC<any> = props => {
   const mapRef = useRef<MapView | null>(null);
   const isFocused = useIsFocused();
 
@@ -92,7 +92,6 @@ const Map: React.FC = () => {
     bottomOffset,
   );
 
-  // --- recenter helper ---
   const recenterMap = () => {
     if (mapRef.current && userLatitude && userLongitude) {
       mapRef.current.animateToRegion(
@@ -109,7 +108,6 @@ const Map: React.FC = () => {
     }
   };
 
-  // UI states
   if (loading || (!userLatitude && !userLongitude)) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
@@ -155,11 +153,10 @@ const Map: React.FC = () => {
         zoomEnabled={true}
         onMapReady={() => setMapReady(true)}
         onLayout={() => {
-          // ensure mapReady is set if onMapReady missed for some reason
           setMapReady(true);
         }}
+        {...props}
       >
-        {/* User marker + pulse */}
         {userLatitude && userLongitude && (
           <>
             {userLatitude !== null && userLongitude !== null && (
@@ -239,7 +236,7 @@ const Map: React.FC = () => {
             position: 'absolute',
             bottom: bottomOffset,
             right: 16,
-            backgroundColor: '#fff',
+            backgroundColor: COLORS.primary,
             padding: 14,
             borderRadius: 40,
             elevation: 5,

@@ -55,24 +55,6 @@ export default function FindOffers() {
     ];
   }, [distance]);
 
-  // Fetch Distance
-  useEffect(() => {
-    const loadDistance = async () => {
-      try {
-        if (pickup && destination) {
-          const dist = await fetchDistance(pickup, destination);
-          setDistance(dist);
-        }
-      } catch (err) {
-        console.log('Distance error:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadDistance();
-  }, [pickup, destination]);
-
   const handleBack = () => {
     navigation.goBack();
   };

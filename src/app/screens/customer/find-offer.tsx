@@ -1,7 +1,7 @@
 // --- IMPORTS ---
 import { createRide } from '@/services/rideService';
 import { icons } from '@/constants';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useLocationStore } from '@/store';
 import { calculateFare, fetchDistance } from '@/utils/mapUtils';
@@ -295,23 +295,22 @@ export default function FindOffers() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
-      <RideLayout title="Find Offers" snapPoints={['60%', '80%', '90%']}>
-        <FlatList
-          data={rideOptions}
-          keyExtractor={item => item.type}
-          contentContainerStyle={{ padding: 16, paddingBottom: 150 }}
-          renderItem={({ item }) => (
-            <RideCard
-              item={item}
-              selected={selected}
-              onSelect={setSelected}
-              price={price}
-              setPrice={setPrice}
-            />
-          )}
-        />
-      </RideLayout>
+    <RideLayout title="Find Offers" snapPoints={['60%', '80%', '90%']}>
+      <FlatList
+        data={rideOptions}
+        keyExtractor={item => item.type}
+        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+        renderItem={({ item }) => (
+          <RideCard
+            item={item}
+            selected={selected}
+            onSelect={setSelected}
+            price={price}
+            setPrice={setPrice}
+          />
+        )}
+      />
+
       {/* BOTTOM BAR */}
       <View
         style={{
@@ -357,6 +356,6 @@ export default function FindOffers() {
           disabled={loading}
         />
       </View>
-    </View>
+    </RideLayout>
   );
 }

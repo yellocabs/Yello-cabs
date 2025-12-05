@@ -59,30 +59,8 @@ const LocationEntry = ({ title, address, isOrigin, navigation }) => {
 /* ---------------------------------------------- */
 const RideSummary = () => {
   const navigation = useNavigation();
-  const route = useRoute<any>();
 
-  const {
-    userAddress,
-    destinationAddress,
-    userLatitude,
-    userLongitude,
-    destinationLatitude,
-    destinationLongitude,
-    distance,
-    duration, // ⬅️ GET distance directly
-    distanceText,
-    setDestinationLocation,
-  } = useLocationStore();
-
-  useEffect(() => {
-    if (route.params?.location) {
-      setDestinationLocation(route.params.location);
-    }
-  }, [route.params?.location]);
-
-  useEffect(() => {
-    fetchDistance(); // ⬅️ This sets global distance automatically
-  }, [userLatitude, userLongitude, destinationLatitude, destinationLongitude]);
+  const { userAddress, destinationAddress, distanceText } = useLocationStore();
 
   const handlePress = () => {
     setTimeout(() => {
