@@ -295,21 +295,23 @@ export default function FindOffers() {
   };
 
   return (
-    <RideLayout title="Find Offers" snapPoints={['60%', '80%', '90%']}>
-      <FlatList
-        data={rideOptions}
-        keyExtractor={item => item.type}
-        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
-        renderItem={({ item }) => (
-          <RideCard
-            item={item}
-            selected={selected}
-            onSelect={setSelected}
-            price={price}
-            setPrice={setPrice}
-          />
-        )}
-      />
+    <View style={{ flex: 1 }}>
+      <RideLayout title="Find Offers" snapPoints={['60%', '80%', '90%']}>
+        <FlatList
+          data={rideOptions}
+          keyExtractor={item => item.type}
+          contentContainerStyle={{ padding: 16, paddingBottom: 150 }}
+          renderItem={({ item }) => (
+            <RideCard
+              item={item}
+              selected={selected}
+              onSelect={setSelected}
+              price={price}
+              setPrice={setPrice}
+            />
+          )}
+        />
+      </RideLayout>
 
       {/* BOTTOM BAR */}
       <View
@@ -356,6 +358,6 @@ export default function FindOffers() {
           disabled={loading}
         />
       </View>
-    </RideLayout>
+    </View>
   );
 }

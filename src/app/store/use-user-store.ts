@@ -11,10 +11,12 @@ type CustomLocation = {
 interface UserStoreProps {
   user: any;
   location: CustomLocation;
+  destination: CustomLocation;
   outOfRange: boolean;
   setUser: (data: any) => void;
   setOutOfRange: (data: boolean) => void;
   setLocation: (data: CustomLocation) => void;
+  setDestination: (data: CustomLocation) => void;
   clearData: () => void;
 }
 
@@ -23,16 +25,25 @@ export const useUserStore = create<UserStoreProps>()(
     set => ({
       user: null,
       location: null,
+      destination: null,
       outOfRange: false,
       setUser: data => set({ user: data }),
       setLocation: data => set({ location: data }),
+      setDestination: data => set({ destination: data }),
       setOutOfRange: data => set({ outOfRange: data }),
-      clearData: () => set({ user: null, location: null, outOfRange: false }),
+      clearData: () =>
+        set({
+          user: null,
+          location: null,
+          destination: null,
+          outOfRange: false,
+        }),
     }),
     {
       name: 'user-store',
       partialize: state => ({
         user: state.user,
+        destination: state.destination,
       }),
       storage: createJSONStorage(() => AsyncStorage),
     },
