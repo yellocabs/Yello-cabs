@@ -58,7 +58,12 @@ const RideCard = ({ item, selected, onSelect, price, setPrice }) => {
     <TouchableOpacity
       onPress={() => onSelect(item.type)}
       className="rounded-2xl mb-5"
-      style={{ backgroundColor: isSelected ? CARD_BG : 'white', padding: 18 }}
+      style={{
+        backgroundColor: isSelected ? CARD_BG : 'white',
+        padding: 18,
+        borderColor: '#000',
+        borderWidth: 1,
+      }}
     >
       <View className="flex-row items-center">
         <IconWrapper>{item.icon}</IconWrapper>
@@ -290,22 +295,23 @@ export default function FindOffers() {
   };
 
   return (
-    <RideLayout title="Find Offers" snapPoints={['60%', '80%', '90%']}>
-      <FlatList
-        data={rideOptions}
-        keyExtractor={item => item.type}
-        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
-        renderItem={({ item }) => (
-          <RideCard
-            item={item}
-            selected={selected}
-            onSelect={setSelected}
-            price={price}
-            setPrice={setPrice}
-          />
-        )}
-      />
-
+    <View style={{ flex: 1 }}>
+      <RideLayout title="Find Offers" snapPoints={['60%', '80%', '90%']}>
+        <FlatList
+          data={rideOptions}
+          keyExtractor={item => item.type}
+          contentContainerStyle={{ padding: 16, paddingBottom: 150 }}
+          renderItem={({ item }) => (
+            <RideCard
+              item={item}
+              selected={selected}
+              onSelect={setSelected}
+              price={price}
+              setPrice={setPrice}
+            />
+          )}
+        />
+      </RideLayout>
       {/* BOTTOM BAR */}
       <View
         style={{
@@ -351,6 +357,6 @@ export default function FindOffers() {
           disabled={loading}
         />
       </View>
-    </RideLayout>
+    </View>
   );
 }
