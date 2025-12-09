@@ -1,6 +1,6 @@
-import { Driver, MarkerData } from "@/types/declare";
+import { Driver, MarkerData } from '@/types/declare';
 
-const directionsAPI = "AIzaSyAC8JJ79eaC8PjAdFpNImUTjpRuJXUcWMM";
+const directionsAPI = 'AIzaSyAC8JJ79eaC8PjAdFpNImUTjpRuJXUcWMM';
 
 export const generateMarkersFromData = ({
   data,
@@ -11,7 +11,7 @@ export const generateMarkersFromData = ({
   userLatitude: number;
   userLongitude: number;
 }): MarkerData[] => {
-  return data.map((driver) => {
+  return data.map(driver => {
     const latOffset = (Math.random() - 0.5) * 0.01; // Random offset between -0.005 and 0.005
     const lngOffset = (Math.random() - 0.5) * 0.01; // Random offset between -0.005 and 0.005
 
@@ -90,7 +90,7 @@ export const calculateDriverTimes = async (driverLocations, destination) => {
       const data = await response.json();
 
       if (!data?.routes?.length || !data.routes[0]?.legs?.length) {
-        console.warn("No route found for driver", driver);
+        console.warn('No route found for driver', driver);
         continue;
       }
 
@@ -101,10 +101,9 @@ export const calculateDriverTimes = async (driverLocations, destination) => {
       });
     }
 
-    console.log(results)
     return results;
   } catch (error) {
-    console.error("Error calculating driver times:", error);
+    console.error('Error calculating driver times:', error);
     return [];
   }
 };

@@ -8,6 +8,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import CustomButton from '@/components/shared/custom-button';
 import LocationPermissionModal from '@/components/shared/location-permission-modal';
 import GoogleTextInput from '@/components/customer/google-text-input';
+import { useWS } from '@/services/WSProvider';
 
 const TwoAddressInput = ({
   userAddress,
@@ -106,7 +107,7 @@ const ExpandedAddressSelector = ({
 }: any) => {
   return (
     <>
-      <Text className="text-xl font-JakartaBold text-center pt-3 pb-2 text-gray-900">
+      <Text className="text-xl font-UrbanistBold text-center pt-3 pb-2 text-gray-900">
         Select Address
       </Text>
 
@@ -143,6 +144,14 @@ const HomeScreen = () => {
     requestLocationPermission,
     dismissPermissionModal,
   } = useFetchLocation();
+
+  const { on } = useWS();
+
+  useEffect(() => {
+    on('connect', () => {
+      console.log('Socket connected from home-screen');
+    });
+  }, [on]);
 
   const handleExpand = () => {
     layoutRef.current?.expandTo(1); // Snap to 90%

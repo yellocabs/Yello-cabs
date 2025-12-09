@@ -28,8 +28,6 @@ export const useFetchLocation = () => {
 
     Geolocation.getCurrentPosition(
       async position => {
-        console.log('Success => hello', position);
-
         const { latitude, longitude, heading } = position.coords;
 
         Geocoder.init('AIzaSyAC8JJ79eaC8PjAdFpNImUTjpRuJXUcWMM');

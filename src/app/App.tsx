@@ -11,6 +11,8 @@ import { configureGoogleSignIn } from './services/google-auth';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import Toast from 'react-native-toast-message';
 
+import { WSProvider } from './services/WSProvider';
+
 export default function App() {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -30,11 +32,13 @@ export default function App() {
   return (
     <SafeAreaProvider className="flex-1">
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <NavigationContainer ref={navigationRef}>
-          <StatusBar barStyle="dark-content" />
-          <RootNavigator />
-          <Toast />
-        </NavigationContainer>
+        <WSProvider>
+          <NavigationContainer ref={navigationRef}>
+            <StatusBar barStyle="dark-content" />
+            <RootNavigator />
+            <Toast />
+          </NavigationContainer>
+        </WSProvider>
       </GestureHandlerRootView>
     </SafeAreaProvider>
   );
