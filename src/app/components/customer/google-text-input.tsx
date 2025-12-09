@@ -1,23 +1,21 @@
-import { useLocationStore } from '@/store/location-store';
-import { GoogleInputProps } from '@/types/declare'; // Assuming this type is updated
+import { useUserStore } from '@/store';
+import { GoogleInputProps } from '@/types/declare';
 import React, { useRef, useState } from 'react';
-import { Dimensions, Image, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, TouchableOpacity, View } from 'react-native';
 import {
   GooglePlacesAutocomplete,
   GooglePlacesAutocompleteRef,
 } from 'react-native-google-places-autocomplete';
-import {
-  ChevronDownIcon,
-  ClockIcon,
-  XMarkIcon,
-} from 'react-native-heroicons/outline';
+import { XMarkIcon } from 'react-native-heroicons/outline';
 
 import { icons } from '@/constants';
 import LocationItem from './LocationItems';
+import Config from 'react-native-config';
 
-// Use the environment variable for the API key
 const { width: screenWidth } = Dimensions.get('window');
+
 const googlePlacesApiKey = 'AIzaSyAC8JJ79eaC8PjAdFpNImUTjpRuJXUcWMM';
+console.log(googlePlacesApiKey);
 
 const GoogleTextInput = ({
   icon,
@@ -26,21 +24,15 @@ const GoogleTextInput = ({
   textInputBackgroundColor,
   handlePress,
   onPressIn,
+  placeholder,
 }: GoogleInputProps) => {
-  // --- Functionality from your first component ---
   const googlePlaceAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
-  const userLatitude = useLocationStore(state => state.userLatitude);
-  const userLongitude = useLocationStore(state => state.userLongitude);
+  const { location: userLocation } = useUserStore();
   const [inputValue, setInputValue] = useState<string>('');
 
-  const handleSuggestionPress = async (data: any) => {
+  const handleSuggestionPress = async (data: any, details: any = null) => {
     try {
-      const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${data.place_id}&fields=geometry&key=${googlePlacesApiKey}`;
-      const response = await fetch(detailsUrl);
-      const json = await response.json();
-
-      const details = json.result;
-
+      // The 'details' object is returned by the API when fetchDetails={true}
       if (details) {
         handlePress({
           latitude: details.geometry.location.lat,
@@ -61,11 +53,10 @@ const GoogleTextInput = ({
       className={`flex flex-row items-center justify-center relative z-50 rounded-xl ${containerStyle}`}
     >
       <GooglePlacesAutocomplete
-        placeholder="where to?"
+        placeholder={placeholder ?? 'Where to?'}
         ref={googlePlaceAutoCompleteRef}
-        fetchDetails={false}
-        debounce={200}
-        // --- Styling from your second component ---
+        fetchDetails={true} // Set to true to get geometry
+        debounce={400} // Increased debounce for cost optimization
         styles={{
           textInputContainer: {
             alignItems: 'center',
@@ -76,21 +67,15 @@ const GoogleTextInput = ({
             shadowColor: '#d4d4d4',
           },
           textInput: {
-            backgroundColor: textInputBackgroundColor
-              ? textInputBackgroundColor
-              : 'white',
+            backgroundColor: textInputBackgroundColor || 'white',
             fontSize: 16,
             fontWeight: '600',
             marginTop: 5,
             width: '100%',
             borderRadius: 200,
-            // paddingLeft: 30,
-            // paddingRight: 80,
           },
           listView: {
-            backgroundColor: textInputBackgroundColor
-              ? textInputBackgroundColor
-              : 'white',
+            backgroundColor: textInputBackgroundColor || 'white',
             position: 'absolute',
             top: 60,
             width: screenWidth * 0.92,
@@ -109,28 +94,24 @@ const GoogleTextInput = ({
             onPress={() => handleSuggestionPress(data)}
           />
         )}
-        // --- Query logic (merged from both) ---
         query={{
           key: googlePlacesApiKey!,
           language: 'en',
-          location:
-            userLatitude != null && userLongitude != null
-              ? `${userLatitude},${userLongitude}`
-              : undefined,
-
-          radius: 10000,
+          location: `${userLocation?.latitude},${userLocation?.longitude}`,
+          radius: '20000', // 20km radius
+          rankby: 'distance',
+          components: 'country:in', // Bias to India
         }}
         renderLeftButton={() => (
           <View className="justify-center items-center w-6 h-6">
             <Image
-              source={icon ? icon : icons.search}
+              source={icon || icons.search}
               className="w-6 h-6"
               resizeMode="contain"
               style={{ tintColor: '#000000' }}
             />
           </View>
         )}
-        // --- renderRightButton from your first component (styled with Tailwind) ---
         renderRightButton={() => (
           <View className="flex-row items-center">
             {inputValue.length > 0 && (
@@ -139,7 +120,7 @@ const GoogleTextInput = ({
                   googlePlaceAutoCompleteRef.current?.setAddressText('');
                   setInputValue('');
                 }}
-                className="px-1.5" // was moderateScale(5)
+                className="px-1.5"
               >
                 <XMarkIcon size={20} color="grey" />
               </TouchableOpacity>
@@ -148,26 +129,25 @@ const GoogleTextInput = ({
         )}
         textInputProps={{
           placeholderTextColor: 'black',
-          placeholder: initialLocation ?? 'Where to ?',
-
+          placeholder: placeholder
+            ? placeholder
+            : (initialLocation ?? 'Where to?'),
           onFocus: () => {
             googlePlaceAutoCompleteRef.current?.setAddressText('');
             setInputValue('');
-            onPressIn?.(); // <-- Safe call
+            onPressIn?.();
           },
-
           onChangeText: text => setInputValue(text),
           value: inputValue,
         }}
         predefinedPlaces={[]}
         keyboardShouldPersistTaps="always"
-        minLength={1}
-        listViewDisplayed="auto"
+        minLength={2}
         enablePoweredByContainer={false}
         onFail={error =>
           console.error('GooglePlacesAutocomplete error:', error)
         }
-        timeout={5000}
+        onNotFound={() => console.log('No results found')}
       />
     </View>
   );

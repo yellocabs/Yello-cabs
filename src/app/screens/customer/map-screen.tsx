@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import MapView, { Region } from 'react-native-maps';
-import { useLocationStore } from '@/store';
+import { useUserStore } from '@/store';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import CustomButton from '@/components/shared/custom-button';
@@ -9,10 +9,10 @@ import CustomButton from '@/components/shared/custom-button';
 const MapScreen: React.FC = () => {
   const navigation = useNavigation();
   const route = useRoute();
-  const { userLatitude, userLongitude } = useLocationStore();
+  const { location, setDestination } = useUserStore();
   const [region, setRegion] = useState<Region>({
-    latitude: userLatitude || 37.78825,
-    longitude: userLongitude || -122.4324,
+    latitude: location?.latitude || 37.78825,
+    longitude: location?.longitude || -122.4324,
     latitudeDelta: 0.0922,
     longitudeDelta: 0.0421,
   });
@@ -30,17 +30,16 @@ const MapScreen: React.FC = () => {
       const data = await response.json();
       if (data.status === 'OK' && data.results.length > 0) {
         const address = data.results[0].formatted_address;
+        const location = {
+          latitude: region.latitude,
+          longitude: region.longitude,
+          address: address,
+        };
+        setDestination(location);
         // @ts-ignore
-        navigation.navigate('Tabs', {
-          screen: 'Home',
-          params: {
-            location: {
-              latitude: region.latitude,
-              longitude: region.longitude,
-              address: address,
-            },
-            type: route.params?.type,
-          },
+        navigation.navigate('Rider', {
+          screen: 'FindOffer',
+          params: { location },
         });
       }
     } catch (error) {

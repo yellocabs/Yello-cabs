@@ -3,16 +3,19 @@ import React, {
   useContext,
   useEffect,
   useRef,
-  useCallback,
+  useState,
 } from 'react';
+import { io, Socket } from 'socket.io-client';
 import { SOCKET_URL } from './config';
-
-type Listener = (data: any) => void;
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface WSService {
+  initializeSocket: () => void;
   emit: (event: string, data?: any) => void;
-  on: (event: string, cb: Listener) => void;
+  on: (event: string, cb: (data: any) => void) => void;
   off: (event: string) => void;
+  removeListener: (listenerName: string) => void;
+  updateAccessToken: () => void;
   disconnect: () => void;
 }
 
@@ -21,91 +24,86 @@ const WSContext = createContext<WSService | undefined>(undefined);
 export const WSProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
-  const socket = useRef<WebSocket | null>(null);
-  const listeners = useRef<Record<string, Listener[]>>({});
+  const [socketAccessToken, setSocketAccessToken] = useState<string | null>(
+    null,
+  );
+  const socket = useRef<Socket>();
 
-  // -----------------------------
-  // EVENT LISTENER REGISTRATION
-  // -----------------------------
-  const on = useCallback((event: string, cb: Listener) => {
-    if (!listeners.current[event]) listeners.current[event] = [];
-    listeners.current[event].push(cb);
-  }, []);
-
-  const off = useCallback((event: string) => {
-    listeners.current[event] = [];
-  }, []);
-
-  const triggerEvent = useCallback((event: string, data: any) => {
-    const eventListeners = listeners.current[event];
-    if (eventListeners) eventListeners.forEach(cb => cb(data));
-  }, []);
-
-  // -----------------------------
-  // WS CONNECTION SETUP
-  // -----------------------------
   useEffect(() => {
-    const wsUrl = SOCKET_URL.replace(/^http/, 'ws') + '/ws';
-    console.log('Connecting WebSocket →', wsUrl);
+    (async () => {
+      const token = await AsyncStorage.getItem('authToken');
+      setSocketAccessToken(token);
+    })();
+  }, []);
 
-    socket.current = new WebSocket(wsUrl);
-
-    socket.current.onopen = () => {
-      console.log('WebSocket connected');
-      triggerEvent('connect', null);
-    };
-
-    socket.current.onmessage = event => {
-      try {
-        const json = JSON.parse(event.data);
-
-        // Custom event system
-        if (json.event) triggerEvent(json.event, json.data);
-        else triggerEvent('message', json);
-      } catch {
-        // Raw message (like our open server sends: "Echo: ...")
-        triggerEvent('message', event.data);
+  useEffect(() => {
+    console.log('SocketAccessToken:', socketAccessToken);
+    if (socketAccessToken) {
+      if (socket.current) {
+        socket.current.disconnect();
       }
-    };
 
-    socket.current.onerror = error => {
-      console.log('WebSocket error:', error);
-      triggerEvent('connect_error', error);
-    };
-
-    socket.current.onclose = () => {
-      console.log('WebSocket disconnected');
-      triggerEvent('disconnect', null);
-    };
+      socket.current = io(SOCKET_URL, {
+        path: '/api/users/ws',
+        transports: ['websocket'],
+        withCredentials: true,
+        extraHeaders: {
+          access_token: socketAccessToken || '',
+        },
+      });
+      console.log('initialized');
+      socket.current.on('connect', () => {
+        console.log('Connected to socket');
+      });
+      socket.current.on('connect_error', error => {
+        if (error.message === 'Authentication error') {
+          console.log('Auth connection error: ', error.message);
+        }
+      });
+    }
 
     return () => {
-      socket.current?.close();
+      socket.current?.disconnect();
     };
-  }, []);
+  }, [socketAccessToken]);
 
-  // -----------------------------
-  // EMIT EVENTS TO SERVER
-  // -----------------------------
   const emit = (event: string, data: any = {}) => {
-    if (socket.current?.readyState === WebSocket.OPEN) {
-      socket.current.send(JSON.stringify({ event, data }));
-    } else {
-      console.log('WS not ready, cannot emit');
+    socket.current?.emit(event, data);
+  };
+
+  const on = (event: string, cb: (data: any) => void) => {
+    socket.current?.on(event, cb);
+  };
+
+  const off = (event: string) => {
+    socket.current?.off(event);
+  };
+
+  const removeListener = (listenerName: string) => {
+    socket?.current?.removeListener(listenerName);
+  };
+
+  const disconnect = () => {
+    if (socket.current) {
+      socket.current.disconnect();
+      socket.current = undefined;
     }
   };
 
-  // -----------------------------
-  // MANUAL DISCONNECT
-  // -----------------------------
-  const disconnect = () => {
-    socket.current?.close();
+  const updateAccessToken = async () => {
+    const token = (await AsyncStorage.getItem('authToken')) as any;
+
+    setSocketAccessToken(token);
   };
 
   const socketService: WSService = {
+    initializeSocket: () => {},
     emit,
-    on,
     off,
+    on,
     disconnect,
+    removeListener,
+    updateAccessToken,
   };
 
   return (
@@ -115,6 +113,8 @@ export const WSProvider: React.FC<{ children: React.ReactNode }> = ({
 
 export const useWS = (): WSService => {
   const socketService = useContext(WSContext);
-  if (!socketService) throw new Error('useWS must be used inside a WSProvider');
+  if (!socketService) {
+    throw new Error('useWS must be used within a WSProvider');
+  }
   return socketService;
 };

@@ -188,6 +188,7 @@ const LoginScreen = () => {
     try {
       setLoading(true);
       const response = await sendOtp(phone);
+      console.log(response);
       if (response.data?.success) {
         setVerification({
           code: '', // Clear previous OTP

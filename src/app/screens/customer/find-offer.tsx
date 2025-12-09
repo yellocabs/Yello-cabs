@@ -1,7 +1,6 @@
-// --- IMPORTS ---
 import { createRide } from '@/services/rideService';
 import { icons } from '@/constants';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useLocationStore } from '@/store';
 import { calculateFare, fetchDistance } from '@/utils/mapUtils';
@@ -61,8 +60,12 @@ const RideCard = ({ item, selected, onSelect, price, setPrice }) => {
       style={{
         backgroundColor: isSelected ? CARD_BG : 'white',
         padding: 18,
-        borderColor: '#000',
-        borderWidth: 1,
+        borderColor: '#CED1DD',
+        borderWidth: 0.3,
+        boxShadow: '0px 5px 0px #e0e0e0 ',
+        shadowOpacity: 0.5,
+        shadowRadius: 5,
+        shadowOffset: { width: 0, height: 2 },
       }}
     >
       <View className="flex-row items-center">
@@ -206,12 +209,13 @@ export default function FindOffers() {
 
   // ---- CALCULATE FARE (PASS DURATION TOO) ----
   useEffect(() => {
+    console.log('holojdjdjd', distance);
     if (!distance || !durations.auto) return;
 
     const durationNumber = parseInt(durations.auto, 10) || 0;
 
     const fares = calculateFare(distance, durationNumber);
-
+    console.log('hololoo', fares);
     setFarePrices({
       bike: fares.bike,
       auto: fares.auto,

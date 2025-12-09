@@ -1,4 +1,3 @@
-import { useLocationStore } from '@/store/location-store';
 const GOOGLE_API_KEY = 'AIzaSyAC8JJ79eaC8PjAdFpNImUTjpRuJXUcWMM'; // Replace with your key
 
 export const getPlacesSuggestions = async (input: string) => {
@@ -62,29 +61,17 @@ export const calculateDistance = (
 };
 
 export const fetchDistance = async (
+  origin: { latitude: number; longitude: number },
+  destination: { latitude: number; longitude: number },
   mode: 'driving' | 'walking' | 'bicycling' | 'transit' = 'driving',
 ) => {
-  const {
-    userLatitude,
-    userLongitude,
-    destinationLatitude,
-    destinationLongitude,
-  } = useLocationStore.getState();
-
-  if (
-    !userLatitude ||
-    !userLongitude ||
-    !destinationLatitude ||
-    !destinationLongitude
-  ) {
+  if (!origin || !destination) {
     return null;
   }
 
   try {
     const response = await fetch(
-      `https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${
-        userLatitude
-      },${userLongitude}&destinations=${destinationLatitude},${destinationLongitude}&key=${GOOGLE_API_KEY}&mode=${mode}`,
+      `https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins=${origin.latitude},${origin.longitude}&destinations=${destination.latitude},${destination.longitude}&key=${GOOGLE_API_KEY}&mode=${mode}`,
     );
 
     const data = await response.json();
@@ -141,13 +128,14 @@ export const calculateFare = (
     calculatedFare *= cityMultiplier;
 
     calculatedFare = Math.max(calculatedFare, minimumFare);
-
+    console.log('hola', calculatedFare);
     // ceil only if decimal exists
     return calculatedFare % 1 !== 0
       ? Math.ceil(calculatedFare)
       : calculatedFare;
   };
 
+  console.log(calculateFare);
   return {
     bike: fareCalculation(rateStructure.bike),
     auto: fareCalculation(rateStructure.auto),

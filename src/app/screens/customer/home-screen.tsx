@@ -46,11 +46,10 @@ const TwoAddressInput = ({
           resizeMode="contain"
         />
       </View>
-
       {/* RIGHT INPUTS */}
       <View className="flex-1">
         <GoogleTextInput
-          placeholder="From"
+          placeholder={userAddress ? userAddress : 'From'}
           initialLocation={userAddress || ''}
           containerStyle="bg-neutral-100 mb-4"
           textInputBackgroundColor="transparent"
@@ -60,7 +59,7 @@ const TwoAddressInput = ({
         />
 
         <GoogleTextInput
-          placeholder="Destination"
+          placeholder="Where To?"
           initialLocation={destinationAddress}
           containerStyle="bg-neutral-100"
           textInputBackgroundColor="transparent"
@@ -134,9 +133,10 @@ const HomeScreen = () => {
   const [expanded, setExpanded] = useState(false);
   const snapPoints = useMemo(() => [height * 0.9, height * 0.9], [height]);
 
-  const { user, destination, setDestination, setLocation } = useUserStore();
+  const { user, destination, setDestination, setLocation, location } =
+    useUserStore();
 
-  const userAddress = user?.location?.address;
+  const userAddress = location?.address;
   const destinationAddress = destination?.address;
 
   const {
@@ -144,14 +144,6 @@ const HomeScreen = () => {
     requestLocationPermission,
     dismissPermissionModal,
   } = useFetchLocation();
-
-  const { on } = useWS();
-
-  useEffect(() => {
-    on('connect', () => {
-      console.log('Socket connected from home-screen');
-    });
-  }, [on]);
 
   const handleExpand = () => {
     layoutRef.current?.expandTo(1); // Snap to 90%
@@ -202,7 +194,7 @@ const HomeScreen = () => {
           <View className="my-3 px-6" style={{ height: height * 0.25 }}>
             <GoogleTextInput
               icon={icons.search}
-              initialLocation={destinationAddress || ''}
+              initialLocation={''}
               containerStyle="bg-neutral-100"
               textInputBackgroundColor="transparent"
               handlePress={setDestination}

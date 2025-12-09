@@ -3,10 +3,10 @@ import { PermissionsAndroid, Platform } from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 import Geocoder from 'react-native-geocoding';
 import { useRiderStore } from '@/store';
-import { useLocationStore } from '@/store/location-store';
+import { useUserStore } from '@/store/use-user-store';
 
 export const useFetchLocation = () => {
-  const { setUserLocation } = useLocationStore();
+  const { setLocation } = useUserStore();
   const { setLocation: setRiderLocation } = useRiderStore();
 
   const [address, setAddress] = useState('Fetching location...');
@@ -39,7 +39,7 @@ export const useFetchLocation = () => {
           console.log('Formatted Address: ', formatted);
 
           setAddress(formatted);
-          setUserLocation({ latitude, longitude, address: formatted });
+          setLocation({ latitude, longitude, address: formatted });
           setRiderLocation({
             latitude,
             longitude,
@@ -49,7 +49,11 @@ export const useFetchLocation = () => {
         } catch (e) {
           console.log('Geocoder Error:', e);
           setAddress('Unable to fetch address');
-          setUserLocation({ latitude, longitude, address: 'Unknown location' });
+          setLocation({
+            latitude,
+            longitude,
+            address: 'Unknown location',
+          });
           setRiderLocation({
             latitude,
             longitude,

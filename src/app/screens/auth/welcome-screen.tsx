@@ -138,7 +138,7 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={{ flex: 1, backgroundColor: '#f0bd1a' }}>
+      <View style={{ flex: 1, backgroundColor: '#05339c' }}>
         {/* TOP ICON */}
         <View
           style={{
