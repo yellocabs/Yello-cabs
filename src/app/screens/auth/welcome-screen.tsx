@@ -5,6 +5,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from 'react';
+import { COLORS } from '@/assets/colors';
 import { View, useWindowDimensions, Image, Text } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Swiper from 'react-native-swiper';
@@ -63,12 +64,17 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
   const currentSlide = bottomSheetData[activeIndex];
   const sheetLast = activeIndex === bottomSheetData.length - 1;
 
+  // ...
+
   const SlideContent = ({ data }: any) => (
     <View
       style={{
         flex: 1,
+
         paddingHorizontal: moderate(20),
+
         paddingVertical: moderate(25),
+
         justifyContent: 'space-between',
       }}
     >
@@ -76,8 +82,11 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
         <Text
           style={{
             fontSize: moderate(34),
+
             fontFamily: 'UrbanistExtraBold',
-            color: '#000',
+
+            color: COLORS.BRAND_BLACK,
+
             lineHeight: moderate(45),
           }}
         >
@@ -87,8 +96,11 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
         <Text
           style={{
             fontSize: moderate(30),
+
             fontFamily: 'UrbanistExtraBold',
-            color: '#000',
+
+            color: COLORS.BRAND_BLACK,
+
             marginBottom: moderate(10),
           }}
         >
@@ -98,7 +110,9 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
         <Text
           style={{
             fontSize: moderate(15),
+
             fontFamily: 'UrbanistRegular',
+
             color: '#444',
           }}
         >
@@ -109,7 +123,9 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
       <View
         style={{
           flexDirection: 'row',
+
           gap: moderate(12),
+
           marginBottom: moderate(60),
         }}
       >
@@ -127,7 +143,7 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
           title={sheetLast ? 'Get Started' : 'Next'}
           onPress={handleNext}
           bgVariant="primary"
-          textVariant="#fff"
+          textVariant={COLORS.BRAND_WHITE}
           rounded="xl"
           height="h-14"
           flex
@@ -138,39 +154,49 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={{ flex: 1, backgroundColor: '#72B0D5' }}>
+      <View style={{ flex: 1, backgroundColor: COLORS.PRIMARY.DEFAULT }}>
         {/* TOP ICON */}
+
         <View
           style={{
             position: 'absolute',
+
             top: height * 0.06,
+
             left: width * 0.05,
+
             zIndex: 99,
           }}
         >
           <CustomIconButton
             icon={icons.vehicle}
             size={moderate(45)}
-            bg="#fff"
+            bg={COLORS.BRAND_WHITE}
             onPress={handleNext}
           />
         </View>
 
         {/* SWIPER */}
+
         <Swiper
           ref={swiperRef}
           loop={false}
           onIndexChanged={index => {
             setActiveIndex(index);
+
             onIndexChange?.(index);
           }}
           dot={
             <View
               style={{
                 width: 10,
+
                 height: 10,
+
                 margin: 3,
+
                 backgroundColor: 'rgba(255,255,255,0.4)',
+
                 borderRadius: 50,
               }}
             />
@@ -179,53 +205,76 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
             <View
               style={{
                 width: 35,
+
                 height: 10,
+
                 margin: 3,
-                backgroundColor: '#fff',
+
+                backgroundColor: COLORS.BRAND_WHITE,
+
                 borderRadius: 50,
               }}
             />
           }
           paginationStyle={{
             position: 'absolute',
+
             top: height * 0.07,
+
             right: width * 0.07,
+
             bottom: undefined,
+
             left: undefined,
           }}
         >
           {onboarding.map(item => {
             // ----------------------------------------------
+
             // CONDITIONAL IMAGE CONTAINER + IMAGE STYLES
+
             // ----------------------------------------------
+
             let containerStyle: any = {};
+
             let imageStyle: any = {};
+
             <View></View>;
+
             if (item.id === 1) {
               containerStyle = {
                 marginBottom: height * 0.2,
               };
+
               imageStyle = {
                 width: width * 1,
+
                 height: height * 0.47,
               };
             } else if (item.id === 2) {
               containerStyle = {
                 marginBottom: height * 0.12,
+
                 justifyContent: 'flex-start',
+
                 alignSelf: 'center',
               };
+
               imageStyle = {
                 width: width * 1.2,
+
                 height: height * 0.6,
+
                 alignSelf: 'center',
               };
             } else if (item.id === 3) {
               containerStyle = {
                 marginBottom: height * 0.09,
               };
+
               imageStyle = {
                 width: width * 1,
+
                 height: height * 0.45,
               };
             }
@@ -235,8 +284,11 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
                 key={item.id}
                 style={{
                   flex: 1,
+
                   justifyContent: 'center',
+
                   alignItems: 'center',
+
                   overflow: 'hidden',
                 }}
               >
@@ -253,11 +305,12 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
         </Swiper>
 
         {/* BOTTOM SHEET */}
+
         <BottomSheet
           ref={bottomSheetRef}
           activeHeight={height * 0.38}
           minHeight={0.38}
-          backgroundColor="#fff"
+          backgroundColor={COLORS.BRAND_WHITE}
           showBackdrop={false}
         >
           <SlideContent data={currentSlide} />

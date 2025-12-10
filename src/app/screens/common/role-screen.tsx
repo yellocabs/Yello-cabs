@@ -1,3 +1,4 @@
+import { COLORS } from '@/assets/colors';
 import React, { useState } from 'react';
 import {
   View,
@@ -36,36 +37,49 @@ const RoleScreen = () => {
     }
   };
 
+  // ...
+
   const RoleOption = ({
     role,
+
     icon,
+
     isSelected,
+
     onSelect,
   }: {
     role: 'rider' | 'captain';
+
     icon: any;
+
     isSelected: boolean;
+
     onSelect: (role: 'rider' | 'captain') => void;
   }) => {
     const roleName = role === 'rider' ? 'Rider' : 'Captain';
+
     const description =
       role === 'rider'
         ? 'Book quick and safe rides.'
         : 'Earn by driving your cab.';
 
-    const baseClasses =
-      'rounded-3xl shadow-md items-center justify-between bg-brand-white';
+    const baseClasses = 'rounded-3xl shadow-md items-center justify-between';
 
-    const selectedClasses = 'border-2 border-[#1055c9] bg-[#bed4fa] ';
-    const unselectedClasses = 'border border-general-300';
+    const selectedClasses = `border-2 border-[${COLORS.PRIMARY[500]}] bg-[${COLORS.PRIMARY[100]}]`;
 
-    const textColor = isSelected ? 'text-brand-black' : 'text-general-200';
+    const unselectedClasses = `border border-[${COLORS.GENERAL[300]}] bg-[${COLORS.BRAND_WHITE}]`;
+
+    const textColor = isSelected
+      ? `text-[${COLORS.BRAND_BLACK}]`
+      : `text-[${COLORS.GENERAL[200]}]`;
 
     return (
       <TouchableOpacity
         style={{
           width: width * 0.4,
+
           paddingVertical: height * 0.02,
+
           paddingHorizontal: width * 0.04,
         }}
         className={`${baseClasses} ${
@@ -77,10 +91,12 @@ const RoleScreen = () => {
         <View
           style={{
             width: width * 0.12,
+
             height: width * 0.12,
+
             marginBottom: height * 0.015,
           }}
-          className="rounded-2xl bg-primary-100 items-center justify-center"
+          className={`rounded-2xl bg-[${COLORS.PRIMARY[100]}] items-center justify-center`}
         >
           <Image
             source={icon}
@@ -107,13 +123,15 @@ const RoleScreen = () => {
           <View
             style={{
               marginTop: height * 0.015,
+
               paddingVertical: height * 0.006,
+
               paddingHorizontal: width * 0.03,
             }}
-            className="rounded-full bg-brand-white self-center"
+            className={`rounded-full bg-[${COLORS.BRAND_WHITE}] self-center`}
           >
             <Text
-              className="text-primary  font-UrbanistSemiBold"
+              className={`text-[${COLORS.PRIMARY.DEFAULT}] font-UrbanistSemiBold`}
               style={{ fontSize: width * 0.03 }}
             >
               Selected
@@ -125,76 +143,107 @@ const RoleScreen = () => {
   };
 
   return (
-    <View className="flex-1 bg-[#8fb4f2]">
+    <View style={{ flex: 1, backgroundColor: COLORS.PRIMARY.DEFAULT }}>
       {/* Top Circle */}
+
       <View
         style={{
           width: width * 0.33,
+
           height: width * 0.33,
+
           top: -height * 0.08,
+
           right: -width * 0.1,
+
+          backgroundColor: COLORS.PRIMARY[500],
         }}
-        className="absolute rounded-full bg-primary "
+        className="absolute rounded-full"
       />
 
       {/* Bottom Circle */}
+
       <View
         style={{
           width: width * 0.37,
+
           height: width * 0.37,
+
           bottom: -height * 0.1,
+
           left: -width * 0.12,
+
+          backgroundColor: COLORS.PRIMARY[500],
         }}
-        className="absolute rounded-full bg-primary "
+        className="absolute rounded-full"
       />
 
       <View
         style={{
           paddingHorizontal: width * 0.06,
+
           paddingTop: height * 0.07,
+
           paddingBottom: height * 0.05,
         }}
         className="flex-1"
       >
         {/* Illustration */}
+
         <View style={{ marginBottom: height * 0.03 }} className="items-center">
           <Image
             source={IllustrationImage}
             resizeMode="contain"
             style={{
               width: width * 0.95,
+
               height: height * 0.15,
+
               marginBottom: height * 0.015,
             }}
           />
         </View>
 
         {/* Title */}
+
         <View style={{ marginBottom: height * 0.04 }}>
           <Text
             className="text-center text-brand-black font-bold"
             style={{
               fontSize: width * 0.095,
+
               lineHeight: width * 0.11,
+
+              color: COLORS.BRAND_BLACK,
             }}
           >
             Choose your role
           </Text>
 
           <Text
-            className="text-center text-white font-UrbanistMedium"
+            className="text-center font-UrbanistMedium"
             style={{
               fontSize: width * 0.042,
+
               marginTop: height * 0.01,
+
               paddingHorizontal: width * 0.03,
+
+              color: COLORS.BRAND_WHITE,
             }}
           >
             Select{' '}
-            <Text className="font-UrbanistSemiBold text-brand-black">
+            <Text
+              style={{ color: COLORS.BRAND_BLACK }}
+              className="font-UrbanistSemiBold"
+            >
               Captain
             </Text>{' '}
             if you want to drive, or{' '}
-            <Text className="font-UrbanistSemiBold text-brand-black">
+            <Text
+              style={{ color: COLORS.BRAND_BLACK }}
+              className="font-UrbanistSemiBold"
+            >
               Rider
             </Text>{' '}
             if you want to travel.
@@ -202,17 +251,30 @@ const RoleScreen = () => {
         </View>
 
         {/* Role Card */}
+
         <View
-          className="bg-brand-white rounded-3xl shadow-lg shadow-general-300"
+          className="rounded-3xl shadow-lg"
           style={{
             paddingHorizontal: width * 0.05,
+
             paddingVertical: height * 0.03,
+
             marginBottom: height * 0.04,
+
+            backgroundColor: COLORS.BRAND_WHITE,
+
+            shadowColor: COLORS.GENERAL[300],
           }}
         >
           <Text
-            className="font-UrbanistSemiBold text-brand-black"
-            style={{ fontSize: width * 0.04, marginBottom: height * 0.02 }}
+            className="font-UrbanistSemiBold"
+            style={{
+              fontSize: width * 0.04,
+
+              marginBottom: height * 0.02,
+
+              color: COLORS.BRAND_BLACK,
+            }}
           >
             Continue as
           </Text>
@@ -224,6 +286,7 @@ const RoleScreen = () => {
               isSelected={selectedRole === 'rider'}
               onSelect={handleRoleSelect}
             />
+
             <RoleOption
               role="captain"
               icon={icons.driver}
@@ -234,6 +297,7 @@ const RoleScreen = () => {
         </View>
 
         {/* Get Started */}
+
         <CustomButton
           title="Get started"
           onPress={handleGetStarted}
@@ -247,6 +311,7 @@ const RoleScreen = () => {
         />
 
         {/* Made in Bharat */}
+
         <View
           style={{
             bottom: height * 0.03,
@@ -256,20 +321,27 @@ const RoleScreen = () => {
           <View
             style={{
               paddingVertical: height * 0.006,
+
               paddingHorizontal: width * 0.04,
+
+              backgroundColor: COLORS.BRAND_WHITE,
             }}
-            className="flex-row items-center bg-brand-white rounded-full shadow-sm"
+            className="flex-row items-center rounded-full shadow-sm"
           >
             <Image
               source={require('@/assets/icons/flag.png')}
               style={{ width: width * 0.05, height: width * 0.05 }}
               resizeMode="contain"
             />
+
             <Text
-              className="text-general-200 font-UrbanistMedium"
+              className="font-UrbanistMedium"
               style={{
                 fontSize: width * 0.03,
+
                 marginLeft: width * 0.02,
+
+                color: COLORS.GENERAL[200],
               }}
             >
               Made in Bharat

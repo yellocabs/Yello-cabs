@@ -14,6 +14,7 @@ import {
   StyleSheet,
   useWindowDimensions,
 } from 'react-native';
+import { COLORS } from '@/assets/colors';
 import { ReactNativeModal } from 'react-native-modal';
 import OTPInput from 'react-native-otp-textinput';
 import { useNavigation } from '@react-navigation/native';
@@ -286,188 +287,309 @@ const LoginScreen = () => {
   const H = height;
   const W = width;
 
+  // ...
+
   const styles = StyleSheet.create({
     outerShapeTop: {
       position: 'absolute',
+
       top: -H * 0.02,
+
       right: -W * 0.02,
+
       width: W * 0.22,
+
       height: W * 0.22,
+
       borderRadius: (W * 0.22) / 2,
-      backgroundColor: '#1055c9', // matches primary-200
+
+      backgroundColor: COLORS.PRIMARY.DEFAULT,
+
       opacity: 0.8,
     },
+
     outerShapeBottom: {
       position: 'absolute',
+
       bottom: -H * 0.03,
+
       left: -W * 0.02,
+
       width: W * 0.22,
+
       height: W * 0.22,
+
       borderRadius: (W * 0.22) / 2,
-      backgroundColor: '#1055c9', // matches brand-accent
+
+      backgroundColor: COLORS.BRAND_ACCENT.DEFAULT,
+
       opacity: 0.8,
     },
+
     badge: {
       flexDirection: 'row',
+
       alignItems: 'center',
+
       paddingHorizontal: W * 0.03,
+
       paddingVertical: H * 0.012,
+
       borderRadius: 999,
-      backgroundColor: '#ffffff',
-      shadowColor: '#000',
+
+      backgroundColor: COLORS.BRAND_WHITE,
+
+      shadowColor: COLORS.BRAND_BLACK,
+
       shadowOpacity: 0.03,
+
       shadowRadius: 6,
+
       elevation: 1,
+
       marginBottom: H * 0.02,
     },
+
     badgeIconWrapper: {
       width: W * 0.082,
+
       height: W * 0.082,
+
       borderRadius: (W * 0.082) / 2,
-      backgroundColor: '#f0bd1a',
+
+      backgroundColor: COLORS.PRIMARY[500],
+
       alignItems: 'center',
+
       justifyContent: 'center',
+
       marginRight: W * 0.02,
     },
+
     heading: {
       fontSize: Math.round(W * 0.075), // approx text-3xl
+
       lineHeight: Math.round(W * 0.09),
+
       textAlign: 'center',
+
       marginBottom: H * 0.005,
+
+      color: COLORS.BRAND_BLACK,
     },
+
     subheading: {
       fontSize: Math.round(W * 0.038), // approx text-base
+
       textAlign: 'center',
+
       marginBottom: H * 0.02,
+
+      color: COLORS.TEXT.MUTED,
     },
+
     card: {
       width: '100%',
-      backgroundColor: '#ffffff',
+
+      backgroundColor: COLORS.BRAND_WHITE,
+
       borderRadius: W * 0.06,
+
       paddingHorizontal: W * 0.04,
+
       paddingVertical: H * 0.025,
-      shadowColor: '#000',
+
+      shadowColor: COLORS.BRAND_BLACK,
+
       shadowOpacity: 0.03,
+
       shadowRadius: 8,
+
       elevation: 1,
+
       marginBottom: H * 0.02,
     },
+
     phoneRow: {
       flexDirection: 'row',
+
       alignItems: 'center',
+
       borderWidth: 1,
-      borderColor: '#E6E9F0',
+
+      borderColor: COLORS.GENERAL[100],
+
       borderRadius: W * 0.04,
-      backgroundColor: '#ffffff',
+
+      backgroundColor: COLORS.BRAND_WHITE,
+
       height: Math.max(H * 0.065, 48), // keeps it readable on small devices
     },
+
     countryWrapper: {
       flexDirection: 'row',
+
       alignItems: 'center',
+
       paddingHorizontal: W * 0.03,
+
       borderRightWidth: 1,
-      borderRightColor: '#E6E9F0',
+
+      borderRightColor: COLORS.GENERAL[100],
     },
+
     phoneInput: {
       flex: 1,
+
       fontSize: Math.round(W * 0.042),
+
       paddingHorizontal: W * 0.03,
-      color: '#111827',
+
+      color: COLORS.TEXT.DEFAULT,
     },
+
     sendOtpBtnWrapper: {
       marginTop: H * 0.015,
     },
+
     dividerRow: {
       flexDirection: 'row',
+
       alignItems: 'center',
+
       width: '100%',
+
       marginVertical: H * 0.02,
     },
+
     dividerLine: {
       flex: 1,
+
       height: 1,
-      backgroundColor: '#E6E9F0',
+
+      backgroundColor: COLORS.GENERAL[100],
     },
+
     dividerText: {
       marginHorizontal: W * 0.02,
+
       fontSize: Math.round(W * 0.035),
+
+      color: COLORS.TEXT.MUTED,
     },
+
     otpModalContainer: {
-      backgroundColor: '#fff',
+      backgroundColor: COLORS.BRAND_WHITE,
+
       paddingHorizontal: W * 0.07,
+
       paddingVertical: H * 0.038,
+
       borderRadius: W * 0.06,
     },
+
     otpInputStyle: {
       borderWidth: 1,
-      borderColor: '#CED1DD',
+
+      borderColor: COLORS.GENERAL[100],
+
       borderRadius: 12,
+
       minWidth: Math.max(W * 0.11, 40),
+
       height: Math.max(H * 0.07, 48),
+
       fontFamily: 'Urbanist-Medium',
+
       fontSize: Math.round(W * 0.045),
+
       textAlign: 'center',
+
+      color: COLORS.TEXT.DEFAULT,
     } as TextStyle,
+
     successModalImage: {
       width: Math.max(W * 0.28, 90),
+
       height: Math.max(W * 0.28, 90),
+
       marginVertical: H * 0.02,
     },
+
     successModalContainer: {
-      backgroundColor: '#fff',
+      backgroundColor: COLORS.BRAND_WHITE,
+
       paddingHorizontal: W * 0.07,
+
       paddingVertical: H * 0.038,
+
       borderRadius: W * 0.06,
+
       alignItems: 'center',
     },
+
     bottomHelperText: {
       marginTop: H * 0.02,
     },
   });
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F7FAFC' }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.GENERAL[500] }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={{ flex: 1 }}
       >
         <ScrollView
-          className="flex-1 bg-primary-100"
+          className="flex-1"
+          style={{ backgroundColor: COLORS.PRIMARY[100] }}
           contentContainerStyle={{ flexGrow: 1, paddingBottom: H * 0.03 }}
           keyboardShouldPersistTaps="handled"
         >
           {/* Decorative shapes (responsive) */}
+
           <View style={styles.outerShapeTop} />
+
           <View style={styles.outerShapeBottom} />
 
           <View
             style={{
               flex: 1,
+
               paddingHorizontal: W * 0.04,
+
               paddingTop: H * 0.04,
+
               paddingBottom: H * 0.02,
+
               justifyContent: 'space-between',
             }}
           >
             {/* Top Section */}
+
             <View style={{ alignItems: 'center' }}>
               {/* Brand Badge */}
+
               <View style={styles.badge}>
                 <View style={styles.badgeIconWrapper}>
                   <Image
                     source={icons.taxi}
                     style={{
                       width: W * 0.05,
+
                       height: W * 0.05,
+
                       resizeMode: 'contain',
                     }}
                   />
                 </View>
+
                 <Text
                   style={{
                     fontSize: Math.round(W * 0.045),
+
                     fontFamily: 'UrbanistSemiBold',
-                    color: '#111827',
+
+                    color: COLORS.BRAND_BLACK,
                   }}
                 >
                   YelloCabs
@@ -475,32 +597,44 @@ const LoginScreen = () => {
               </View>
 
               {/* Headings */}
+
               <Text
                 style={[
                   styles.heading,
-                  { fontFamily: 'UrbanistExtraBold', color: '#111827' },
+
+                  {
+                    fontFamily: 'UrbanistExtraBold',
+                    color: COLORS.BRAND_BLACK,
+                  },
                 ]}
               >
                 Sign in to your account
               </Text>
+
               <Text
                 style={[
                   styles.subheading,
-                  { fontFamily: 'UrbanistMedium', color: '#6B7280' },
+
+                  { fontFamily: 'UrbanistMedium', color: COLORS.TEXT.MUTED },
                 ]}
               >
                 Enter your phone number to continue booking rides.
               </Text>
 
               {/* Card */}
+
               <View style={styles.card}>
                 {/* Phone Number Field */}
+
                 <View style={{ width: '100%', marginBottom: H * 0.02 }}>
                   <Text
                     style={{
                       fontSize: Math.round(W * 0.038),
+
                       fontFamily: 'UrbanistSemiBold',
-                      color: '#111827',
+
+                      color: COLORS.BRAND_BLACK,
+
                       marginBottom: H * 0.01,
                     }}
                   >
@@ -512,16 +646,21 @@ const LoginScreen = () => {
                       <Text
                         style={{
                           fontSize: Math.round(W * 0.05),
+
                           marginRight: W * 0.02,
                         }}
                       >
                         🇮🇳
                       </Text>
+
                       <Text
                         style={{
                           fontSize: Math.round(W * 0.038),
+
                           fontFamily: 'UrbanistMedium',
-                          color: '#111827',
+
+                          color: COLORS.BRAND_BLACK,
+
                           marginRight: W * 0.02,
                         }}
                       >
@@ -533,7 +672,7 @@ const LoginScreen = () => {
                       style={styles.phoneInput}
                       placeholder="Enter mobile number"
                       keyboardType="number-pad"
-                      placeholderTextColor="#858585"
+                      placeholderTextColor={COLORS.TEXT.MUTED}
                       maxLength={10}
                       onChangeText={setPhone}
                       value={phone}
@@ -543,8 +682,11 @@ const LoginScreen = () => {
                   <Text
                     style={{
                       marginTop: H * 0.008,
+
                       fontSize: Math.round(W * 0.032),
-                      color: '#9CA3AF',
+
+                      color: COLORS.TEXT.MUTED,
+
                       fontFamily: 'UrbanistLight',
                     }}
                   >
@@ -565,16 +707,20 @@ const LoginScreen = () => {
               </View>
 
               {/* Divider */}
+
               <View style={styles.dividerRow}>
                 <View style={styles.dividerLine} />
+
                 <Text
                   style={[
                     styles.dividerText,
-                    { fontFamily: 'UrbanistMedium', color: '#9CA3AF' },
+
+                    { fontFamily: 'UrbanistMedium', color: COLORS.TEXT.MUTED },
                   ]}
                 >
                   or continue with
                 </Text>
+
                 <View style={styles.dividerLine} />
               </View>
 
@@ -582,24 +728,34 @@ const LoginScreen = () => {
             </View>
 
             {/* Bottom helper text */}
+
             <View style={[styles.bottomHelperText, { alignItems: 'center' }]}>
               <Text
                 style={{
                   fontSize: Math.round(W * 0.03),
+
                   fontFamily: 'UrbanistLight',
-                  color: '#9CA3AF',
+
+                  color: COLORS.TEXT.MUTED,
+
                   textAlign: 'center',
                 }}
               >
                 By continuing, you agree to our{' '}
                 <Text
-                  style={{ fontFamily: 'UrbanistMedium', color: '#111827' }}
+                  style={{
+                    fontFamily: 'UrbanistMedium',
+                    color: COLORS.BRAND_BLACK,
+                  }}
                 >
                   Terms of Service
                 </Text>{' '}
                 and{' '}
                 <Text
-                  style={{ fontFamily: 'UrbanistMedium', color: '#111827' }}
+                  style={{
+                    fontFamily: 'UrbanistMedium',
+                    color: COLORS.BRAND_BLACK,
+                  }}
                 >
                   Privacy Policy
                 </Text>
@@ -612,6 +768,7 @@ const LoginScreen = () => {
         </ScrollView>
 
         {/* OTP Modal */}
+
         <ReactNativeModal
           isVisible={verification.state === 'pending'}
           onBackdropPress={() =>
@@ -629,23 +786,32 @@ const LoginScreen = () => {
             <Text
               style={{
                 fontFamily: 'UrbanistExtraBold',
+
                 fontSize: Math.round(W * 0.055),
+
                 marginBottom: H * 0.008,
-                color: '#111827',
+
+                color: COLORS.BRAND_BLACK,
               }}
             >
               Verify OTP
             </Text>
+
             <Text
               style={{
                 marginBottom: H * 0.02,
-                color: '#6B7280',
+
+                color: COLORS.TEXT.MUTED,
+
                 fontFamily: 'UrbanistMedium',
               }}
             >
               We’ve sent a 4-digit code to{' '}
               <Text
-                style={{ fontFamily: 'UrbanistSemiBold', color: '#111827' }}
+                style={{
+                  fontFamily: 'UrbanistSemiBold',
+                  color: COLORS.BRAND_BLACK,
+                }}
               >
                 +91 {phone || 'your number'}
               </Text>
@@ -662,10 +828,11 @@ const LoginScreen = () => {
               textInputStyle={styles.otpInputStyle}
               containerStyle={{
                 marginBottom: H * 0.01,
+
                 justifyContent: 'space-between',
               }}
               keyboardType="number-pad"
-              tintColor="#FDB726"
+              tintColor={COLORS.PRIMARY[500]}
             />
 
             <CustomButton
@@ -681,20 +848,25 @@ const LoginScreen = () => {
               onPress={onResendOtp}
               style={{
                 marginTop: H * 0.015,
+
                 alignItems: 'center',
               }}
             >
               <Text
                 style={{
                   fontSize: Math.round(W * 0.033),
-                  color: '#6B7280',
+
+                  color: COLORS.TEXT.MUTED,
+
                   fontFamily: 'UrbanistMedium',
                 }}
               >
                 Didn’t receive the code?{' '}
                 <Text
                   style={{
-                    color: countdown > 0 ? '#9CA3AF' : '#111827',
+                    color:
+                      countdown > 0 ? COLORS.TEXT.MUTED : COLORS.BRAND_BLACK,
+
                     fontFamily: 'UrbanistSemiBold',
                   }}
                 >
@@ -706,6 +878,7 @@ const LoginScreen = () => {
         </ReactNativeModal>
 
         {/* Success Modal */}
+
         <ReactNativeModal
           isVisible={showSuccessModal}
           useNativeDriver
@@ -717,22 +890,31 @@ const LoginScreen = () => {
               style={styles.successModalImage}
               resizeMode="contain"
             />
+
             <Text
               style={{
                 fontSize: Math.round(W * 0.06),
+
                 fontFamily: 'UrbanistExtraBold',
+
                 textAlign: 'center',
-                color: '#111827',
+
+                color: COLORS.BRAND_BLACK,
               }}
             >
               Verified
             </Text>
+
             <Text
               style={{
                 fontSize: Math.round(W * 0.036),
-                color: '#6B7280',
+
+                color: COLORS.TEXT.MUTED,
+
                 textAlign: 'center',
+
                 marginTop: H * 0.01,
+
                 fontFamily: 'UrbanistMedium',
               }}
             >
@@ -744,12 +926,15 @@ const LoginScreen = () => {
               loading={loading}
               onPress={() => {
                 setShowSuccessModal(false);
+
                 onHome();
               }}
               className="mt-6 w-full rounded-2xl bg-primary-500"
               style={{
                 marginTop: H * 0.02,
+
                 width: '100%',
+
                 height: Math.max(H * 0.07, 52),
               }}
             />
