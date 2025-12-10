@@ -56,7 +56,9 @@ const RideCard = ({ item, selected, onSelect, price, setPrice }) => {
       onPress={() => onSelect(item.type)}
       className="rounded-2xl mb-5"
       style={{
-        backgroundColor: isSelected ? COLORS.PRIMARY[500] : COLORS.BRAND_WHITE,
+        backgroundColor: isSelected
+          ? COLORS.PRIMARY.DEFAULT
+          : COLORS.BRAND_WHITE,
         padding: 18,
         borderColor: COLORS.GENERAL[100],
         borderWidth: 0.3,

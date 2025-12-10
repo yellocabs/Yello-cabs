@@ -39,14 +39,14 @@ const TwoAddressInput = ({
       <View className="items-center mr-4 mt-2">
         <Image
           source={icons.crosshair}
-          style={{ width: 24, height: 24, tintColor: COLORS.PRIMARY[500] }}
+          style={{ width: 24, height: 24, tintColor: COLORS.PRIMARY.DEFAULT }}
           resizeMode="contain"
         />
 
         <View
           style={{
             width: 0.5,
-            height: 14,
+            height: 18,
             marginVertical: 1,
             borderRightWidth: 1,
             borderColor: COLORS.GRAY[100],
@@ -56,7 +56,7 @@ const TwoAddressInput = ({
 
         <Image
           source={icons.pin}
-          style={{ width: 24, height: 24, tintColor: COLORS.PRIMARY[500] }}
+          style={{ width: 24, height: 24, tintColor: COLORS.PRIMARY.DEFAULT }}
           resizeMode="contain"
         />
       </View>

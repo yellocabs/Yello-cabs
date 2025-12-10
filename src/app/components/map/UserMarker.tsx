@@ -1,12 +1,29 @@
+import { COLORS } from '@/assets/colors';
 import { icons } from '@/constants';
 import { useLocationStore } from '@/store';
 import React from 'react';
 import { Animated, Text, View, Image } from 'react-native'; // Added Image
 import { Marker, Circle } from 'react-native-maps';
 
-// Define the soft, aesthetic color palette
-const PRIMARY_COLOR = '#e5e0d1ff'; // Soft Gold/Yellow for the glow
-const ACCENT_COLOR = '#dadada'; // Deeper Orange for the center focus
+// Helper function to convert hex to rgba
+const hexToRgba = (hex, opacity) => {
+  let r = 0,
+    g = 0,
+    b = 0;
+  // 3 digits
+  if (hex.length === 4) {
+    r = parseInt(hex[1] + hex[1], 16);
+    g = parseInt(hex[2] + hex[2], 16);
+    b = parseInt(hex[3] + hex[3], 16);
+  }
+  // 6 digits
+  else if (hex.length === 7) {
+    r = parseInt(hex[1] + hex[2], 16);
+    g = parseInt(hex[3] + hex[4], 16);
+    b = parseInt(hex[5] + hex[6], 16);
+  }
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+};
 
 interface Props {
   latitude: number | null;
@@ -39,7 +56,7 @@ const UserMarker: React.FC<Props> = ({ latitude, longitude, pulseAnim }) => {
       <Circle
         center={{ latitude, longitude }}
         radius={350} // Large, wide glow
-        fillColor="rgba(255, 215, 0, 0.1)" // Very light yellow
+        fillColor={hexToRgba(COLORS.PRIMARY.DEFAULT, 0.1)} // Very light yellow
         strokeWidth={0}
       />
 
@@ -48,8 +65,8 @@ const UserMarker: React.FC<Props> = ({ latitude, longitude, pulseAnim }) => {
       <Circle
         center={{ latitude, longitude }}
         radius={200} // Base size for the mid-layer glow
-        fillColor="rgba(255, 199, 44, 0.2)" // Soft gold fill
-        strokeColor="rgba(255, 199, 44, 0.5)"
+        fillColor={hexToRgba(COLORS.PRIMARY.DEFAULT, 0.2)} // Soft gold fill
+        strokeColor={hexToRgba(COLORS.PRIMARY.DEFAULT, 0.5)}
         strokeWidth={1}
       />
 
@@ -61,11 +78,11 @@ const UserMarker: React.FC<Props> = ({ latitude, longitude, pulseAnim }) => {
               width: MARKER_SIZE,
               height: MARKER_SIZE,
               borderRadius: MARKER_SIZE / 2,
-              backgroundColor: ACCENT_COLOR, // Background for border
+              backgroundColor: COLORS.BRAND_ACCENT.DEFAULT, // Background for border
               borderWidth: 3,
-              borderColor: '#FFFFFF', // White border around the image
+              borderColor: COLORS.BRAND_WHITE, // White border around the image
               overflow: 'hidden', // Ensures image stays within bounds
-              shadowColor: '#000',
+              shadowColor: COLORS.BRAND_BLACK,
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.3,
               shadowRadius: 5,

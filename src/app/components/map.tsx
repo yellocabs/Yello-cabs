@@ -8,20 +8,16 @@ import {
   Dimensions,
   Animated,
 } from 'react-native';
-import MapView, {
-  Marker,
-  Region,
-  Circle,
-  PROVIDER_DEFAULT,
-} from 'react-native-maps';
+import MapView, { Marker, Region, PROVIDER_DEFAULT } from 'react-native-maps';
 import MapViewDirections from 'react-native-maps-directions';
 import { useIsFocused } from '@react-navigation/native';
 
-import { COLORS, icons } from '@/constants';
+import { icons } from '@/constants';
 import { calculateRegion } from '@/libs/map';
-import { useRiderStore, useLocationStore } from '@/store';
+import { useRiderStore, useUserStore } from '@/store';
 import useMapAnimation from '@/hooks/useMapAnimation';
 import UserMarker from './map/UserMarker';
+import { COLORS } from '@/assets/colors';
 
 const { height } = Dimensions.get('window');
 
@@ -35,12 +31,12 @@ const FALLBACK_REGION: Region = {
 // Replace with your own key or keep from env / config
 const DIRECTIONS_API_KEY = 'AIzaSyAC8JJ79eaC8PjAdFpNImUTjpRuJXUcWMM'; // replace as needed
 
-const RAPIDO_MAP_STYLE = [
+const CUSTOM_MAP_STYLE = [
   {
     elementType: 'geometry',
     stylers: [
       {
-        color: '#f5f5f5',
+        color: COLORS.GENERAL[500],
       },
     ],
   },
@@ -56,7 +52,7 @@ const RAPIDO_MAP_STYLE = [
     elementType: 'labels.text.fill',
     stylers: [
       {
-        color: '#616161',
+        color: COLORS.GRAY[300],
       },
     ],
   },
@@ -64,7 +60,7 @@ const RAPIDO_MAP_STYLE = [
     elementType: 'labels.text.stroke',
     stylers: [
       {
-        color: '#f5f5f5',
+        color: COLORS.GENERAL[500],
       },
     ],
   },
@@ -81,7 +77,7 @@ const RAPIDO_MAP_STYLE = [
     elementType: 'labels.text.fill',
     stylers: [
       {
-        color: '#9e9e9e',
+        color: COLORS.GRAY[200],
       },
     ],
   },
@@ -90,7 +86,7 @@ const RAPIDO_MAP_STYLE = [
     elementType: 'geometry',
     stylers: [
       {
-        color: '#eeeeee',
+        color: COLORS.GENERAL[300],
       },
     ],
   },
@@ -99,7 +95,7 @@ const RAPIDO_MAP_STYLE = [
     elementType: 'labels.text.fill',
     stylers: [
       {
-        color: '#757575',
+        color: COLORS.GRAY[300],
       },
     ],
   },
@@ -108,7 +104,7 @@ const RAPIDO_MAP_STYLE = [
     elementType: 'geometry',
     stylers: [
       {
-        color: '#e5e5e5',
+        color: COLORS.GENERAL[700],
       },
     ],
   },
@@ -117,7 +113,7 @@ const RAPIDO_MAP_STYLE = [
     elementType: 'labels.text.fill',
     stylers: [
       {
-        color: '#9e9e9e',
+        color: COLORS.GRAY[200],
       },
     ],
   },
@@ -126,7 +122,7 @@ const RAPIDO_MAP_STYLE = [
     elementType: 'geometry',
     stylers: [
       {
-        color: '#ffffff',
+        color: COLORS.BRAND_WHITE,
       },
     ],
   },
@@ -135,7 +131,7 @@ const RAPIDO_MAP_STYLE = [
     elementType: 'labels.text.fill',
     stylers: [
       {
-        color: '#757575',
+        color: COLORS.GRAY[300],
       },
     ],
   },
@@ -144,7 +140,7 @@ const RAPIDO_MAP_STYLE = [
     elementType: 'geometry',
     stylers: [
       {
-        color: '#dadada',
+        color: COLORS.GRAY[100],
       },
     ],
   },
@@ -153,7 +149,7 @@ const RAPIDO_MAP_STYLE = [
     elementType: 'labels.text.fill',
     stylers: [
       {
-        color: '#616161',
+        color: COLORS.GRAY[300],
       },
     ],
   },
@@ -162,7 +158,7 @@ const RAPIDO_MAP_STYLE = [
     elementType: 'labels.text.fill',
     stylers: [
       {
-        color: '#9e9e9e',
+        color: COLORS.GRAY[200],
       },
     ],
   },
@@ -171,7 +167,7 @@ const RAPIDO_MAP_STYLE = [
     elementType: 'geometry',
     stylers: [
       {
-        color: '#e5e5e5',
+        color: COLORS.GENERAL[700],
       },
     ],
   },
@@ -180,7 +176,7 @@ const RAPIDO_MAP_STYLE = [
     elementType: 'geometry',
     stylers: [
       {
-        color: '#eeeeee',
+        color: COLORS.GENERAL[300],
       },
     ],
   },
@@ -189,7 +185,7 @@ const RAPIDO_MAP_STYLE = [
     elementType: 'geometry',
     stylers: [
       {
-        color: '#c9c9c9',
+        color: COLORS.GENERAL[600],
       },
     ],
   },
@@ -198,7 +194,7 @@ const RAPIDO_MAP_STYLE = [
     elementType: 'labels.text.fill',
     stylers: [
       {
-        color: '#9e9e9e',
+        color: COLORS.GRAY[200],
       },
     ],
   },
@@ -216,7 +212,9 @@ const Map: React.FC<any> = props => {
   const [mapReady, setMapReady] = useState(false);
 
   // Using your stores
-  const { destinationLatitude, destinationLongitude } = useLocationStore();
+  const { destination } = useUserStore();
+  const destinationLatitude = destination?.latitude;
+  const destinationLongitude = destination?.longitude;
 
   const { location: riderLocation } = useRiderStore();
   const userLatitude = riderLocation?.latitude;
@@ -255,7 +253,7 @@ const Map: React.FC<any> = props => {
   if (loading || (!userLatitude && !userLongitude)) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#000" />
+        <ActivityIndicator size="large" color={COLORS.PRIMARY.DEFAULT} />
       </View>
     );
   }
@@ -263,7 +261,7 @@ const Map: React.FC<any> = props => {
   if (error) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <Text style={{ color: 'red' }}>{error}</Text>
+        <Text style={{ color: COLORS.DANGER[600] }}>{error}</Text>
       </View>
     );
   }
@@ -284,7 +282,7 @@ const Map: React.FC<any> = props => {
         }}
         provider={PROVIDER_DEFAULT}
         style={{ flex: 1 }}
-        customMapStyle={RAPIDO_MAP_STYLE}
+        customMapStyle={CUSTOM_MAP_STYLE}
         initialRegion={initialRegion}
         showsUserLocation={false}
         showsTraffic={false}
@@ -319,11 +317,11 @@ const Map: React.FC<any> = props => {
                   width: 20,
                   height: 20,
                   borderRadius: 10,
-                  backgroundColor: '#FFA500',
+                  backgroundColor: COLORS.WARNING[500],
                   borderWidth: 3,
-                  borderColor: '#fff',
+                  borderColor: COLORS.BRAND_WHITE,
                   elevation: 6,
-                  shadowColor: '#000',
+                  shadowColor: COLORS.BRAND_BLACK,
                   shadowOpacity: 0.25,
                   shadowRadius: 4,
                 }}
@@ -347,7 +345,11 @@ const Map: React.FC<any> = props => {
               >
                 <Image
                   source={icons.pin}
-                  style={{ width: 30, height: 30, tintColor: '#E91E63' }}
+                  style={{
+                    width: 30,
+                    height: 30,
+                    tintColor: COLORS.DANGER[600],
+                  }}
                   resizeMode="contain"
                 />
               </Marker>
@@ -359,7 +361,7 @@ const Map: React.FC<any> = props => {
                   longitude: destinationLongitude,
                 }}
                 apikey={DIRECTIONS_API_KEY}
-                strokeColor="#000"
+                strokeColor={COLORS.BRAND_BLACK}
                 strokeWidth={5}
                 lineCap="round"
                 lineJoin="round"
@@ -380,18 +382,18 @@ const Map: React.FC<any> = props => {
             position: 'absolute',
             bottom: bottomOffset,
             right: 16,
-            backgroundColor: COLORS.primary,
+            backgroundColor: COLORS.PRIMARY.DEFAULT,
             padding: 14,
             borderRadius: 40,
             elevation: 5,
-            shadowColor: '#000',
+            shadowColor: COLORS.BRAND_BLACK,
             shadowOpacity: 0.15,
             shadowRadius: 6,
           }}
         >
           <Image
             source={icons.crosshair}
-            style={{ width: 26, height: 26, tintColor: '#000' }}
+            style={{ width: 26, height: 26, tintColor: COLORS.BRAND_BLACK }}
           />
         </TouchableOpacity>
       )}

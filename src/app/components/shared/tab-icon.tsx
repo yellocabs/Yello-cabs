@@ -1,8 +1,17 @@
-import React from "react";
-import { Text, Image, ImageSourcePropType, useWindowDimensions } from "react-native";
-import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
-import { View } from "react-native";
-import { COLORS } from "@/constants";
+import React from 'react';
+import {
+  Text,
+  Image,
+  ImageSourcePropType,
+  useWindowDimensions,
+} from 'react-native';
+import { View } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  withTiming,
+} from 'react-native-reanimated';
+
+import { COLORS } from '@/assets/colors';
 
 interface TabIconProps {
   source: ImageSourcePropType;
@@ -13,16 +22,21 @@ interface TabIconProps {
 const TabIcon = ({ source, label, focused }: TabIconProps) => {
   const { width } = useWindowDimensions();
 
-  // Define responsive sizes
-  const iconSize = width * 0.065; // ~6.5% of screen width
-  const containerWidth = focused ? width * 0.28 : width * 0.15; // expanded vs normal
+  // Dynamic sizes
+  const iconSize = width * 0.065;
+  const containerWidth = focused ? width * 0.28 : width * 0.15;
   const textMargin = width * 0.02;
 
+  // Animated container (width + background color)
   const animatedContainer = useAnimatedStyle(() => ({
-    width: withTiming(containerWidth, { duration: 250 }),
-    backgroundColor: withTiming(focused ? COLORS.primary : "#ffff", { duration: 250 }),
+    width: withTiming(containerWidth, { duration: 220 }),
+    backgroundColor: withTiming(
+      focused ? COLORS.PRIMARY.DEFAULT : COLORS.BRAND_WHITE,
+      { duration: 250 },
+    ),
   }));
 
+  // Animated text (fade + slide)
   const animatedText = useAnimatedStyle(() => ({
     opacity: withTiming(focused ? 1 : 0, { duration: 200 }),
     transform: [
@@ -32,29 +46,47 @@ const TabIcon = ({ source, label, focused }: TabIconProps) => {
 
   return (
     <Animated.View
-      className="h-[50px] rounded-full flex-row items-center justify-center"
       style={[
-        animatedContainer,
         {
+          height: 50,
+          borderRadius: 999,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
           paddingHorizontal: 8,
-          shadowColor: "#000",
+          marginHorizontal: 4,
+          backgroundColor: COLORS.BRAND_ACCENT.DEFAULT, // baseline color
+          shadowColor: '#000',
           shadowOpacity: 0.08,
           shadowRadius: 4,
           elevation: 4,
-          marginHorizontal: 4, // space between tabs
         },
+        animatedContainer,
       ]}
     >
+      {/* Icon */}
       <Image
         source={source}
         resizeMode="contain"
-        style={{ width: iconSize, height: iconSize, tintColor: "#000" }}
+        style={{
+          width: iconSize,
+          height: iconSize,
+          tintColor: COLORS.BRAND_BLACK,
+        }}
       />
 
+      {/* Label (only visible when focused) */}
       {focused && (
         <Animated.Text
-          className="ml-2 text-sm font-semibold "
-          style={[animatedText, { marginLeft: textMargin }]}
+          style={[
+            {
+              marginLeft: textMargin,
+              fontSize: 13,
+              fontWeight: '600',
+              color: COLORS.BRAND_BLACK,
+            },
+            animatedText,
+          ]}
         >
           {label}
         </Animated.Text>
