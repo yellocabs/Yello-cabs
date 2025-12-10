@@ -18,7 +18,7 @@ module.exports = {
       },
       colors: {
         primary: {
-          DEFAULT: '#f0bd1a', // Use for standard bg-primary or text-primary
+          DEFAULT: '#72B0D5', // Use for standard bg-primary or text-primary
           500: '#FDB726', // The main gold/yellow
           200: '#dfc081ff',
           100: '#FFF7E9', // Lighter shade for backgrounds/hovers

@@ -6,46 +6,12 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import CustomButton from '@/components/shared/custom-button';
 
+import { COLORS } from '@/assets/colors';
+
+// ...
+
 const MapScreen: React.FC = () => {
-  const navigation = useNavigation();
-  const route = useRoute();
-  const { location, setDestination } = useUserStore();
-  const [region, setRegion] = useState<Region>({
-    latitude: location?.latitude || 37.78825,
-    longitude: location?.longitude || -122.4324,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-  });
-
-  const handleRegionChangeComplete = (newRegion: Region) => {
-    setRegion(newRegion);
-  };
-
-  const handleConfirm = async () => {
-    // Reverse geocode to get address
-    try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${region.latitude},${region.longitude}&key=AIzaSyAC8JJ79eaC8PjAdFpNImUTjpRuJXUcWMM`,
-      );
-      const data = await response.json();
-      if (data.status === 'OK' && data.results.length > 0) {
-        const address = data.results[0].formatted_address;
-        const location = {
-          latitude: region.latitude,
-          longitude: region.longitude,
-          address: address,
-        };
-        setDestination(location);
-        // @ts-ignore
-        navigation.navigate('Rider', {
-          screen: 'FindOffer',
-          params: { location },
-        });
-      }
-    } catch (error) {
-      console.error('Geocoding error:', error);
-    }
-  };
+  // ...
 
   return (
     <View style={styles.container}>
@@ -55,7 +21,7 @@ const MapScreen: React.FC = () => {
         onRegionChangeComplete={handleRegionChangeComplete}
       />
       <View style={styles.markerFixed}>
-        <Ionicons name="location-pin" size={40} color="red" />
+        <Ionicons name="location-pin" size={40} color={COLORS.DANGER[600]} />
       </View>
       <View style={styles.buttonContainer}>
         <CustomButton title="Confirm Location" onPress={handleConfirm} />

@@ -127,7 +127,7 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
           title={sheetLast ? 'Get Started' : 'Next'}
           onPress={handleNext}
           bgVariant="primary"
-          textVariant="primary"
+          textVariant="#fff"
           rounded="xl"
           height="h-14"
           flex
@@ -138,7 +138,7 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={{ flex: 1, backgroundColor: '#1055c9' }}>
+      <View style={{ flex: 1, backgroundColor: '#72B0D5' }}>
         {/* TOP ICON */}
         <View
           style={{
@@ -151,7 +151,7 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
           <CustomIconButton
             icon={icons.vehicle}
             size={moderate(45)}
-            bg="#1055c9"
+            bg="#fff"
             onPress={handleNext}
           />
         </View>

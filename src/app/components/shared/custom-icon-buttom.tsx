@@ -20,7 +20,7 @@ const CustomIconButton = ({ icon, size = 70, bg = '#1055c9', onPress }) => {
     >
       <Image
         source={icon}
-        style={{ width: size * 0.7, height: size * 0.7 }}
+        style={{ width: size * 0.8, height: size * 0.8 }}
         resizeMode="contain"
       />
     </TouchableOpacity>

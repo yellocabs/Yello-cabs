@@ -12,6 +12,7 @@ import { icons } from '@/constants';
 import LocationItem from './LocationItems';
 import Config from 'react-native-config';
 import { useNavigation } from '@react-navigation/native';
+import { COLORS } from '@/assets/colors';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -45,9 +46,11 @@ const GoogleTextInput = ({
         setInputValue(data.description);
         googlePlaceAutoCompleteRef.current?.setAddressText(data.description);
         googlePlaceAutoCompleteRef.current?.blur();
-        navigation.navigate('Rider', {
-          screen: 'FindOffer',
-        });
+        setTimeout(() => {
+          navigation.navigate('Rider', {
+            screen: 'FindOffer',
+          });
+        }, 2000);
       }
     } catch (error) {
       console.error('Failed to fetch place details:', error);
@@ -60,6 +63,7 @@ const GoogleTextInput = ({
       const response = await fetch(detailsUrl);
       const json = await response.json();
       const details = json.result;
+      console.log(details);
       handleSuggestionPress(data, details);
     } catch (error) {
       console.error('Failed to fetch place details:', error);
@@ -81,10 +85,10 @@ const GoogleTextInput = ({
             borderRadius: 20,
             marginHorizontal: 20,
             position: 'relative',
-            shadowColor: '#d4d4d4',
+            shadowColor: COLORS.GRAY[100],
           },
           textInput: {
-            backgroundColor: textInputBackgroundColor || 'white',
+            backgroundColor: textInputBackgroundColor || COLORS.BRAND_WHITE,
             fontSize: 16,
             fontWeight: '600',
             marginTop: 5,
@@ -92,25 +96,24 @@ const GoogleTextInput = ({
             borderRadius: 200,
           },
           listView: {
-            backgroundColor: textInputBackgroundColor || 'white',
+            backgroundColor: textInputBackgroundColor || COLORS.BRAND_WHITE,
             position: 'absolute',
             top: 60,
             width: screenWidth * 0.92,
             borderRadius: 10,
-            shadowColor: '#d4d4d4',
+            shadowColor: COLORS.GRAY[100],
             zIndex: 9999,
             marginHorizontal: -screenWidth * 0.15,
           },
         }}
         renderRow={data => (
-          <TouchableOpacity onPress={() => getDetailsAndNavigate(data)}>
-            <LocationItem
-              item={{
-                title: data.structured_formatting.main_text,
-                description: data.structured_formatting.secondary_text,
-              }}
-            />
-          </TouchableOpacity>
+          <LocationItem
+            item={{
+              title: data.structured_formatting.main_text,
+              description: data.structured_formatting.secondary_text,
+            }}
+            onPress={() => getDetailsAndNavigate(data)}
+          />
         )}
         query={{
           key: googlePlacesApiKey!,
@@ -126,7 +129,7 @@ const GoogleTextInput = ({
               source={icon || icons.search}
               className="w-6 h-6"
               resizeMode="contain"
-              style={{ tintColor: '#000000' }}
+              style={{ tintColor: COLORS.BRAND_BLACK }}
             />
           </View>
         )}
@@ -140,13 +143,13 @@ const GoogleTextInput = ({
                 }}
                 className="px-1.5"
               >
-                <XMarkIcon size={20} color="grey" />
+                <XMarkIcon size={20} color={COLORS.GRAY[300]} />
               </TouchableOpacity>
             )}
           </View>
         )}
         textInputProps={{
-          placeholderTextColor: 'black',
+          placeholderTextColor: COLORS.BRAND_BLACK,
           placeholder: placeholder
             ? placeholder
             : (initialLocation ?? 'Where to?'),

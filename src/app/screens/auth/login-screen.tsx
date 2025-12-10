@@ -294,7 +294,7 @@ const LoginScreen = () => {
       width: W * 0.22,
       height: W * 0.22,
       borderRadius: (W * 0.22) / 2,
-      backgroundColor: '#FDE9B3', // matches primary-200
+      backgroundColor: '#1055c9', // matches primary-200
       opacity: 0.8,
     },
     outerShapeBottom: {
@@ -304,7 +304,7 @@ const LoginScreen = () => {
       width: W * 0.22,
       height: W * 0.22,
       borderRadius: (W * 0.22) / 2,
-      backgroundColor: '#FFDAB3', // matches brand-accent
+      backgroundColor: '#1055c9', // matches brand-accent
       opacity: 0.8,
     },
     badge: {

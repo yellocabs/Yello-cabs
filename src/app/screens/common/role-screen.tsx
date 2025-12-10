@@ -56,7 +56,7 @@ const RoleScreen = () => {
     const baseClasses =
       'rounded-3xl shadow-md items-center justify-between bg-brand-white';
 
-    const selectedClasses = 'border-2 border-primary-500 bg-primary-100';
+    const selectedClasses = 'border-2 border-[#1055c9] bg-[#bed4fa] ';
     const unselectedClasses = 'border border-general-300';
 
     const textColor = isSelected ? 'text-brand-black' : 'text-general-200';
@@ -113,7 +113,7 @@ const RoleScreen = () => {
             className="rounded-full bg-brand-white self-center"
           >
             <Text
-              className="text-primary-500 font-UrbanistSemiBold"
+              className="text-primary  font-UrbanistSemiBold"
               style={{ fontSize: width * 0.03 }}
             >
               Selected
@@ -125,7 +125,7 @@ const RoleScreen = () => {
   };
 
   return (
-    <View className="flex-1 bg-primary-100">
+    <View className="flex-1 bg-[#8fb4f2]">
       {/* Top Circle */}
       <View
         style={{
@@ -134,7 +134,7 @@ const RoleScreen = () => {
           top: -height * 0.08,
           right: -width * 0.1,
         }}
-        className="absolute rounded-full bg-primary-200 opacity-80"
+        className="absolute rounded-full bg-primary "
       />
 
       {/* Bottom Circle */}
@@ -145,7 +145,7 @@ const RoleScreen = () => {
           bottom: -height * 0.1,
           left: -width * 0.12,
         }}
-        className="absolute rounded-full bg-brand-accent opacity-80"
+        className="absolute rounded-full bg-primary "
       />
 
       <View
@@ -172,7 +172,7 @@ const RoleScreen = () => {
         {/* Title */}
         <View style={{ marginBottom: height * 0.04 }}>
           <Text
-            className="text-center text-brand-black font-UrbanistExtraBold"
+            className="text-center text-brand-black font-bold"
             style={{
               fontSize: width * 0.095,
               lineHeight: width * 0.11,
@@ -182,7 +182,7 @@ const RoleScreen = () => {
           </Text>
 
           <Text
-            className="text-center text-general-200 font-UrbanistMedium"
+            className="text-center text-white font-UrbanistMedium"
             style={{
               fontSize: width * 0.042,
               marginTop: height * 0.01,

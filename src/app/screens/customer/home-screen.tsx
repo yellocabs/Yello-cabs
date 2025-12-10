@@ -10,6 +10,10 @@ import LocationPermissionModal from '@/components/shared/location-permission-mod
 import GoogleTextInput from '@/components/customer/google-text-input';
 import { useWS } from '@/services/WSProvider';
 
+import { COLORS } from '@/assets/colors';
+
+// ...
+
 const TwoAddressInput = ({
   userAddress,
   destinationAddress,
@@ -20,6 +24,7 @@ const TwoAddressInput = ({
 }: any) => {
   const handleDestinationPress = (location: any) => {
     setDestination(location);
+    console.log('destination');
     setTimeout(() => {
       navigation.navigate('Rider', {
         screen: 'FindOffer',
@@ -34,15 +39,24 @@ const TwoAddressInput = ({
       <View className="items-center mr-4 mt-2">
         <Image
           source={icons.crosshair}
-          style={{ width: 24, height: 24, tintColor: '#FFB800' }}
+          style={{ width: 24, height: 24, tintColor: COLORS.PRIMARY[500] }}
           resizeMode="contain"
         />
 
-        <View className="w-0.5 h-14 my-1 border-r border-dashed border-gray-300" />
+        <View
+          style={{
+            width: 0.5,
+            height: 14,
+            marginVertical: 1,
+            borderRightWidth: 1,
+            borderColor: COLORS.GRAY[100],
+            borderStyle: 'dashed',
+          }}
+        />
 
         <Image
           source={icons.pin}
-          style={{ width: 24, height: 24, tintColor: '#FFB800' }}
+          style={{ width: 24, height: 24, tintColor: COLORS.PRIMARY[500] }}
           resizeMode="contain"
         />
       </View>
@@ -77,9 +91,15 @@ const SelectOnMap = () => {
   return (
     <View className="px-6">
       <View className="flex-row items-center my-3">
-        <View className="flex-1 h-px bg-gray-300" />
-        <Text className="mx-4 text-gray-500">Or</Text>
-        <View className="flex-1 h-px bg-gray-300" />
+        <View
+          style={{ flex: 1, height: 1, backgroundColor: COLORS.GRAY[100] }}
+        />
+        <Text style={{ marginHorizontal: 4, color: COLORS.TEXT.MUTED }}>
+          Or
+        </Text>
+        <View
+          style={{ flex: 1, height: 1, backgroundColor: COLORS.GRAY[100] }}
+        />
       </View>
       <CustomButton
         title="Select on Map"
@@ -106,7 +126,10 @@ const ExpandedAddressSelector = ({
 }: any) => {
   return (
     <>
-      <Text className="text-xl font-UrbanistBold text-center pt-3 pb-2 text-gray-900">
+      <Text
+        style={{ color: COLORS.TEXT.DEFAULT }}
+        className="text-xl font-UrbanistBold text-center pt-3 pb-2"
+      >
         Select Address
       </Text>
 
@@ -120,7 +143,9 @@ const ExpandedAddressSelector = ({
       />
       <SelectOnMap />
 
-      <View className="h-2 bg-neutral-50 w-full" />
+      <View
+        style={{ height: 8, backgroundColor: COLORS.BG.MUTED, width: '100%' }}
+      />
     </>
   );
 };

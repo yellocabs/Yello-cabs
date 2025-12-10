@@ -2,15 +2,13 @@ import { createRide } from '@/services/rideService';
 import { icons } from '@/constants';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { useLocationStore } from '@/store';
+import { useUserStore } from '@/store';
 import { calculateFare, fetchDistance } from '@/utils/mapUtils';
 import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
 import { ZapIcon } from 'lucide-react-native';
 import CustomButton from '@/components/shared/custom-button';
 import RideLayout from '@/components/customer/ride-layout';
-
-const PRIMARY_COLOR = '#f0bd1a';
-const CARD_BG = '#f0bd1a';
+import { COLORS } from '@/assets/colors';
 
 // --- ICONS ---
 const BikeIcon = () => (
@@ -58,11 +56,10 @@ const RideCard = ({ item, selected, onSelect, price, setPrice }) => {
       onPress={() => onSelect(item.type)}
       className="rounded-2xl mb-5"
       style={{
-        backgroundColor: isSelected ? CARD_BG : 'white',
+        backgroundColor: isSelected ? COLORS.PRIMARY[500] : COLORS.BRAND_WHITE,
         padding: 18,
-        borderColor: '#CED1DD',
+        borderColor: COLORS.GENERAL[100],
         borderWidth: 0.3,
-        boxShadow: '0px 5px 0px #e0e0e0 ',
         shadowOpacity: 0.5,
         shadowRadius: 5,
         shadowOffset: { width: 0, height: 2 },
@@ -73,12 +70,15 @@ const RideCard = ({ item, selected, onSelect, price, setPrice }) => {
 
         <View className="flex-1 ml-3">
           <Text className="text-xl font-semibold text-black">{item.title}</Text>
-          <Text className="text-gray-600">{item.time} away</Text>
-          <Text className="text-gray-600">{item.dropTime}</Text>
+          <Text style={{ color: COLORS.TEXT.MUTED }}>{item.time} away</Text>
+          <Text style={{ color: COLORS.TEXT.MUTED }}>{item.dropTime}</Text>
         </View>
 
         {!isSelected && (
-          <Text className="text-lg font-bold text-gray-800">
+          <Text
+            style={{ color: COLORS.TEXT.DEFAULT }}
+            className="text-lg font-bold"
+          >
             ₹{formatPrice(item.price)}
           </Text>
         )}
@@ -86,15 +86,26 @@ const RideCard = ({ item, selected, onSelect, price, setPrice }) => {
 
       {isSelected && (
         <View className="items-center">
-          <View className="flex-row items-center bg-[#333] rounded-full px-4 py-2 mt-3">
+          <View
+            style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}
+            className="flex-row items-center rounded-full px-4 py-2 mt-3"
+          >
             <TouchableOpacity
               onPress={() => setPrice(p => Math.max(20, p - 5))}
               className="w-10 h-10 rounded-full bg-[#555] flex items-center justify-center"
             >
-              <Text className="text-white text-2xl font-bold">-</Text>
+              <Text
+                style={{ color: COLORS.BRAND_WHITE }}
+                className="text-2xl font-bold"
+              >
+                -
+              </Text>
             </TouchableOpacity>
 
-            <Text className="mx-6 text-white text-3xl font-bold">
+            <Text
+              style={{ color: COLORS.BRAND_WHITE }}
+              className="mx-6 text-3xl font-bold"
+            >
               ₹{formatPrice(price)}
             </Text>
 
@@ -102,11 +113,19 @@ const RideCard = ({ item, selected, onSelect, price, setPrice }) => {
               onPress={() => setPrice(p => p + 5)}
               className="w-10 h-10 rounded-full bg-[#555] flex items-center justify-center"
             >
-              <Text className="text-white text-2xl font-bold">+</Text>
+              <Text
+                style={{ color: COLORS.BRAND_WHITE }}
+                className="text-2xl font-bold"
+              >
+                +
+              </Text>
             </TouchableOpacity>
           </View>
 
-          <Text className="mt-2 line-through">
+          <Text
+            style={{ color: COLORS.TEXT.DEFAULT }}
+            className="mt-2 line-through"
+          >
             Recommended fare: ₹{formatPrice(item.price)}
           </Text>
         </View>
@@ -115,8 +134,8 @@ const RideCard = ({ item, selected, onSelect, price, setPrice }) => {
   );
 };
 const ToggleSwitch = ({ isActive, onToggle }) => {
-  const trackColor = isActive ? PRIMARY_COLOR : '#d1d1d1';
-  const thumbColor = isActive ? '#333' : '#888';
+  const trackColor = isActive ? COLORS.PRIMARY[500] : COLORS.GENERAL[100];
+  const thumbColor = isActive ? COLORS.BRAND_BLACK : COLORS.GRAY[300];
 
   return (
     <TouchableOpacity
@@ -140,34 +159,24 @@ export default function FindOffers() {
   const [price, setPrice] = useState(0);
   const [selected, setSelected] = useState('Bike');
   const [loading, setLoading] = useState(false);
-
   const [durations, setDurations] = useState({
     bike: '',
     auto: '',
     cabEconomy: '',
     cabPremium: '',
   });
-
   const [farePrices, setFarePrices] = useState({
     bike: 0,
     auto: 0,
     cabEconomy: 0,
     cabPremium: 0,
   });
+  const { location, destination, setDestination } = useUserStore();
 
   const navigation = useNavigation();
   const route = useRoute<any>();
 
-  const {
-    distance,
-    userLatitude,
-    userLongitude,
-    destinationLatitude,
-    destinationLongitude,
-    userAddress,
-    destinationAddress,
-    setDestinationLocation,
-  } = useLocationStore();
+  const [distance, setDistance] = useState(0);
 
   // READABLE DATE FORMAT
   const getDropTime = (duration: string) => {
@@ -175,21 +184,47 @@ export default function FindOffers() {
     const now = new Date();
     const minutes = parseInt(duration, 10) || 0;
     now.setMinutes(now.getMinutes() + minutes);
-    return `Drop ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    return `Drop ${now.toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    })}`;
   };
 
   // Handle selecting location
   useEffect(() => {
     if (route.params?.location) {
-      setDestinationLocation(route.params.location);
+      setDestination(route.params.location);
     }
   }, [route.params?.location]);
 
   // Fetch durations + distance from Google
   useEffect(() => {
     const load = async () => {
-      const bike = await fetchDistance('bicycling');
-      const driving = await fetchDistance('driving');
+      if (!destination || !location) return;
+      const bike = await fetchDistance(
+        {
+          latitude: location.latitude,
+          longitude: location.longitude,
+        },
+        {
+          latitude: destination.latitude,
+          longitude: destination.longitude,
+        },
+        'bicycling',
+      );
+      const driving = await fetchDistance(
+        {
+          latitude: location.latitude,
+          longitude: location.longitude,
+        },
+        {
+          latitude: destination.latitude,
+          longitude: destination.longitude,
+        },
+        'driving',
+      );
+
+      console.log('driving', driving);
 
       setDurations({
         bike: bike?.duration || '',
@@ -200,22 +235,25 @@ export default function FindOffers() {
 
       if (driving?.distance) {
         const km = parseFloat(driving.distance.replace(' km', ''));
-        useLocationStore.getState().setDistance(km);
+        setDistance(km);
       }
     };
 
-    if (destinationLatitude && destinationLongitude) load();
-  }, [destinationLatitude, destinationLongitude]);
+    if (destination?.latitude && destination?.longitude) load();
+  }, [destination, location]);
 
   // ---- CALCULATE FARE (PASS DURATION TOO) ----
   useEffect(() => {
-    console.log('holojdjdjd', distance);
     if (!distance || !durations.auto) return;
 
     const durationNumber = parseInt(durations.auto, 10) || 0;
 
+    console.log('distance', distance);
+    console.log('durationNumber', durationNumber);
+
     const fares = calculateFare(distance, durationNumber);
-    console.log('hololoo', fares);
+    console.log('fares', fares);
+
     setFarePrices({
       bike: fares.bike,
       auto: fares.auto,
@@ -283,14 +321,14 @@ export default function FindOffers() {
               : 'auto',
 
       drop: {
-        latitude: destinationLatitude,
-        longitude: destinationLongitude,
-        address: destinationAddress,
+        latitude: destination?.latitude,
+        longitude: destination?.longitude,
+        address: destination?.address,
       },
       pickup: {
-        latitude: userLatitude,
-        longitude: userLongitude,
-        address: userAddress,
+        latitude: location?.latitude,
+        longitude: location?.longitude,
+        address: location?.address,
       },
     });
 
@@ -325,9 +363,9 @@ export default function FindOffers() {
           left: 0,
           right: 0,
           borderTopWidth: 1,
-          borderTopColor: '#e5e7eb',
+          borderTopColor: COLORS.GENERAL[100],
           padding: 16,
-          backgroundColor: 'white',
+          backgroundColor: COLORS.BRAND_WHITE,
         }}
       >
         <View
@@ -335,7 +373,7 @@ export default function FindOffers() {
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
-            backgroundColor: '#f3f4f6',
+            backgroundColor: COLORS.GENERAL[500],
             padding: 16,
             borderRadius: 12,
             marginBottom: 16,
@@ -344,7 +382,7 @@ export default function FindOffers() {
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <ZapIcon />
 
-            <Text style={{ marginLeft: 12, color: '#1f2937' }}>
+            <Text style={{ marginLeft: 12, color: COLORS.TEXT.DEFAULT }}>
               Auto-accept offer of{' '}
               <Text style={{ fontWeight: 'bold' }}>₹{price.toFixed(2)}</Text>
             </Text>
