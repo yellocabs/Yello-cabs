@@ -138,7 +138,7 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={{ flex: 1, backgroundColor: '#05339c' }}>
+      <View style={{ flex: 1, backgroundColor: '#1055c9' }}>
         {/* TOP ICON */}
         <View
           style={{
@@ -149,9 +149,9 @@ const WelcomeScreen = forwardRef<any, any>(({ onIndexChange }, ref) => {
           }}
         >
           <CustomIconButton
-            icon={icons.rider}
+            icon={icons.vehicle}
             size={moderate(45)}
-            bg="#ffe592"
+            bg="#1055c9"
             onPress={handleNext}
           />
         </View>

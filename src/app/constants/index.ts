@@ -75,6 +75,7 @@ import right from '@/assets/icons/right-arrow.png';
 import edit from '@/assets/icons/pencil.png';
 import rider from '@/assets/icons/delivery.png';
 import parcel from '@/assets/icons/parcel.png';
+import vehicle from '@/assets/icons/vehicle.png';
 
 export const images = {
   onboarding1,
@@ -156,6 +157,7 @@ export const icons = {
   switch_off,
   switch_on,
   parcel,
+  vehicle,
 };
 
 export const onboarding = [

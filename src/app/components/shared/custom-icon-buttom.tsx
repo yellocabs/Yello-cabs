@@ -1,7 +1,7 @@
-import React from "react";
-import { TouchableOpacity, View, Image } from "react-native";
+import React from 'react';
+import { TouchableOpacity, View, Image } from 'react-native';
 
-const CustomIconButton = ({ icon, size = 70, bg = "#F7EFB2", onPress }) => {
+const CustomIconButton = ({ icon, size = 70, bg = '#1055c9', onPress }) => {
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -12,7 +12,7 @@ const CustomIconButton = ({ icon, size = 70, bg = "#F7EFB2", onPress }) => {
         height: size,
         backgroundColor: bg,
         borderRadius: size * 0.3, // rounded like your image
-        shadowColor: "#000",
+        shadowColor: '#000',
         shadowOpacity: 0.1,
         shadowRadius: 5,
         elevation: 3,
@@ -20,7 +20,7 @@ const CustomIconButton = ({ icon, size = 70, bg = "#F7EFB2", onPress }) => {
     >
       <Image
         source={icon}
-        style={{ width: size * 0.55, height: size * 0.55 }}
+        style={{ width: size * 0.7, height: size * 0.7 }}
         resizeMode="contain"
       />
     </TouchableOpacity>

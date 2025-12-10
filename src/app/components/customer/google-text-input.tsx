@@ -11,6 +11,7 @@ import { XMarkIcon } from 'react-native-heroicons/outline';
 import { icons } from '@/constants';
 import LocationItem from './LocationItems';
 import Config from 'react-native-config';
+import { useNavigation } from '@react-navigation/native';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -29,8 +30,10 @@ const GoogleTextInput = ({
   const googlePlaceAutoCompleteRef = useRef<GooglePlacesAutocompleteRef>(null);
   const { location: userLocation } = useUserStore();
   const [inputValue, setInputValue] = useState<string>('');
+  const navigation = useNavigation();
 
   const handleSuggestionPress = async (data: any, details: any = null) => {
+    console.log('handleSuggestionPress');
     try {
       // The 'details' object is returned by the API when fetchDetails={true}
       if (details) {
@@ -42,7 +45,22 @@ const GoogleTextInput = ({
         setInputValue(data.description);
         googlePlaceAutoCompleteRef.current?.setAddressText(data.description);
         googlePlaceAutoCompleteRef.current?.blur();
+        navigation.navigate('Rider', {
+          screen: 'FindOffer',
+        });
       }
+    } catch (error) {
+      console.error('Failed to fetch place details:', error);
+    }
+  };
+
+  const getDetailsAndNavigate = async (data: any) => {
+    try {
+      const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${data.place_id}&fields=geometry&key=${googlePlacesApiKey}`;
+      const response = await fetch(detailsUrl);
+      const json = await response.json();
+      const details = json.result;
+      handleSuggestionPress(data, details);
     } catch (error) {
       console.error('Failed to fetch place details:', error);
     }
@@ -55,7 +73,6 @@ const GoogleTextInput = ({
       <GooglePlacesAutocomplete
         placeholder={placeholder ?? 'Where to?'}
         ref={googlePlaceAutoCompleteRef}
-        fetchDetails={true} // Set to true to get geometry
         debounce={400} // Increased debounce for cost optimization
         styles={{
           textInputContainer: {
@@ -86,13 +103,14 @@ const GoogleTextInput = ({
           },
         }}
         renderRow={data => (
-          <LocationItem
-            item={{
-              title: data.structured_formatting.main_text,
-              description: data.structured_formatting.secondary_text,
-            }}
-            onPress={() => handleSuggestionPress(data)}
-          />
+          <TouchableOpacity onPress={() => getDetailsAndNavigate(data)}>
+            <LocationItem
+              item={{
+                title: data.structured_formatting.main_text,
+                description: data.structured_formatting.secondary_text,
+              }}
+            />
+          </TouchableOpacity>
         )}
         query={{
           key: googlePlacesApiKey!,
