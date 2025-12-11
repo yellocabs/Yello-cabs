@@ -12,11 +12,15 @@ import SystemNavigationBar from 'react-native-system-navigation-bar';
 import Toast from 'react-native-toast-message';
 
 import { WSProvider } from './services/WSProvider';
+import { useUserStore } from './store/use-user-store';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
+  const { setDestination } = useUserStore();
+
   useEffect(() => {
     configureGoogleSignIn();
+    setDestination(null);
   }, []);
   useEffect(() => {
     SystemNavigationBar.immersive();
