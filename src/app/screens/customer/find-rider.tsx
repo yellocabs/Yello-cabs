@@ -16,6 +16,7 @@ import {
 import { icons } from '@/constants';
 import { COLORS } from '@/assets/colors';
 import RideLayout from '@/components/customer/ride-layout';
+import { useUserStore } from '@/store';
 
 // Responsive utils
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -27,6 +28,7 @@ const clamp = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const RideFareComponent: React.FC = ({ route, navigation }) => {
   const { price, isAutoAccept } = route.params || {};
   const [currentFare, setCurrentFare] = useState<number>(price);
+  const { location, destination } = useUserStore();
 
   const [isAutoAcceptEnabled, setIsAutoAcceptEnabled] =
     useState<boolean>(isAutoAccept);
@@ -232,7 +234,7 @@ const RideFareComponent: React.FC = ({ route, navigation }) => {
         </View>
         <View style={styles.locationInfo}>
           <Text style={styles.locationTitle}>Pickup</Text>
-          <Text style={styles.locationText}>TDI City Road No. 1</Text>
+          <Text style={styles.locationText}>{location?.address || ''}</Text>
         </View>
       </View>
 
@@ -248,7 +250,7 @@ const RideFareComponent: React.FC = ({ route, navigation }) => {
         <View style={styles.locationInfo}>
           <Text style={styles.locationTitle}>Drop off</Text>
           <Text style={styles.locationText} numberOfLines={2}>
-            Railway Station Road (Sector 18, Panchkula, Haryana)
+            {destination?.address || ''}
           </Text>
         </View>
       </View>
