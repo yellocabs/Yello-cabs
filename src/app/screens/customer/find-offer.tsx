@@ -136,7 +136,7 @@ const RideCard = ({ item, selected, onSelect, price, setPrice }) => {
   );
 };
 const ToggleSwitch = ({ isActive, onToggle }) => {
-  const trackColor = isActive ? COLORS.PRIMARY[500] : COLORS.GENERAL[100];
+  const trackColor = isActive ? COLORS.PRIMARY.DEFAULT : COLORS.GENERAL[100];
   const thumbColor = isActive ? COLORS.BRAND_BLACK : COLORS.GRAY[300];
 
   return (
@@ -339,12 +339,13 @@ export default function FindOffers() {
       screen: 'FindRider',
       params: {
         price,
+        isAutoAccept,
       },
     });
   };
   return (
     <View style={{ flex: 1 }}>
-      <RideLayout title="Find Offers" snapPoints={['60%', '80%', '90%']}>
+      <RideLayout title="Find Offers" snapPoints={['50%', '80%', '90%']}>
         <FlatList
           data={rideOptions}
           keyExtractor={item => item.type}

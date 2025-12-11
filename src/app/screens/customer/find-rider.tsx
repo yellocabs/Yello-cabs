@@ -25,11 +25,11 @@ const clamp = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 
 // === Component ===
 const RideFareComponent: React.FC = ({ route, navigation }) => {
-  const { price } = route.params || {};
+  const { price, isAutoAccept } = route.params || {};
   const [currentFare, setCurrentFare] = useState<number>(price);
 
   const [isAutoAcceptEnabled, setIsAutoAcceptEnabled] =
-    useState<boolean>(false);
+    useState<boolean>(isAutoAccept);
 
   // === TIMER LOGIC ===
   const TOTAL_TIME = 120; // 2:00 minutes
@@ -87,7 +87,7 @@ const RideFareComponent: React.FC = ({ route, navigation }) => {
     setIsAutoAcceptEnabled(s => !s);
   };
 
-  const handleCancel = () => navigation.navigate('Home');
+  const handleCancel = () => navigation.navigate('Tabs', { screen: 'Home' });
 
   // === UI Sub Components ===
 
