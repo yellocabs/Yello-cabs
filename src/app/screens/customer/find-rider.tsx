@@ -1,5 +1,6 @@
 // src/app/screens/customer/find-rider.tsx
-import React, { useMemo, useState } from 'react';
+
+import React, { useMemo, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,37 +11,75 @@ import {
   Dimensions,
   Image,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import { icons } from '@/constants';
 import { COLORS } from '@/assets/colors';
 import RideLayout from '@/components/customer/ride-layout';
 
-// --- Responsive Utilities ---
+// Responsive utils
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const BASE_WIDTH = 375;
 const scale = (size: number) => (SCREEN_WIDTH / BASE_WIDTH) * size;
 const clamp = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 
-// --- Component ---
+// === Component ===
 const RideFareComponent: React.FC = ({ route, navigation }) => {
   const { price } = route.params || {};
   const [currentFare, setCurrentFare] = useState<number>(price);
+
   const [isAutoAcceptEnabled, setIsAutoAcceptEnabled] =
     useState<boolean>(false);
 
-  // Example average fare to compute "below average" progress (you can replace with real value)
-  const AVERAGE_FARE = 180;
-  const progress = useMemo(
-    () => clamp(currentFare / Math.max(AVERAGE_FARE, 1), 0, 1),
-    [currentFare],
-  );
+  // === TIMER LOGIC ===
+  const TOTAL_TIME = 120; // 2:00 minutes
+  const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
+
+  // Progress bar based on time
+  const progress = useMemo(() => {
+    return clamp(timeLeft / TOTAL_TIME, 0, 1);
+  }, [timeLeft]);
+
+  // Format timer into mm:ss
+  const formatTime = (sec: number) => {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+  };
+
+  // Timer countdown + popup
+  useEffect(() => {
+    if (timeLeft <= 0) {
+      Alert.alert(
+        'No Driver Found',
+        'Would you like to keep searching or cancel your request?',
+        [
+          {
+            text: 'Keep Searching',
+            onPress: () => setTimeLeft(TOTAL_TIME),
+          },
+          {
+            text: 'Cancel',
+            style: 'destructive',
+            onPress: () => navigation.navigate('Home'),
+          },
+        ],
+      );
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setTimeLeft(prev => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [timeLeft]);
 
   const handleFareChange = (change: number) => {
     setCurrentFare(prev => Math.max(0, prev + change));
   };
 
   const handleRaiseFare = () => {
-    // Default raise amount — you can modify or expose via props
     setCurrentFare(prev => prev + 20);
   };
 
@@ -48,12 +87,10 @@ const RideFareComponent: React.FC = ({ route, navigation }) => {
     setIsAutoAcceptEnabled(s => !s);
   };
 
-  const handleCancel = () => {
-    // Hook your cancel logic here (navigation, API call etc.)
-    console.log('Cancel request');
-  };
+  const handleCancel = () => navigation.navigate('Home');
 
-  // --- Subcomponents ---
+  // === UI Sub Components ===
+
   const HeaderInfo = () => (
     <View style={styles.header}>
       <View>
@@ -95,23 +132,17 @@ const RideFareComponent: React.FC = ({ route, navigation }) => {
         </View>
 
         <View style={styles.timerContainer}>
-          <Text style={styles.timerText}>1:55</Text>
-          <Text style={styles.fareHint}>Below avg</Text>
+          <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
+          <Text style={styles.fareHint}>Searching…</Text>
         </View>
       </View>
 
-      {/* progress bar showing how far from average fare */}
+      {/* Progress bar */}
       <View style={styles.progressWrap}>
         <View style={styles.progressBackground}>
           <View
             style={[styles.progressFill, { width: `${progress * 100}%` }]}
           />
-        </View>
-        <View style={styles.progressMeta}>
-          <Text style={styles.progressText}>
-            {Math.round(progress * 100)}% of avg
-          </Text>
-          <Text style={styles.avgText}>Avg ₹{AVERAGE_FARE}</Text>
         </View>
       </View>
 
@@ -120,7 +151,6 @@ const RideFareComponent: React.FC = ({ route, navigation }) => {
         <TouchableOpacity
           onPress={() => handleFareChange(-10)}
           style={styles.smallButton}
-          accessibilityLabel="Decrease fare by ten rupees"
         >
           <Text style={styles.smallButtonText}>-10</Text>
         </TouchableOpacity>
@@ -133,7 +163,6 @@ const RideFareComponent: React.FC = ({ route, navigation }) => {
         <TouchableOpacity
           onPress={() => handleFareChange(10)}
           style={styles.smallButton}
-          accessibilityLabel="Increase fare by ten rupees"
         >
           <Text style={styles.smallButtonText}>+10</Text>
         </TouchableOpacity>
@@ -242,6 +271,7 @@ const RideFareComponent: React.FC = ({ route, navigation }) => {
     </View>
   );
 
+  // === Final UI ===
   return (
     <RideLayout title="Finding Rider" snapPoints={['60%', '80%', '90%']}>
       <SafeAreaView style={styles.safe}>
@@ -257,7 +287,7 @@ const RideFareComponent: React.FC = ({ route, navigation }) => {
   );
 };
 
-// --- Styles ---
+// === Styles ===
 const styles = StyleSheet.create({
   safe: {
     width: '100%',
@@ -375,19 +405,6 @@ const styles = StyleSheet.create({
     height: scale(8),
     backgroundColor: COLORS.PRIMARY.DEFAULT,
   },
-  progressMeta: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: scale(8),
-  },
-  progressText: {
-    fontSize: scale(12),
-    color: COLORS.TEXT.MUTED,
-  },
-  avgText: {
-    fontSize: scale(12),
-    color: COLORS.TEXT.MUTED,
-  },
 
   adjustRow: {
     flexDirection: 'row',
@@ -403,13 +420,13 @@ const styles = StyleSheet.create({
     borderColor: COLORS.PRIMARY.DEFAULT,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'transparent',
   },
   smallButtonText: {
     color: COLORS.PRIMARY.DEFAULT,
     fontWeight: '700',
     fontSize: scale(16),
   },
+
   currentFareWrap: {
     flexDirection: 'row',
     alignItems: 'flex-end',
