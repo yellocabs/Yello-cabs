@@ -254,7 +254,6 @@ export default function FindOffers() {
     console.log('durationNumber', durationNumber);
 
     const fares = calculateFare(distance, durationNumber);
-    console.log('fares', fares);
 
     setFarePrices({
       bike: fares.bike,
@@ -312,16 +311,17 @@ export default function FindOffers() {
   const handleRideBooking = async () => {
     setLoading(true);
 
-    await createRide({
-      vehicle:
-        selected === 'Cab Economy'
-          ? 'cabEconomy'
-          : selected === 'Cab Premium'
-            ? 'cabPremium'
-            : selected === 'Bike'
-              ? 'bike'
-              : 'auto',
+    const vehicle =
+      selected === 'Cab Economy'
+        ? 'cabEconomy'
+        : selected === 'Cab Premium'
+          ? 'cabPremium'
+          : selected === 'Bike'
+            ? 'bike'
+            : 'auto';
 
+    await createRide({
+      vehicle,
       drop: {
         latitude: destination?.latitude,
         longitude: destination?.longitude,
@@ -335,9 +335,13 @@ export default function FindOffers() {
     });
 
     setLoading(false);
-    navigation.navigate('FindRider');
+    navigation.navigate('Rider', {
+      screen: 'FindRider',
+      params: {
+        price,
+      },
+    });
   };
-
   return (
     <View style={{ flex: 1 }}>
       <RideLayout title="Find Offers" snapPoints={['60%', '80%', '90%']}>

@@ -3,7 +3,7 @@ export const COLORS = {
     DEFAULT: '#72B0D5',
     500: '#FDB726',
     200: '#dfc081ff',
-    100: '#FFF7E9',
+    100: '#BFE4F3',
   },
   BRAND_ACCENT: {
     DEFAULT: '#E8C58C',
