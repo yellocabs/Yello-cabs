@@ -265,7 +265,7 @@ const RideFareComponent: React.FC = ({ route, navigation }) => {
 
   // === Final UI ===
   return (
-    <RideLayout title="Finding Rider" snapPoints={['60%', '80%', '90%']}>
+    <RideLayout title="Finding Rider" snapPoints={['50%', '90%']}>
       <SafeAreaView style={styles.safe}>
         <View style={styles.container}>
           <HeaderInfo />
@@ -426,7 +426,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   currentFareCurrency: {
-    fontSize: scale(18),
+    fontSize: scale(40),
     fontWeight: '700',
     color: COLORS.TEXT.DEFAULT,
     marginRight: scale(6),
