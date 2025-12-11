@@ -125,10 +125,6 @@ const RideFareComponent: React.FC = ({ route, navigation }) => {
       <View style={styles.fareTop}>
         <View>
           <Text style={styles.fareLabel}>Fare</Text>
-          <Text style={styles.fareBig}>
-            <Text style={styles.currency}>₹</Text>
-            {currentFare}
-          </Text>
         </View>
 
         <View style={styles.timerContainer}>
@@ -263,10 +259,6 @@ const RideFareComponent: React.FC = ({ route, navigation }) => {
     <View style={styles.footer}>
       <TouchableOpacity style={styles.ghostButton} onPress={handleCancel}>
         <Text style={styles.ghostButtonText}>Cancel request</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.ctaButton}>
-        <Text style={styles.ctaText}>Contact support</Text>
       </TouchableOpacity>
     </View>
   );
@@ -440,7 +432,7 @@ const styles = StyleSheet.create({
     marginRight: scale(6),
   },
   currentFareNumber: {
-    fontSize: scale(36),
+    fontSize: scale(40),
     fontWeight: '900',
     color: COLORS.TEXT.DEFAULT,
   },
@@ -568,18 +560,6 @@ const styles = StyleSheet.create({
   },
   ghostButtonText: {
     color: COLORS.TEXT.MUTED,
-    fontWeight: '700',
-  },
-  ctaButton: {
-    paddingVertical: scale(12),
-    paddingHorizontal: scale(14),
-    borderRadius: scale(12),
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: COLORS.PRIMARY.DEFAULT,
-  },
-  ctaText: {
-    color: COLORS.PRIMARY.DEFAULT,
     fontWeight: '700',
   },
 });
