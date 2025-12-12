@@ -1,4 +1,4 @@
-import { createRide } from '@/services/rideService';
+import { createRide } from '@/api/end-points/ride';
 import { icons } from '@/constants';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -159,7 +159,7 @@ const ToggleSwitch = ({ isActive, onToggle }) => {
 export default function FindOffers() {
   const [isAutoAccept, setIsAutoAccept] = useState(false);
   const [price, setPrice] = useState(0);
-  const [selected, setSelected] = useState('Bike');
+  const [selected, setSelected] = useState('bike');
   const [loading, setLoading] = useState(false);
   const [durations, setDurations] = useState({
     bike: '',
@@ -267,7 +267,7 @@ export default function FindOffers() {
   const rideOptions = useMemo(
     () => [
       {
-        type: 'Bike',
+        type: 'bike',
         title: 'Moto',
         icon: <BikeIcon />,
         time: durations.bike,
@@ -275,7 +275,7 @@ export default function FindOffers() {
         price: farePrices.bike,
       },
       {
-        type: 'Auto',
+        type: 'auto',
         title: 'Auto',
         icon: <AutoIcon />,
         time: durations.auto,
@@ -309,39 +309,52 @@ export default function FindOffers() {
   }, [selected, rideOptions]);
 
   const handleRideBooking = async () => {
+    if (
+      !location?.latitude ||
+      !location?.longitude ||
+      !destination?.latitude ||
+      !destination?.longitude ||
+      !price ||
+      !selected
+    ) {
+      alert('Please select pickup, dropoff, and vehicle type.');
+      return;
+    }
+
     setLoading(true);
 
-    const vehicle =
-      selected === 'Cab Economy'
-        ? 'cabEconomy'
-        : selected === 'Cab Premium'
-          ? 'cabPremium'
-          : selected === 'Bike'
-            ? 'bike'
-            : 'auto';
-
-    await createRide({
-      vehicle,
-      drop: {
-        latitude: destination?.latitude,
-        longitude: destination?.longitude,
-        address: destination?.address,
-      },
-      pickup: {
-        latitude: location?.latitude,
-        longitude: location?.longitude,
-        address: location?.address,
-      },
-    });
-
-    setLoading(false);
-    navigation.navigate('Rider', {
-      screen: 'FindRider',
-      params: {
-        price,
-        isAutoAccept,
-      },
-    });
+    try {
+      const payload = {
+        startPosition: {
+          lat: String(location.latitude),
+          long: String(location.longitude),
+          adrs: location.address || '',
+        },
+        destinationPosition: {
+          lat: String(destination.latitude),
+          long: String(destination.longitude),
+          adrs: destination.address || '',
+        },
+        fair: price,
+        vehicleType: selected,
+      };
+      console.log('payload:', payload);
+      const response = await createRide(payload);
+      console.log('create response:', response);
+      if (response.data) {
+        navigation.navigate('Rider', {
+          screen: 'FindRider',
+          params: {
+            ride: response.data,
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Error booking ride:', error);
+      alert('Failed to book ride. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <View style={{ flex: 1 }}>

@@ -146,15 +146,20 @@ const LoginScreen = () => {
       const token = response.data?.data?.token;
       const responseUser = response.data?.data?.user;
 
-      console.log(response);
-
       if (token) {
         await AsyncStorage.setItem('authToken', token);
-        console.log(token);
         setToken(token);
       }
+      console.log('one');
       if (responseUser) {
-        setUser(responseUser);
+        console.log('two');
+
+        const userWithToken = {
+          ...responseUser,
+          token, // add token here
+        };
+
+        setUser(userWithToken);
       }
 
       setVerification(prev => ({

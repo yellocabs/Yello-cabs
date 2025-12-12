@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '@/types/navigation-types';
 import AuthNavigator from './auth-navigator';
@@ -24,10 +24,16 @@ const RootNavigator = () => {
     const checkToken = async () => {
       try {
         const token = await AsyncStorage.getItem('authToken');
+        console.log('Token:', token);
         const userStore = await AsyncStorage.getItem('user-store');
+        console.log('store:', userStore);
+
         if (token && userStore) {
+          console.log('hello from inside');
           const { state } = JSON.parse(userStore);
+
           const storedUser = state.user;
+          console.log('user:', storedUser);
           setToken(token);
           if (storedUser) {
             setUser(storedUser);

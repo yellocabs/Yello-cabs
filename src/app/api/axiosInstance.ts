@@ -9,8 +9,10 @@ const api = axios.create({
 
 api.interceptors.request.use(config => {
   const token = useUserStore.getState().user?.token;
-  console.log(token);
+  // console.log('user from axios:', useUserStore.getState().user);
+  // console.log('token from axios:', token);
   if (token) {
+    // console.log('token from lalla:', token);
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;

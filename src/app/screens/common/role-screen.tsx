@@ -19,11 +19,11 @@ const RoleScreen = () => {
   const { setUser } = useUserStore();
   const { width, height } = useWindowDimensions();
 
-  const [selectedRole, setSelectedRole] = useState<'rider' | 'captain' | null>(
+  const [selectedRole, setSelectedRole] = useState<'customer' | 'rider' | null>(
     null,
   );
 
-  const handleRoleSelect = (role: 'rider' | 'captain') => {
+  const handleRoleSelect = (role: 'customer' | 'rider') => {
     setSelectedRole(role);
     setUser({ role });
   };
@@ -42,12 +42,12 @@ const RoleScreen = () => {
     isSelected,
     onSelect,
   }: {
-    role: 'rider' | 'captain';
+    role: 'customer' | 'rider';
     icon: any;
     isSelected: boolean;
-    onSelect: (role: 'rider' | 'captain') => void;
+    onSelect: (role: 'customer' | 'rider') => void;
   }) => {
-    const roleName = role === 'rider' ? 'Rider' : 'Captain';
+    const roleName = role === 'rider' ? 'Rider' : 'customer';
     const description =
       role === 'rider'
         ? 'Book quick and safe rides.'
@@ -216,15 +216,15 @@ const RoleScreen = () => {
 
           <View className="flex-row justify-between">
             <RoleOption
-              role="rider"
+              role="customer"
               icon={icons.user}
-              isSelected={selectedRole === 'rider'}
+              isSelected={selectedRole === 'customer'}
               onSelect={handleRoleSelect}
             />
             <RoleOption
-              role="captain"
+              role="rider"
               icon={icons.driver}
-              isSelected={selectedRole === 'captain'}
+              isSelected={selectedRole === 'rider'}
               onSelect={handleRoleSelect}
             />
           </View>
