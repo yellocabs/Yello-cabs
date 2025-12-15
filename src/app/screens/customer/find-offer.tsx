@@ -9,6 +9,7 @@ import { ZapIcon } from 'lucide-react-native';
 import CustomButton from '@/components/shared/custom-button';
 import RideLayout from '@/components/customer/ride-layout';
 import { COLORS } from '@/assets/colors';
+import ErrorModal from '@/components/shared/error-modal';
 
 // --- ICONS ---
 const BikeIcon = () => (
@@ -161,6 +162,8 @@ export default function FindOffers() {
   const [price, setPrice] = useState(0);
   const [selected, setSelected] = useState('bike');
   const [loading, setLoading] = useState(false);
+  const [errorModalVisible, setErrorModalVisible] = useState(false);
+  const [errorModalMessage, setErrorModalMessage] = useState('');
   const [durations, setDurations] = useState({
     bike: '',
     auto: '',
@@ -225,8 +228,6 @@ export default function FindOffers() {
         },
         'driving',
       );
-
-      console.log('driving', driving);
 
       setDurations({
         bike: bike?.duration || '',
@@ -317,7 +318,8 @@ export default function FindOffers() {
       !price ||
       !selected
     ) {
-      alert('Please select pickup, dropoff, and vehicle type.');
+      setErrorModalMessage('Please select pickup, dropoff, and vehicle type.');
+      setErrorModalVisible(true);
       return;
     }
 
@@ -338,20 +340,20 @@ export default function FindOffers() {
         fair: price,
         vehicleType: selected,
       };
-      console.log('payload:', payload);
       const response = await createRide(payload);
-      console.log('create response:', response);
+      console.log('create response:', response.data);
       if (response.data) {
         navigation.navigate('Rider', {
           screen: 'FindRider',
           params: {
             ride: response.data,
+            isAutoAccept,
           },
         });
       }
     } catch (error) {
-      console.error('Error booking ride:', error);
-      alert('Failed to book ride. Please try again.');
+      setErrorModalMessage('Failed to book ride. Please try again.');
+      setErrorModalVisible(true);
     } finally {
       setLoading(false);
     }
@@ -420,6 +422,11 @@ export default function FindOffers() {
           disabled={loading}
         />
       </View>
+      <ErrorModal
+        isVisible={errorModalVisible}
+        message={errorModalMessage}
+        onClose={() => setErrorModalVisible(false)}
+      />
     </View>
   );
 }

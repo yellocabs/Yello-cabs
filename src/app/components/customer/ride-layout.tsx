@@ -30,7 +30,10 @@ interface RideLayoutProps {
 
 // We forward a ref so parent can call methods on this layout (e.g. goToNext)
 const RideLayout = forwardRef<any, RideLayoutProps>(
-  ({ title, children, snapPoints, onChange, initialIndex = 0 }, ref) => {
+  (
+    { title, children, snapPoints, onChange, initialIndex = 0, onBackPress },
+    ref,
+  ) => {
     const { height } = useWindowDimensions();
     const bottomSheetRef = useRef<BottomSheet>(null);
     const navigation = useNavigation();
@@ -85,7 +88,7 @@ const RideLayout = forwardRef<any, RideLayoutProps>(
                 icon={icons.left}
                 size={45}
                 bg="#fffce8"
-                onPress={() => navigation.goBack()}
+                onPress={onBackPress ? onBackPress : () => navigation.goBack()}
               />
             )}
 

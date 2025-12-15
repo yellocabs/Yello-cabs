@@ -1,6 +1,11 @@
 // src/app/screens/customer/find-rider.tsx
-
-import React, { useMemo, useState, useEffect } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   View,
   Text,
@@ -11,94 +16,218 @@ import {
   Dimensions,
   Image,
   SafeAreaView,
-  Alert,
+  BackHandler,
+  GestureResponderEvent,
 } from 'react-native';
-import { icons } from '@/constants';
+import { useFocusEffect } from '@react-navigation/native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  Easing,
+  runOnJS,
+} from 'react-native-reanimated';
+
+import NoDriverFoundModal from '@/components/shared/no-driver-found-modal';
+import { useUserStore } from '@/store';
 import { COLORS } from '@/assets/colors';
 import RideLayout from '@/components/customer/ride-layout';
-import { useUserStore } from '@/store';
+import { icons } from '@/constants';
 
-// Responsive utils
+// === Responsive utils ===
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const BASE_WIDTH = 375;
 const scale = (size: number) => (SCREEN_WIDTH / BASE_WIDTH) * size;
 const clamp = (v: number, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 
-// === Component ===
-const RideFareComponent: React.FC = ({ route, navigation }) => {
-  const { price, isAutoAccept } = route.params || {};
-  const [currentFare, setCurrentFare] = useState<number>(price);
-  const { location, destination } = useUserStore();
+type RouteParams = {
+  ride?: any;
+  isAutoAccept?: boolean;
+};
 
-  const [isAutoAcceptEnabled, setIsAutoAcceptEnabled] =
-    useState<boolean>(isAutoAccept);
+const FindRiderScreen: React.FC<any> = ({ route, navigation }) => {
+  const params = (route?.params || {}) as RouteParams;
+  const rideFareFromParams = Number(params?.ride?.data?.ride?.fair ?? 0);
 
-  // === TIMER LOGIC ===
-  const TOTAL_TIME = 120; // 2:00 minutes
-  const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
+  const { location, destination, setDestination } = useUserStore();
 
-  // Progress bar based on time
-  const progress = useMemo(() => {
-    return clamp(timeLeft / TOTAL_TIME, 0, 1);
+  const [currentFare, setCurrentFare] = useState<number>(rideFareFromParams);
+  const [isAutoAcceptEnabled, setIsAutoAcceptEnabled] = useState<boolean>(
+    !!params.isAutoAccept,
+  );
+
+  // Timer
+  const TOTAL_TIME = 20;
+  const [timeLeft, setTimeLeft] = useState<number>(TOTAL_TIME);
+  const timerRef = useRef<number | null>(null);
+
+  // Modal states
+  const [showCancelModal, setShowCancelModal] = useState<boolean>(false);
+  const [showNoDriverModal, setShowNoDriverModal] = useState<boolean>(false);
+
+  // Reanimated shared values for modal animation
+  const cancelModalAnim = useSharedValue(0); // 0 hidden, 1 visible
+  const noDriverModalAnim = useSharedValue(0);
+
+  // animate when visible changes
+  useEffect(() => {
+    cancelModalAnim.value = withTiming(showCancelModal ? 1 : 0, {
+      duration: 220,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [showCancelModal]);
+
+  useEffect(() => {
+    noDriverModalAnim.value = withTiming(showNoDriverModal ? 1 : 0, {
+      duration: 260,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [showNoDriverModal]);
+
+  // Animated styles
+  const modalOverlayStyle = useAnimatedStyle(() => ({
+    opacity: Math.max(cancelModalAnim.value, noDriverModalAnim.value) * 1.0,
+  }));
+
+  const modalBoxStyle = useAnimatedStyle(() => {
+    // choose scale/opactiy from whichever modal is visible (priority: cancel then nodriver)
+    const v = Math.max(cancelModalAnim.value, noDriverModalAnim.value);
+    return {
+      transform: [{ scale: 0.96 + 0.04 * v }],
+      opacity: v,
+      translateY: (1 - v) * 8,
+    };
+  });
+
+  // === Timer handling ===
+  useEffect(() => {
+    // start timer
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    timerRef.current = setInterval(() => {
+      setTimeLeft(prev => prev - 1);
+    }, 1000) as unknown as number;
+
+    return () => {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // when timer reaches 0, show NoDriver modal and stop timer
+  useEffect(() => {
+    if (timeLeft <= 0) {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      // show custom modal instead of Alert
+      setShowNoDriverModal(true);
+    }
   }, [timeLeft]);
 
-  // Format timer into mm:ss
+  // Format time mm:ss
   const formatTime = (sec: number) => {
     const m = Math.floor(sec / 60);
-    const s = sec % 60;
+    const s = Math.max(0, sec % 60);
     return `${m}:${s < 10 ? '0' : ''}${s}`;
   };
 
-  // Timer countdown + popup
+  // === Back handling: Android hardware + navigation (iOS swipe/back)
+  const openCancelModal = useCallback(() => {
+    setShowCancelModal(true);
+  }, []);
+
+  const closeCancelModal = useCallback(() => setShowCancelModal(false), []);
+
+  const confirmCancel = useCallback(() => {
+    setShowCancelModal(false);
+    // navigate home — keep same behavior as handleCancel
+    setDestination(null);
+    navigation.navigate('Tabs', { screen: 'Home' });
+  }, [navigation]);
+
+  // Android hardware back
   useEffect(() => {
-    if (timeLeft <= 0) {
-      Alert.alert(
-        'No Driver Found',
-        'Would you like to keep searching or cancel your request?',
-        [
-          {
-            text: 'Keep Searching',
-            onPress: () => setTimeLeft(TOTAL_TIME),
-          },
-          {
-            text: 'Cancel',
-            style: 'destructive',
-            onPress: () => navigation.navigate('Home'),
-          },
-        ],
-      );
-      return;
+    const onBackPress = () => {
+      // if a modal is visible, close it instead of opening another
+      if (showCancelModal || showNoDriverModal) {
+        // prioritize closing the cancel modal first, else close nodriver
+        if (showNoDriverModal) {
+          setShowNoDriverModal(false);
+          return true;
+        }
+        setShowCancelModal(false);
+        return true; // handled
+      }
+
+      // show the cancel confirmation modal
+      setShowCancelModal(true);
+      return true; // prevent default
+    };
+
+    const sub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => sub.remove();
+  }, [showCancelModal, showNoDriverModal]);
+
+  // iOS / stack back gesture intercept
+  useEffect(() => {
+    const beforeRemove = (e: any) => {
+      // If modal open, allow it (it will be closed by modal)
+      if (showCancelModal || showNoDriverModal) {
+        e.preventDefault();
+        if (showNoDriverModal) setShowNoDriverModal(false);
+        if (showCancelModal) setShowCancelModal(false);
+        return;
+      }
+
+      // prevent default navigation and show cancel modal
+      e.preventDefault();
+      setShowCancelModal(true);
+    };
+
+    const sub = navigation.addListener('beforeRemove', beforeRemove);
+    return () => navigation.removeListener('beforeRemove', beforeRemove);
+  }, [navigation, showCancelModal, showNoDriverModal]);
+
+  // === Fare handlers ===
+  const handleFareChange = (delta: number) =>
+    setCurrentFare(f => Math.max(0, Math.round((f + delta) * 1)));
+
+  const handleRaiseFare = () => setCurrentFare(f => f + 20);
+
+  // === No-driver modal actions ===
+  const handleKeepSearching = () => {
+    setShowNoDriverModal(false);
+    setTimeLeft(TOTAL_TIME);
+    // restart timer
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
     }
-
-    const interval = setInterval(() => {
+    timerRef.current = setInterval(() => {
       setTimeLeft(prev => prev - 1);
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [timeLeft]);
-
-  const handleFareChange = (change: number) => {
-    setCurrentFare(prev => Math.max(0, prev + change));
+    }, 1000) as unknown as number;
   };
 
-  const handleRaiseFare = () => {
-    setCurrentFare(prev => prev + 20);
+  const handleNoDriverCancel = () => {
+    setShowNoDriverModal(false);
+    confirmCancel();
+    navigation.navigate('Tabs', { screen: 'Home' });
   };
 
-  const handleToggleAutoAccept = () => {
-    setIsAutoAcceptEnabled(s => !s);
-  };
-
-  const handleCancel = () => navigation.navigate('Tabs', { screen: 'Home' });
-
-  // === UI Sub Components ===
-
+  // === Subcomponents (concise) ===
   const HeaderInfo = () => (
     <View style={styles.header}>
       <View>
-        <Text style={styles.headerTitle}>Finding Driver</Text>
+        <Text style={styles.headerTitle}>Searching for drivers…</Text>
         <Text style={styles.headerSubtitle}>
-          We’re searching nearby drivers for you
+          We’re scanning nearby drivers for the best match
         </Text>
       </View>
 
@@ -122,90 +251,88 @@ const RideFareComponent: React.FC = ({ route, navigation }) => {
     </View>
   );
 
-  const FareCard = () => (
-    <View style={styles.card}>
-      <View style={styles.fareTop}>
-        <View>
+  const FareCard = () => {
+    const progress = useMemo(
+      () => clamp(timeLeft / TOTAL_TIME, 0, 1),
+      [timeLeft],
+    );
+    return (
+      <View style={styles.card}>
+        <View style={styles.fareTop}>
           <Text style={styles.fareLabel}>Fare</Text>
+          <View style={styles.timerContainer}>
+            <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
+            <Text style={styles.fareHint}>Searching…</Text>
+          </View>
         </View>
 
-        <View style={styles.timerContainer}>
-          <Text style={styles.timerText}>{formatTime(timeLeft)}</Text>
-          <Text style={styles.fareHint}>Searching…</Text>
-        </View>
-      </View>
-
-      {/* Progress bar */}
-      <View style={styles.progressWrap}>
-        <View style={styles.progressBackground}>
-          <View
-            style={[styles.progressFill, { width: `${progress * 100}%` }]}
-          />
-        </View>
-      </View>
-
-      {/* fare adjuster */}
-      <View style={styles.adjustRow}>
-        <TouchableOpacity
-          onPress={() => handleFareChange(-10)}
-          style={styles.smallButton}
-        >
-          <Text style={styles.smallButtonText}>-10</Text>
-        </TouchableOpacity>
-
-        <View style={styles.currentFareWrap}>
-          <Text style={styles.currentFareCurrency}>₹</Text>
-          <Text style={styles.currentFareNumber}>{currentFare}</Text>
-        </View>
-
-        <TouchableOpacity
-          onPress={() => handleFareChange(10)}
-          style={styles.smallButton}
-        >
-          <Text style={styles.smallButtonText}>+10</Text>
-        </TouchableOpacity>
-      </View>
-
-      <TouchableOpacity
-        onPress={handleRaiseFare}
-        style={styles.primaryButton}
-        activeOpacity={0.85}
-      >
-        <Text style={styles.primaryButtonText}>Raise fare</Text>
-      </TouchableOpacity>
-    </View>
-  );
-
-  const AutoAcceptCard = () => (
-    <View style={styles.cardRow}>
-      <View style={[styles.card, styles.autoCard]}>
-        <View style={styles.autoRow}>
-          <View style={styles.autoLeft}>
-            <Image
-              source={icons.out}
-              style={[styles.autoIcon, { tintColor: COLORS.PRIMARY.DEFAULT }]}
+        <View style={styles.progressWrap}>
+          <View style={styles.progressBackground}>
+            <View
+              style={[styles.progressFill, { width: `${progress * 100}%` }]}
             />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.autoTitle}>Auto-accept nearest driver</Text>
-              <Text style={styles.autoSubtitle}>
-                Automatically accept the nearest driver for ₹{currentFare}
-              </Text>
-            </View>
+          </View>
+        </View>
+
+        <View style={styles.adjustRow}>
+          <TouchableOpacity
+            onPress={() => handleFareChange(-10)}
+            style={styles.smallButton}
+          >
+            <Text style={styles.smallButtonText}>-10</Text>
+          </TouchableOpacity>
+
+          <View style={styles.currentFareWrap}>
+            <Text style={styles.currentFareCurrency}>₹</Text>
+            <Text style={styles.currentFareNumber}>{currentFare}</Text>
           </View>
 
-          <Switch
-            value={isAutoAcceptEnabled}
-            onValueChange={handleToggleAutoAccept}
-            trackColor={{
-              false: COLORS.GENERAL[300],
-              true: COLORS.PRIMARY.DEFAULT,
-            }}
-            thumbColor={
-              Platform.OS === 'android' ? COLORS.BRAND_WHITE : undefined
-            }
-            ios_backgroundColor={COLORS.GENERAL[300]}
-          />
+          <TouchableOpacity
+            onPress={() => handleFareChange(10)}
+            style={styles.smallButton}
+          >
+            <Text style={styles.smallButtonText}>+10</Text>
+          </TouchableOpacity>
         </View>
+
+        <TouchableOpacity
+          onPress={handleRaiseFare}
+          style={styles.primaryButton}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.primaryButtonText}>Raise fare</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  const AutoAcceptCard = () => (
+    <View style={[styles.card, styles.autoCard]}>
+      <View style={styles.autoRow}>
+        <View style={styles.autoLeft}>
+          <Image
+            source={icons.out}
+            style={[styles.autoIcon, { tintColor: COLORS.PRIMARY.DEFAULT }]}
+          />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.autoTitle}>Auto-accept nearest driver</Text>
+            <Text style={styles.autoSubtitle}>
+              Automatically accept the nearest driver for ₹{currentFare}
+            </Text>
+          </View>
+        </View>
+
+        <Switch
+          value={isAutoAcceptEnabled}
+          onValueChange={() => setIsAutoAcceptEnabled(s => !s)}
+          trackColor={{
+            false: COLORS.GENERAL[300],
+            true: COLORS.PRIMARY.DEFAULT,
+          }}
+          thumbColor={
+            Platform.OS === 'android' ? COLORS.BRAND_WHITE : undefined
+          }
+        />
       </View>
     </View>
   );
@@ -214,7 +341,10 @@ const RideFareComponent: React.FC = ({ route, navigation }) => {
     <View style={styles.card}>
       <View style={styles.locationRow}>
         <View style={styles.qrRow}>
-          <Image source={icons.qrCode} style={styles.qrIcon} />
+          <Image
+            source={icons.qrCode}
+            style={[styles.qrIcon, { tintColor: COLORS.PRIMARY.DEFAULT }]}
+          />
           <Text style={styles.qrText}>₹{currentFare} QR code</Text>
         </View>
       </View>
@@ -234,7 +364,7 @@ const RideFareComponent: React.FC = ({ route, navigation }) => {
         </View>
         <View style={styles.locationInfo}>
           <Text style={styles.locationTitle}>Pickup</Text>
-          <Text style={styles.locationText}>{location?.address || ''}</Text>
+          <Text style={styles.locationText}>{location?.address ?? ''}</Text>
         </View>
       </View>
 
@@ -250,32 +380,64 @@ const RideFareComponent: React.FC = ({ route, navigation }) => {
         <View style={styles.locationInfo}>
           <Text style={styles.locationTitle}>Drop off</Text>
           <Text style={styles.locationText} numberOfLines={2}>
-            {destination?.address || ''}
+            {destination?.address ?? ''}
           </Text>
         </View>
       </View>
     </View>
   );
 
-  const FooterActions = () => (
-    <View style={styles.footer}>
-      <TouchableOpacity style={styles.ghostButton} onPress={handleCancel}>
-        <Text style={styles.ghostButtonText}>Cancel request</Text>
-      </TouchableOpacity>
-    </View>
-  );
+  // === Modal renderers (Option D: fullscreen dark overlay & centered minimal popup) ===
+  const CancelModal = () =>
+    showCancelModal ? (
+      <Animated.View style={[styles.modalOverlay, modalOverlayStyle]}>
+        <Animated.View style={[styles.modalBox, modalBoxStyle]}>
+          <Text style={styles.modalTitle}>Cancel ride request?</Text>
+          <Text style={styles.modalDesc}>
+            Your search is in progress. Do you want to stop looking for a
+            driver?
+          </Text>
 
-  // === Final UI ===
+          <View style={styles.modalActions}>
+            <TouchableOpacity
+              style={[styles.modalBtn, styles.modalKeepBtn]}
+              onPress={() => setShowCancelModal(false)}
+            >
+              <Text style={styles.modalKeepText}>No, keep searching</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.modalBtn, styles.modalCancelConfirmBtn]}
+              onPress={confirmCancel}
+            >
+              <Text style={styles.modalCancelConfirmText}>Yes, cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+      </Animated.View>
+    ) : null;
+
   return (
-    <RideLayout title="Finding Rider" snapPoints={['50%', '90%']}>
+    <RideLayout
+      title="Finding Rider"
+      snapPoints={['50%', '90%']}
+      onBackPress={() => setShowCancelModal(true)}
+    >
       <SafeAreaView style={styles.safe}>
         <View style={styles.container}>
           <HeaderInfo />
           <FareCard />
           <AutoAcceptCard />
           <LocationCard />
-          <FooterActions />
         </View>
+
+        {/* Modals */}
+        <CancelModal />
+        <NoDriverFoundModal
+          isVisible={showNoDriverModal}
+          onKeepSearching={handleKeepSearching}
+          onCancel={handleNoDriverCancel}
+        />
       </SafeAreaView>
     </RideLayout>
   );
@@ -283,9 +445,7 @@ const RideFareComponent: React.FC = ({ route, navigation }) => {
 
 // === Styles ===
 const styles = StyleSheet.create({
-  safe: {
-    width: '100%',
-  },
+  safe: { width: '100%' },
   container: {
     paddingHorizontal: scale(16),
     paddingTop: scale(12),
@@ -359,18 +519,6 @@ const styles = StyleSheet.create({
     fontSize: scale(12),
     marginBottom: scale(6),
   },
-  fareBig: {
-    fontSize: scale(34),
-    fontWeight: '800',
-    color: COLORS.TEXT.DEFAULT,
-    lineHeight: scale(38),
-  },
-  currency: {
-    fontSize: scale(20),
-    fontWeight: '700',
-    marginRight: scale(6),
-  },
-
   timerContainer: {
     alignItems: 'flex-end',
   },
@@ -454,9 +602,6 @@ const styles = StyleSheet.create({
   },
 
   // Auto accept
-  cardRow: {
-    marginBottom: scale(8),
-  },
   autoCard: {
     paddingVertical: scale(10),
     paddingHorizontal: scale(12),
@@ -502,7 +647,6 @@ const styles = StyleSheet.create({
     width: scale(22),
     height: scale(22),
     marginRight: scale(10),
-    tintColor: COLORS.PRIMARY.DEFAULT,
   },
   qrText: {
     color: COLORS.PRIMARY.DEFAULT,
@@ -542,28 +686,6 @@ const styles = StyleSheet.create({
     color: COLORS.TEXT.DEFAULT,
     fontWeight: '600',
   },
-
-  // Footer actions
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: scale(6),
-  },
-  ghostButton: {
-    flex: 1,
-    marginRight: scale(8),
-    backgroundColor: COLORS.BG.MUTED,
-    borderRadius: scale(12),
-    paddingVertical: scale(12),
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.GENERAL[300],
-  },
-  ghostButtonText: {
-    color: COLORS.TEXT.MUTED,
-    fontWeight: '700',
-  },
 });
 
-export default RideFareComponent;
+export default FindRiderScreen;

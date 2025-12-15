@@ -24,18 +24,19 @@ const RootNavigator = () => {
     const checkToken = async () => {
       try {
         const token = await AsyncStorage.getItem('authToken');
-        console.log('Token:', token);
+        console.log('Token from nav:', token);
         const userStore = await AsyncStorage.getItem('user-store');
         console.log('store:', userStore);
 
         if (token && userStore) {
           console.log('hello from inside');
           const { state } = JSON.parse(userStore);
+          console.log('state:', state);
 
           const storedUser = state.user;
           console.log('user:', storedUser);
           setToken(token);
-          if (storedUser) {
+          if (token) {
             setUser(storedUser);
             setInitialRoute(storedUser.role === 'captain' ? 'Driver' : 'Tabs');
           }

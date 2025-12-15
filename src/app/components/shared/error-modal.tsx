@@ -12,6 +12,7 @@ type ErrorModalProps = {
   onPrimaryAction?: () => void;
   primaryLabel?: string;
   secondaryLabel?: string;
+  showTroubleshooting?: boolean;
 };
 
 const ErrorModal: React.FC<ErrorModalProps> = ({
@@ -22,6 +23,7 @@ const ErrorModal: React.FC<ErrorModalProps> = ({
   onPrimaryAction,
   primaryLabel = 'Try again',
   secondaryLabel = 'Close',
+  showTroubleshooting = true,
 }) => {
   const handlePrimary = () => {
     if (onPrimaryAction) onPrimaryAction();
@@ -84,10 +86,12 @@ const ErrorModal: React.FC<ErrorModalProps> = ({
         </View>
 
         {/* Subtle helper */}
-        <Text className="mt-4 text-[11px] text-general-200 font-UrbanistLight text-center">
-          If this keeps happening, please check your internet connection or try
-          again later.
-        </Text>
+        {showTroubleshooting && (
+          <Text className="mt-4 text-[11px] text-general-200 font-UrbanistLight text-center">
+            If this keeps happening, please check your internet connection or
+            try again later.
+          </Text>
+        )}
       </View>
     </ReactNativeModal>
   );
