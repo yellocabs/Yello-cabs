@@ -217,8 +217,10 @@ const Map: React.FC<any> = props => {
   const destinationLongitude = destination?.longitude;
 
   const { location: riderLocation } = useRiderStore();
-  const userLatitude = riderLocation?.latitude;
-  const userLongitude = riderLocation?.longitude;
+
+  // Prioritize props over store for user location
+  const userLatitude = props.latitude ?? riderLocation?.latitude;
+  const userLongitude = props.longitude ?? riderLocation?.longitude;
 
   const [loading] = useState(false);
   const [error] = useState<null | string>(null);
