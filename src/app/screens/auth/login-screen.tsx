@@ -146,20 +146,15 @@ const LoginScreen = () => {
       const token = response.data?.data?.token;
       const responseUser = response.data?.data?.user;
 
+      console.log(response);
+
       if (token) {
         await AsyncStorage.setItem('authToken', token);
+        console.log(token);
         setToken(token);
       }
-      console.log('one');
       if (responseUser) {
-        console.log('two');
-
-        const userWithToken = {
-          ...responseUser,
-          token, // add token here
-        };
-
-        setUser(userWithToken);
+        setUser(responseUser);
       }
 
       setVerification(prev => ({
@@ -221,7 +216,7 @@ const LoginScreen = () => {
   };
 
   const onHome = () => {
-    if (user?.role === 'captain') {
+    if (user?.role === 'rider') {
       rootNav?.reset({
         index: 0,
         routes: [{ name: 'Driver', params: { screen: 'Home' } }],

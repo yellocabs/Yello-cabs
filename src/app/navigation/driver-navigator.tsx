@@ -1,12 +1,16 @@
-import { View, Text } from 'react-native'
-import React from 'react'
+import React from 'react';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import RiderHome from '@/screens/rider/RiderHome';
 
-const DriverNavigator = () => {
-  return (
-    <View>
-      <Text>DriverNavigator</Text>
-    </View>
-  )
-}
+const Stack = createNativeStackNavigator();
 
-export default DriverNavigator
+const RiderNavigator = () => (
+  <Stack.Navigator
+    screenOptions={{ headerShown: false }}
+    initialRouteName="RiderHome"
+  >
+    <Stack.Screen name="RiderHome" component={RiderHome} />
+  </Stack.Navigator>
+);
+
+export default RiderNavigator;
