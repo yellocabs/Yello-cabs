@@ -8,14 +8,17 @@ import {
 } from 'react-native';
 
 import Map from '@/components/map';
-import { useUserStore } from '@/store';
+import { useRoute } from '@react-navigation/native';
+import { useRiderStore } from '@/store';
 import { useWS } from '@/services/WSProvider';
 import { COLORS } from '@/assets/colors';
 import { useFetchLocation } from '@/hooks/useFetchLocation';
 
 const RiderHomeScreen = () => {
-  const { location } = useUserStore();
-  const { emit, disconnect } = useWS();
+  const route = useRoute<any>();
+  const vehicleType = 'bike';
+  const { location } = useRiderStore();
+  const { emit, disconnect, isConnected, on, off } = useWS();
   useFetchLocation();
 
   const [isOnline, setIsOnline] = useState(false);
@@ -23,20 +26,35 @@ const RiderHomeScreen = () => {
   const handleToggleOnline = () => {
     if (isOnline) {
       emit('goOffDuty');
-      disconnect();
       setIsOnline(false);
-    } else {
-      if (!location) return;
-
-      emit('goOnDuty', {
-        coords: {
-          latitude: location.latitude,
-          longitude: location.longitude,
-        },
-        vehicleId: 'your-vehicle-id',
-      });
-      setIsOnline(true);
+      return;
     }
+
+    if (!location) {
+      console.warn('Location not available');
+      return;
+    }
+
+    const payload = {
+      coords: {
+        latitude: location.latitude,
+        longitude: location.longitude,
+      },
+      vehicleId: '3f8b9c2a-5e21-4e9b-a7b2-91b6c1d2a999', // MUST be valid
+    };
+
+    if (isConnected()) {
+      console.log('shivam ander hai ', payload);
+      emit('goOnDuty', payload);
+    } else {
+      const onConnect = () => {
+        emit('goOnDuty', payload);
+        off('connect', onConnect);
+      };
+      on('connect', onConnect);
+    }
+
+    setIsOnline(true);
   };
 
   useEffect(() => {
