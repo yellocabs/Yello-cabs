@@ -5,6 +5,7 @@ import AuthNavigator from './auth-navigator';
 import TabNavigator from './tab-navigator';
 import DriverNavigator from './driver-navigator';
 import RiderNavigator from './rider-navigator';
+import VehicleSelectionScreen from '@/screens/rider/vehicleSelection';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ActivityIndicator, View } from 'react-native';
 import { useUserStore } from '@/store/use-user-store';
@@ -66,7 +67,13 @@ const RootNavigator = () => {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user ? (
         user.role === 'rider' ? (
-          <Stack.Screen name="Driver" component={DriverScreen} />
+          <>
+            <Stack.Screen
+              name="VehicleSelection"
+              component={VehicleSelectionScreen}
+            />
+            <Stack.Screen name="Driver" component={DriverScreen} />
+          </>
         ) : (
           <>
             <Stack.Screen name="Tabs" component={TabsScreen} />

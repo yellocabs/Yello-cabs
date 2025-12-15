@@ -221,7 +221,7 @@ const LoginScreen = () => {
     if (user?.role === 'rider') {
       rootNav?.reset({
         index: 0,
-        routes: [{ name: 'Driver', params: { screen: 'Home' } }],
+        routes: [{ name: 'VehicleSelection' }],
       });
     } else {
       rootNav?.reset({
