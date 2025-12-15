@@ -52,5 +52,4 @@ export const logout = async (disconnect?: () => void) => {
   useAuthStore.getState().clearToken();
   clearRiderData();
   clearData();
-  resetAndNavigate('Auth'); // Navigate to Auth flow
 };

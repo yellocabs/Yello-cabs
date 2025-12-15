@@ -25,12 +25,11 @@ const RoleScreen = () => {
 
   const handleRoleSelect = (role: 'customer' | 'rider') => {
     setSelectedRole(role);
-    setUser({ role });
   };
 
   const handleGetStarted = () => {
     if (selectedRole) {
-      navigation.navigate('Login' as never);
+      navigation.navigate('Login' as never, { role: selectedRole } as never);
     } else {
       Alert.alert('Error', 'Please select a role to get started.');
     }

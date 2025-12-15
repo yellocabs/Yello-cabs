@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '@/types/navigation-types';
 import AuthNavigator from './auth-navigator';
@@ -13,32 +13,35 @@ import { WSProvider } from '@/services/WSProvider';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
+const DriverScreen = () => (
+  <WSProvider>
+    <DriverNavigator />
+  </WSProvider>
+);
+
+const TabsScreen = () => (
+  <WSProvider>
+    <TabNavigator />
+  </WSProvider>
+);
+
 const RootNavigator = () => {
   const [loading, setLoading] = useState(true);
   const { setToken } = useAuthStore();
   const { user, setUser } = useUserStore();
-  const [initialRoute, setInitialRoute] =
-    useState<keyof RootStackParamList>('Auth');
 
   useEffect(() => {
     const checkToken = async () => {
       try {
         const token = await AsyncStorage.getItem('authToken');
-        console.log('Token from nav:', token);
         const userStore = await AsyncStorage.getItem('user-store');
-        console.log('store:', userStore);
 
         if (token && userStore) {
-          console.log('hello from inside');
           const { state } = JSON.parse(userStore);
-          console.log('state:', state);
-
           const storedUser = state.user;
-          console.log('user:', storedUser);
           setToken(token);
-          if (token) {
+          if (storedUser) {
             setUser(storedUser);
-            setInitialRoute(storedUser.role === 'captain' ? 'Driver' : 'Tabs');
           }
         }
       } catch (e) {
@@ -49,7 +52,7 @@ const RootNavigator = () => {
     };
 
     checkToken();
-  }, []);
+  }, [setToken, setUser]);
 
   if (loading) {
     return (
@@ -60,17 +63,20 @@ const RootNavigator = () => {
   }
 
   return (
-    <WSProvider>
-      <Stack.Navigator
-        screenOptions={{ headerShown: false }}
-        initialRouteName={initialRoute}
-      >
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {user ? (
+        user.role === 'rider' ? (
+          <Stack.Screen name="Driver" component={DriverScreen} />
+        ) : (
+          <>
+            <Stack.Screen name="Tabs" component={TabsScreen} />
+            <Stack.Screen name="Rider" component={RiderNavigator} />
+          </>
+        )
+      ) : (
         <Stack.Screen name="Auth" component={AuthNavigator} />
-        <Stack.Screen name="Tabs" component={TabNavigator} />
-        <Stack.Screen name="Driver" component={DriverNavigator} />
-        <Stack.Screen name="Rider" component={RiderNavigator} />
-      </Stack.Navigator>
-    </WSProvider>
+      )}
+    </Stack.Navigator>
   );
 };
 

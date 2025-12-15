@@ -17,7 +17,7 @@ import {
 import { COLORS } from '@/assets/colors';
 import { ReactNativeModal } from 'react-native-modal';
 import OTPInput from 'react-native-otp-textinput';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useUserStore } from '@/store/use-user-store';
 import { googleLogin } from '@/services/google-auth';
 import axios from 'axios';
@@ -36,6 +36,8 @@ import ErrorModal from '@/components/shared/error-modal';
 
 const LoginScreen = () => {
   const navigation = useNavigation<any>();
+  const route = useRoute<any>();
+  const { role } = route.params;
   const { height, width } = useWindowDimensions();
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [phone, setPhone] = useState<string>('');
@@ -142,7 +144,7 @@ const LoginScreen = () => {
     try {
       setLoading(true);
 
-      const response = await verifyOtp(phone, otp, user?.role);
+      const response = await verifyOtp(phone, otp, role);
       const token = response.data?.data?.token;
       const responseUser = response.data?.data?.user;
 
