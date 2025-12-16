@@ -14,6 +14,7 @@ import Map from '@/components/map';
 import { useRiderStore } from '@/store';
 import { useWS } from '@/services/WSProvider';
 import { COLORS } from '@/assets/colors';
+import LocationPermissionModal from '@/components/shared/location-permission-modal';
 import { useFetchLocation } from '@/hooks/useFetchLocation';
 import CustomButton from '@/components/shared/custom-button';
 
@@ -34,10 +35,15 @@ type RideOffer = {
 const RiderHomeScreen = () => {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
-  const vehicleType = route.params?.vehicleType;
+  const vehicleType =
+    route.params?.vehicleType || '6940fe73-f3fc-8321-a3e2-b8c37a285822';
   const { location } = useRiderStore();
   const { emit, on, off, isConnected } = useWS();
-  useFetchLocation();
+  const {
+    showPermissionModal,
+    requestLocationPermission,
+    dismissPermissionModal,
+  } = useFetchLocation();
 
   const [isOnline, setIsOnline] = useState(false);
   const [offers, setOffers] = useState<RideOffer[]>([]);
@@ -103,22 +109,32 @@ const RiderHomeScreen = () => {
   }, [on, off]);
 
   const handleToggleOnline = () => {
-    console.log('lalall');
+    console.log('handleToggleOnline called. Current isOnline state:', isOnline);
     if (isOnline) {
+      console.log('Going off duty...');
       emit('goOffDuty');
       setIsOnline(false);
+      console.log('Set isOnline to false.');
     } else {
-      if (!location || !vehicleType) return;
+      if (!location || !vehicleType) {
+        console.warn('Cannot go online: Location or vehicleType missing.', {
+          location,
+          vehicleType,
+        });
+        return;
+      }
 
       const goOnDuty = () => {
+        console.log('Emitting goOnDuty with vehicleType:', vehicleType);
         emit('goOnDuty', {
           coords: {
             latitude: location.latitude,
             longitude: location.longitude,
           },
-          vehicleId: '',
+          vehicleId: vehicleType || '6940fe73-f3fc-8321-a3e2-b8c37a285822',
         });
         setIsOnline(true);
+        console.log('Set isOnline to true.');
       };
 
       if (isConnected()) {
@@ -206,6 +222,11 @@ const RiderHomeScreen = () => {
 
   return (
     <View style={styles.container}>
+      <LocationPermissionModal
+        isVisible={showPermissionModal}
+        onEnable={requestLocationPermission}
+        onNotNow={dismissPermissionModal}
+      />
       <Map latitude={location?.latitude} longitude={location?.longitude} />
 
       <SafeAreaView style={styles.statusWrapper}>
@@ -290,7 +311,6 @@ const RiderHomeScreen = () => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: COLORS.BG.DEFAULT },
   statusWrapper: { position: 'absolute', top: 10, left: 16 },

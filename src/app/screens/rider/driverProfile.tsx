@@ -261,7 +261,7 @@ const DriverProfileScreen = () => {
         ],
         referredBy: 0, // Placeholder
       };
-      await api.post('/api/riders/register', payload);
+      // await api.post('/api/riders/register', payload);
       setUser({ ...user, ...profileData, isProfileComplete: true });
       navigation.reset({
         index: 0,
@@ -491,7 +491,7 @@ const DriverProfileScreen = () => {
         <View style={styles.footer}>
           <CustomButton
             title={step === TOTAL_STEPS ? 'Submit' : 'Next'}
-            disabled={!isStepValid()}
+            // disabled={!isStepValid()}
             onPress={next}
           />
         </View>
