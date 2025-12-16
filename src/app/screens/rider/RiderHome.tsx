@@ -1,85 +1,216 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   SafeAreaView,
+  FlatList,
+  Modal,
+  TextInput,
 } from 'react-native';
-
+import { useRoute, useNavigation } from '@react-navigation/native';
 import Map from '@/components/map';
-import { useRoute } from '@react-navigation/native';
 import { useRiderStore } from '@/store';
 import { useWS } from '@/services/WSProvider';
 import { COLORS } from '@/assets/colors';
 import { useFetchLocation } from '@/hooks/useFetchLocation';
+import CustomButton from '@/components/shared/custom-button';
+
+const OFFER_TIMEOUT = 10; // seconds
+
+type RideOffer = {
+  rideId: string;
+  customerId: string;
+  customerName: string;
+  startPosition: { lat: number; long: number; adrs: string };
+  destinationPosition: { lat: number; long: number; adrs: string };
+  fair: number;
+  distance: string;
+  vehicleType: string;
+  receivedAt: number; // timestamp
+};
 
 const RiderHomeScreen = () => {
   const route = useRoute<any>();
-  const vehicleType = 'bike';
+  const navigation = useNavigation<any>();
+  const vehicleType = route.params?.vehicleType;
   const { location } = useRiderStore();
-  const { emit, disconnect, isConnected, on, off } = useWS();
+  const { emit, on, off, isConnected } = useWS();
   useFetchLocation();
 
   const [isOnline, setIsOnline] = useState(false);
+  const [offers, setOffers] = useState<RideOffer[]>([]);
+  const [timers, setTimers] = useState<{ [rideId: string]: number }>({});
+
+  const [suggestFareModal, setSuggestFareModal] = useState<{
+    visible: boolean;
+    rideId: string | null;
+    currentFare: number;
+  }>({ visible: false, rideId: null, currentFare: 0 });
+  const [newFare, setNewFare] = useState('');
+
+  // Main timer loop
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setOffers(
+        prevOffers =>
+          prevOffers
+            .map(offer => {
+              const elapsed = (Date.now() - offer.receivedAt) / 1000;
+              const remaining = OFFER_TIMEOUT - elapsed;
+              if (remaining <= 0) {
+                return { ...offer, expired: true };
+              }
+              return offer;
+            })
+            .filter(
+              offer =>
+                !offer.expired ||
+                (Date.now() - offer.receivedAt) / 1000 < OFFER_TIMEOUT + 5,
+            ), // Keep expired for 5 more seconds
+      );
+      setTimers(prevTimers => {
+        const newTimers = { ...prevTimers };
+        let needsUpdate = false;
+        offers.forEach(offer => {
+          const elapsed = (Date.now() - offer.receivedAt) / 1000;
+          const newRemaining = Math.max(0, Math.ceil(OFFER_TIMEOUT - elapsed));
+          if (newTimers[offer.rideId] !== newRemaining) {
+            newTimers[offer.rideId] = newRemaining;
+            needsUpdate = true;
+          }
+        });
+        return needsUpdate ? newTimers : prevTimers;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [offers]);
+
+  // Socket listener for new ride offers
+  useEffect(() => {
+    const handleRideOffer = (newOffer: Omit<RideOffer, 'receivedAt'>) => {
+      setOffers(prev => [...prev, { ...newOffer, receivedAt: Date.now() }]);
+      setTimers(prev => ({ ...prev, [newOffer.rideId]: OFFER_TIMEOUT }));
+    };
+
+    on('rideOffer', handleRideOffer);
+
+    return () => {
+      off('rideOffer', handleRideOffer);
+    };
+  }, [on, off]);
 
   const handleToggleOnline = () => {
+    console.log('lalall');
     if (isOnline) {
       emit('goOffDuty');
       setIsOnline(false);
-      return;
-    }
-
-    if (!location) {
-      console.warn('Location not available');
-      return;
-    }
-
-    const payload = {
-      coords: {
-        latitude: location.latitude,
-        longitude: location.longitude,
-      },
-      vehicleId: '3f8b9c2a-5e21-4e9b-a7b2-91b6c1d2a999', // MUST be valid
-    };
-
-    if (isConnected()) {
-      console.log('shivam ander hai ', payload);
-      emit('goOnDuty', payload);
     } else {
-      const onConnect = () => {
-        emit('goOnDuty', payload);
-        off('connect', onConnect);
-      };
-      on('connect', onConnect);
-    }
+      if (!location || !vehicleType) return;
 
-    setIsOnline(true);
+      const goOnDuty = () => {
+        emit('goOnDuty', {
+          coords: {
+            latitude: location.latitude,
+            longitude: location.longitude,
+          },
+          vehicleId: '',
+        });
+        setIsOnline(true);
+      };
+
+      if (isConnected()) {
+        goOnDuty();
+      } else {
+        const onConnect = () => {
+          goOnDuty();
+          off('connect', onConnect);
+        };
+        on('connect', onConnect);
+      }
+    }
   };
 
-  useEffect(() => {
-    let interval: NodeJS.Timeout;
+  const handleAccept = (rideId: string) => {
+    emit('acceptRide', { rideId });
+    // Assume ride acceptance is successful
+    setIsOnline(false); // No longer just "online", but "in-ride"
+    setOffers([]); // Clear all offers
+    // Navigate to the active ride screen
+    navigation.navigate('ActiveRide', { rideId }); // Assuming ActiveRide screen exists
+  };
 
-    if (isOnline && location) {
-      interval = setInterval(() => {
-        emit('updateLocation', {
-          latitude: location.latitude,
-          longitude: location.longitude,
-        });
-      }, 10000);
+  const handleSuggestFare = () => {
+    if (suggestFareModal.rideId && newFare) {
+      emit('suggestFare', {
+        rideId: suggestFareModal.rideId,
+        suggestedFare: parseFloat(newFare),
+      });
+      setSuggestFareModal({ visible: false, rideId: null, currentFare: 0 });
+      setNewFare('');
+      // Remove the offer card after suggesting a new fare
+      setOffers(prev => prev.filter(o => o.rideId !== suggestFareModal.rideId));
     }
+  };
 
-    return () => interval && clearInterval(interval);
-  }, [isOnline, location]);
+  const renderOfferCard = ({ item }: { item: RideOffer }) => {
+    const remainingTime = timers[item.rideId] ?? OFFER_TIMEOUT;
+    const isExpired = remainingTime <= 0;
+
+    return (
+      <View style={styles.requestCard}>
+        <Text style={styles.requestTitle}>New Ride Offer</Text>
+        <View style={styles.requestRow}>
+          <Text style={styles.label}>From</Text>
+          <Text style={styles.value}>{item.startPosition.adrs}</Text>
+        </View>
+        <View style={styles.requestRow}>
+          <Text style={styles.label}>To</Text>
+          <Text style={styles.value}>{item.destinationPosition.adrs}</Text>
+        </View>
+        <View style={styles.requestFooter}>
+          <Text style={styles.price}>₹{item.fair}</Text>
+          <Text style={styles.distance}>{item.distance}</Text>
+        </View>
+
+        <View style={styles.cardActions}>
+          <CustomButton
+            title="Suggest Fare"
+            onPress={() =>
+              setSuggestFareModal({
+                visible: true,
+                rideId: item.rideId,
+                currentFare: item.fair,
+              })
+            }
+            className="flex-1 bg-gray-200"
+            textClassName="text-black"
+            disabled={isExpired}
+          />
+          <CustomButton
+            title={
+              isExpired
+                ? 'Expired'
+                : `Accept (${remainingTime.toString().padStart(2, '0')}s)`
+            }
+            onPress={() => handleAccept(item.rideId)}
+            className={`flex-1 ${isExpired ? 'bg-gray-400' : 'bg-success-500'}`}
+            disabled={isExpired}
+          />
+        </View>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
-      {/* MAP */}
       <Map latitude={location?.latitude} longitude={location?.longitude} />
 
-      {/* ONLINE / OFFLINE STATUS */}
       <SafeAreaView style={styles.statusWrapper}>
-        <View
+        <TouchableOpacity
+          onPress={handleToggleOnline}
           style={[styles.statusPill, isOnline ? styles.online : styles.offline]}
         >
           <View
@@ -91,58 +222,78 @@ const RiderHomeScreen = () => {
           <Text style={styles.statusText}>
             {isOnline ? 'Online' : 'Offline'}
           </Text>
-        </View>
+        </TouchableOpacity>
       </SafeAreaView>
 
-      {/* INCOMING REQUEST PREVIEW (VISIBLE ALWAYS) */}
-      <View style={styles.requestCard}>
-        <Text style={styles.requestTitle}>Incoming Ride</Text>
-
-        <View style={styles.requestRow}>
-          <Text style={styles.label}>Pickup</Text>
-          <Text style={styles.value}>Sector 17, Chandigarh</Text>
+      {isOnline && offers.length > 0 ? (
+        <FlatList
+          data={offers}
+          renderItem={renderOfferCard}
+          keyExtractor={item => item.rideId}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.offerList}
+        />
+      ) : isOnline ? (
+        <View style={styles.noOffersContainer}>
+          <Text style={styles.noOffersText}>Waiting for ride offers...</Text>
         </View>
-
-        <View style={styles.requestRow}>
-          <Text style={styles.label}>Drop</Text>
-          <Text style={styles.value}>Mohali Phase 7</Text>
+      ) : (
+        <View style={styles.bottomAction}>
+          <CustomButton
+            title="Go Online"
+            onPress={handleToggleOnline}
+            className="bg-success-500"
+          />
         </View>
+      )}
 
-        <View style={styles.requestFooter}>
-          <Text style={styles.price}>₹180</Text>
-          <Text style={styles.distance}>4.2 km</Text>
+      <Modal
+        transparent
+        visible={suggestFareModal.visible}
+        onRequestClose={() =>
+          setSuggestFareModal({ visible: false, rideId: null, currentFare: 0 })
+        }
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Suggest a New Fare</Text>
+            <Text style={styles.modalSubtitle}>
+              Current Fare: ₹{suggestFareModal.currentFare}
+            </Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter new fare"
+              keyboardType="numeric"
+              value={newFare}
+              onChangeText={setNewFare}
+            />
+            <CustomButton
+              title="Submit Suggestion"
+              onPress={handleSuggestFare}
+            />
+            <TouchableOpacity
+              style={{ marginTop: 10 }}
+              onPress={() =>
+                setSuggestFareModal({
+                  visible: false,
+                  rideId: null,
+                  currentFare: 0,
+                })
+              }
+            >
+              <Text style={{ textAlign: 'center' }}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
-
-      {/* BOTTOM ACTION */}
-      <View style={styles.bottomAction}>
-        <TouchableOpacity
-          onPress={handleToggleOnline}
-          style={[
-            styles.actionButton,
-            isOnline ? styles.goOffline : styles.goOnline,
-          ]}
-        >
-          <Text style={styles.actionText}>
-            {isOnline ? 'Go Offline' : 'Go Online'}
-          </Text>
-        </TouchableOpacity>
-      </View>
+      </Modal>
     </View>
   );
 };
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.BG.DEFAULT,
-  },
 
-  /* STATUS */
-  statusWrapper: {
-    position: 'absolute',
-    top: 10,
-    left: 16,
-  },
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: COLORS.BG.DEFAULT },
+  statusWrapper: { position: 'absolute', top: 10, left: 16 },
   statusPill: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -150,29 +301,19 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
   },
-  online: {
-    backgroundColor: '#ecfdf5',
-  },
-  offline: {
-    backgroundColor: '#fff7ed',
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    marginRight: 8,
-  },
-  statusText: {
-    fontWeight: '600',
-    color: COLORS.TEXT.DEFAULT,
-  },
-
-  /* REQUEST CARD */
-  requestCard: {
+  online: { backgroundColor: '#ecfdf5' },
+  offline: { backgroundColor: '#fff7ed' },
+  statusDot: { width: 8, height: 8, borderRadius: 4, marginRight: 8 },
+  statusText: { fontWeight: '600', color: COLORS.TEXT.DEFAULT },
+  offerList: {
     position: 'absolute',
-    bottom: 110,
+    bottom: 24,
     left: 16,
     right: 16,
+    paddingRight: 50,
+  },
+  requestCard: {
+    width: 320,
     backgroundColor: COLORS.BRAND_WHITE,
     borderRadius: 16,
     padding: 16,
@@ -180,6 +321,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 6,
+    marginRight: 16,
   },
   requestTitle: {
     fontSize: 16,
@@ -187,57 +329,55 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     color: COLORS.TEXT.DEFAULT,
   },
-  requestRow: {
-    marginBottom: 6,
-  },
-  label: {
-    fontSize: 12,
-    color: COLORS.TEXT.MUTED,
-  },
-  value: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.TEXT.DEFAULT,
-  },
+  requestRow: { marginBottom: 6 },
+  label: { fontSize: 12, color: COLORS.TEXT.MUTED },
+  value: { fontSize: 14, fontWeight: '600', color: COLORS.TEXT.DEFAULT },
   requestFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 12,
   },
-  price: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: COLORS.PRIMARY.DEFAULT,
-  },
-  distance: {
-    fontSize: 14,
-    color: COLORS.TEXT.MUTED,
-  },
-
-  /* BOTTOM ACTION */
-  bottomAction: {
+  price: { fontSize: 18, fontWeight: '700', color: COLORS.PRIMARY.DEFAULT },
+  distance: { fontSize: 14, color: COLORS.TEXT.MUTED },
+  cardActions: { flexDirection: 'row', gap: 8, marginTop: 16 },
+  noOffersContainer: {
     position: 'absolute',
-    bottom: 24,
-    left: 16,
-    right: 16,
-  },
-  actionButton: {
-    height: 56,
-    borderRadius: 14,
+    bottom: 50,
+    left: 0,
+    right: 0,
     alignItems: 'center',
+  },
+  noOffersText: {
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    color: 'white',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  modalContainer: {
+    flex: 1,
     justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
-  goOnline: {
-    backgroundColor: '#22c55e',
+  modalContent: {
+    width: '80%',
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 20,
   },
-  goOffline: {
-    backgroundColor: '#ef4444',
+  modalTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 10 },
+  modalSubtitle: { fontSize: 14, color: 'gray', marginBottom: 20 },
+  input: {
+    height: 50,
+    borderWidth: 1,
+    borderColor: COLORS.GENERAL[100],
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    marginBottom: 16,
   },
-  actionText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
+  bottomAction: { position: 'absolute', bottom: 24, left: 16, right: 16 },
 });
 
 export default RiderHomeScreen;
