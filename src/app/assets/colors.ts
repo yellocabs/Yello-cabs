@@ -1,6 +1,6 @@
 export const COLORS = {
   PRIMARY: {
-    DEFAULT: '#4c99e1',
+    DEFAULT: '#FDB726',
     500: '#FDB726',
     200: '#dfc081ff',
     100: '#BFE4F3',

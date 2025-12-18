@@ -1,18 +1,15 @@
 import axios from 'axios';
 import Config from 'react-native-config';
 import { useUserStore } from '@/store/use-user-store';
+import { BASE_URL } from '@/services/config';
 
 const api = axios.create({
-  baseURL: Config.BASE_URL,
+  baseURL: BASE_URL,
   timeout: 10000,
 });
-
 api.interceptors.request.use(config => {
   const token = useUserStore.getState().user?.token;
-  // console.log('user from axios:', useUserStore.getState().user);
-  // console.log('token from axios:', token);
   if (token) {
-    // console.log('token from lalla:', token);
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;

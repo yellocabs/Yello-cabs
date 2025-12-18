@@ -45,6 +45,9 @@ export const WSProvider: React.FC<{ children: React.ReactNode }> = ({
     socket.on('connect', () => {
       console.log('✅ Socket connected:', socket.id);
     });
+    socket.onAny((event, ...args) => {
+      console.log('📥 SOCKET EVENT FROM BACKEND:', event, args);
+    });
 
     socket.on('connected', data => {
       console.log('🟢 Backend handshake confirmed:', data);

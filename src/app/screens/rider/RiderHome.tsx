@@ -11,12 +11,13 @@ import {
 } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Map from '@/components/map';
-import { useRiderStore } from '@/store';
+import { useRiderStore, useUserStore } from '@/store';
 import { useWS } from '@/services/WSProvider';
 import { COLORS } from '@/assets/colors';
 import LocationPermissionModal from '@/components/shared/location-permission-modal';
 import { useFetchLocation } from '@/hooks/useFetchLocation';
 import CustomButton from '@/components/shared/custom-button';
+import { useDriverStore } from '@/store/driver-store';
 
 const OFFER_TIMEOUT = 10; // seconds
 
@@ -35,8 +36,8 @@ type RideOffer = {
 const RiderHomeScreen = () => {
   const route = useRoute<any>();
   const navigation = useNavigation<any>();
-  const vehicleType =
-    route.params?.vehicleType || '6940fe73-f3fc-8321-a3e2-b8c37a285822';
+  const { driverProfile } = useDriverStore();
+  const vehicleType = driverProfile?.data.vehicles[0].id;
   const { location } = useRiderStore();
   const { emit, on, off, isConnected } = useWS();
   const {
@@ -128,10 +129,11 @@ const RiderHomeScreen = () => {
         console.log('Emitting goOnDuty with vehicleType:', vehicleType);
         emit('goOnDuty', {
           coords: {
-            latitude: location.latitude,
-            longitude: location.longitude,
+            lat: location.latitude,
+            long: location.longitude,
+            adrs: 'Mohali, Punjab',
           },
-          vehicleId: vehicleType || '6940fe73-f3fc-8321-a3e2-b8c37a285822',
+          vehicleId: vehicleType,
         });
         setIsOnline(true);
         console.log('Set isOnline to true.');

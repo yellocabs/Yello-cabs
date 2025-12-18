@@ -11,6 +11,7 @@ import { ActivityIndicator, View } from 'react-native';
 import { useUserStore } from '@/store/use-user-store';
 import { useAuthStore } from '@/store/auth-store';
 import { WSProvider } from '@/services/WSProvider';
+import { useDriverStore } from '@/store/driver-store';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -30,6 +31,13 @@ const RootNavigator = () => {
   const [loading, setLoading] = useState(true);
   const { setToken } = useAuthStore();
   const { user, setUser } = useUserStore();
+
+  // Fetch driver profile on rider login
+  useEffect(() => {
+    if (user && user.role === 'rider') {
+      useDriverStore.getState().fetchDriverProfile();
+    }
+  }, [user]);
 
   useEffect(() => {
     const checkToken = async () => {
