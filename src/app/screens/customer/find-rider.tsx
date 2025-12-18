@@ -29,10 +29,12 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import NoDriverFoundModal from '@/components/shared/no-driver-found-modal';
-import { useUserStore } from '@/store';
+import { useModalStore } from '@/store/modal-store';
 import { COLORS } from '@/assets/colors';
+import { useUserStore } from '@/store';
 import RideLayout from '@/components/customer/ride-layout';
 import { icons } from '@/constants';
+import CancelRideModal from '@/components/shared/CancelRideModal';
 
 // === Responsive utils ===
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -62,40 +64,34 @@ const FindRiderScreen: React.FC<any> = ({ route, navigation }) => {
   const timerRef = useRef<number | null>(null);
 
   // Modal states
-  const [showCancelModal, setShowCancelModal] = useState<boolean>(false);
-  const [showNoDriverModal, setShowNoDriverModal] = useState<boolean>(false);
+  const {
+    showCancelRideModal,
+    showNoDriverFoundModal,
+    hideNoDriverFoundModal,
+    isNoDriverFoundModalVisible,
+  } = useModalStore();
 
   // Reanimated shared values for modal animation
-  const cancelModalAnim = useSharedValue(0); // 0 hidden, 1 visible
   const noDriverModalAnim = useSharedValue(0);
 
   // animate when visible changes
   useEffect(() => {
-    cancelModalAnim.value = withTiming(showCancelModal ? 1 : 0, {
-      duration: 220,
-      easing: Easing.out(Easing.cubic),
-    });
-  }, [showCancelModal]);
-
-  useEffect(() => {
-    noDriverModalAnim.value = withTiming(showNoDriverModal ? 1 : 0, {
+    noDriverModalAnim.value = withTiming(isNoDriverFoundModalVisible ? 1 : 0, {
       duration: 260,
       easing: Easing.out(Easing.cubic),
     });
-  }, [showNoDriverModal]);
+  }, [isNoDriverFoundModalVisible]);
 
   // Animated styles
   const modalOverlayStyle = useAnimatedStyle(() => ({
-    opacity: Math.max(cancelModalAnim.value, noDriverModalAnim.value) * 1.0,
+    opacity: noDriverModalAnim.value,
   }));
 
   const modalBoxStyle = useAnimatedStyle(() => {
-    // choose scale/opactiy from whichever modal is visible (priority: cancel then nodriver)
-    const v = Math.max(cancelModalAnim.value, noDriverModalAnim.value);
     return {
-      transform: [{ scale: 0.96 + 0.04 * v }],
-      opacity: v,
-      translateY: (1 - v) * 8,
+      transform: [{ scale: 0.96 + 0.04 * noDriverModalAnim.value }],
+      opacity: noDriverModalAnim.value,
+      translateY: (1 - noDriverModalAnim.value) * 8,
     };
   });
 
@@ -127,7 +123,7 @@ const FindRiderScreen: React.FC<any> = ({ route, navigation }) => {
         timerRef.current = null;
       }
       // show custom modal instead of Alert
-      setShowNoDriverModal(true);
+      showNoDriverFoundModal(handleKeepSearching, handleNoDriverCancel);
     }
   }, [timeLeft]);
 
@@ -139,61 +135,60 @@ const FindRiderScreen: React.FC<any> = ({ route, navigation }) => {
   };
 
   // === Back handling: Android hardware + navigation (iOS swipe/back)
-  const openCancelModal = useCallback(() => {
-    setShowCancelModal(true);
-  }, []);
-
-  const closeCancelModal = useCallback(() => setShowCancelModal(false), []);
-
   const confirmCancel = useCallback(() => {
-    setShowCancelModal(false);
-    // navigate home — keep same behavior as handleCancel
+    // This cleanup logic is now passed to the global modal
     setDestination(null);
     navigation.navigate('Tabs', { screen: 'Home' });
-  }, [navigation]);
+  }, [navigation, setDestination]);
 
   // Android hardware back
   useEffect(() => {
     const onBackPress = () => {
-      // if a modal is visible, close it instead of opening another
-      if (showCancelModal || showNoDriverModal) {
-        // prioritize closing the cancel modal first, else close nodriver
-        if (showNoDriverModal) {
-          setShowNoDriverModal(false);
-          return true;
-        }
-        setShowCancelModal(false);
-        return true; // handled
+      // If no-driver-modal is visible, the back press should close it.
+      if (isNoDriverFoundModalVisible) {
+        hideNoDriverFoundModal();
+        return true;
       }
 
-      // show the cancel confirmation modal
-      setShowCancelModal(true);
-      return true; // prevent default
+      // Otherwise, show the global cancel confirmation modal
+      showCancelRideModal(confirmCancel);
+      return true; // prevent default back action
     };
 
     const sub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
     return () => sub.remove();
-  }, [showCancelModal, showNoDriverModal]);
+  }, [
+    isNoDriverFoundModalVisible,
+    confirmCancel,
+    showCancelRideModal,
+    hideNoDriverFoundModal,
+  ]);
 
   // iOS / stack back gesture intercept
   useEffect(() => {
     const beforeRemove = (e: any) => {
-      // If modal open, allow it (it will be closed by modal)
-      if (showCancelModal || showNoDriverModal) {
+      // If modal is open, do nothing. Let the modal handle it.
+      // This logic might need adjustment depending on final modal implementation
+      if (isNoDriverFoundModalVisible) {
         e.preventDefault();
-        if (showNoDriverModal) setShowNoDriverModal(false);
-        if (showCancelModal) setShowCancelModal(false);
+        hideNoDriverFoundModal();
         return;
       }
 
       // prevent default navigation and show cancel modal
       e.preventDefault();
-      setShowCancelModal(true);
+      showCancelRideModal(confirmCancel);
     };
 
     const sub = navigation.addListener('beforeRemove', beforeRemove);
     return () => navigation.removeListener('beforeRemove', beforeRemove);
-  }, [navigation, showCancelModal, showNoDriverModal]);
+  }, [
+    navigation,
+    isNoDriverFoundModalVisible,
+    confirmCancel,
+    showCancelRideModal,
+    hideNoDriverFoundModal,
+  ]);
 
   // === Fare handlers ===
   const handleFareChange = (delta: number) =>
@@ -203,7 +198,7 @@ const FindRiderScreen: React.FC<any> = ({ route, navigation }) => {
 
   // === No-driver modal actions ===
   const handleKeepSearching = () => {
-    setShowNoDriverModal(false);
+    hideNoDriverFoundModal();
     setTimeLeft(TOTAL_TIME);
     // restart timer
     if (timerRef.current) {
@@ -216,7 +211,7 @@ const FindRiderScreen: React.FC<any> = ({ route, navigation }) => {
   };
 
   const handleNoDriverCancel = () => {
-    setShowNoDriverModal(false);
+    hideNoDriverFoundModal();
     confirmCancel();
     navigation.navigate('Tabs', { screen: 'Home' });
   };
@@ -387,41 +382,11 @@ const FindRiderScreen: React.FC<any> = ({ route, navigation }) => {
     </View>
   );
 
-  // === Modal renderers (Option D: fullscreen dark overlay & centered minimal popup) ===
-  const CancelModal = () =>
-    showCancelModal ? (
-      <Animated.View style={[styles.modalOverlay, modalOverlayStyle]}>
-        <Animated.View style={[styles.modalBox, modalBoxStyle]}>
-          <Text style={styles.modalTitle}>Cancel ride request?</Text>
-          <Text style={styles.modalDesc}>
-            Your search is in progress. Do you want to stop looking for a
-            driver?
-          </Text>
-
-          <View style={styles.modalActions}>
-            <TouchableOpacity
-              style={[styles.modalBtn, styles.modalKeepBtn]}
-              onPress={() => setShowCancelModal(false)}
-            >
-              <Text style={styles.modalKeepText}>No, keep searching</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.modalBtn, styles.modalCancelConfirmBtn]}
-              onPress={confirmCancel}
-            >
-              <Text style={styles.modalCancelConfirmText}>Yes, cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </Animated.View>
-      </Animated.View>
-    ) : null;
-
   return (
     <RideLayout
       title="Finding Rider"
       snapPoints={['50%', '90%']}
-      onBackPress={() => setShowCancelModal(true)}
+      onBackPress={() => showCancelRideModal(confirmCancel)}
     >
       <SafeAreaView style={styles.safe}>
         <View style={styles.container}>
@@ -430,14 +395,6 @@ const FindRiderScreen: React.FC<any> = ({ route, navigation }) => {
           <AutoAcceptCard />
           <LocationCard />
         </View>
-
-        {/* Modals */}
-        <CancelModal />
-        <NoDriverFoundModal
-          isVisible={showNoDriverModal}
-          onKeepSearching={handleKeepSearching}
-          onCancel={handleNoDriverCancel}
-        />
       </SafeAreaView>
     </RideLayout>
   );

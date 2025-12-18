@@ -13,31 +13,24 @@ import Animated, {
   Easing,
 } from 'react-native-reanimated';
 import { COLORS } from '@/assets/colors';
+import { useModalStore } from '@/store/modal-store';
 
 // === Responsive utils ===
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const BASE_WIDTH = 375;
 const scale = (size: number) => (SCREEN_WIDTH / BASE_WIDTH) * size;
 
-type NoDriverFoundModalProps = {
-  isVisible: boolean;
-  onKeepSearching: () => void;
-  onCancel: () => void;
-};
-
-const NoDriverFoundModal: React.FC<NoDriverFoundModalProps> = ({
-  isVisible,
-  onKeepSearching,
-  onCancel,
-}) => {
+const NoDriverFoundModal: React.FC = () => {
+  const { isNoDriverFoundModalVisible, onKeepSearching, onCancel } =
+    useModalStore();
   const modalAnim = useSharedValue(0);
 
   React.useEffect(() => {
-    modalAnim.value = withTiming(isVisible ? 1 : 0, {
+    modalAnim.value = withTiming(isNoDriverFoundModalVisible ? 1 : 0, {
       duration: 260,
       easing: Easing.out(Easing.cubic),
     });
-  }, [isVisible, modalAnim]);
+  }, [isNoDriverFoundModalVisible, modalAnim]);
 
   const modalOverlayStyle = useAnimatedStyle(() => ({
     opacity: modalAnim.value,
@@ -49,7 +42,7 @@ const NoDriverFoundModal: React.FC<NoDriverFoundModalProps> = ({
     translateY: (1 - modalAnim.value) * 8,
   }));
 
-  if (!isVisible) {
+  if (!isNoDriverFoundModalVisible) {
     return null;
   }
 
@@ -65,14 +58,14 @@ const NoDriverFoundModal: React.FC<NoDriverFoundModalProps> = ({
         <View style={styles.modalActions}>
           <TouchableOpacity
             style={[styles.modalBtn, styles.modalKeepBtn]}
-            onPress={onKeepSearching}
+            onPress={onKeepSearching || undefined}
           >
             <Text style={styles.modalKeepText}>Keep searching</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[styles.modalBtn, styles.modalCancelConfirmBtn]}
-            onPress={onCancel}
+            onPress={onCancel || undefined}
           >
             <Text style={styles.modalCancelConfirmText}>Cancel request</Text>
           </TouchableOpacity>
